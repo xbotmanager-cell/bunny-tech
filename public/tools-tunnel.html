@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Engine - Proxy Tunnel Forge</title>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-color: #0d0614;
+            --purple-glow: rgba(191, 90, 242, 0.35);
+            --pink-glow: rgba(255, 55, 127, 0.35);
+            --cyan-glow: rgba(50, 215, 255, 0.4);
+            --glass-bg: rgba(25, 15, 38, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --text-main: #f2f2f7;
+            --text-muted: #aeaeae;
+            --accent-cyan: #32d7ff;
+            --accent-purple: #bf5af2;
+            --accent-pink: #ff377f;
+            --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .light-theme {
+            --bg-color: #f5f5f7;
+            --purple-glow: rgba(191, 90, 242, 0.15);
+            --pink-glow: rgba(255, 55, 127, 0.15);
+            --cyan-glow: rgba(50, 215, 255, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1c1c1e;
+            --text-muted: #68686e;
+            --accent-cyan: #007aff;
+            --accent-purple: #8e2de2;
+            --accent-pink: #ff2d55;
+            --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        /* Ambient Dynamic Background */
+        .ambient-bg-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; overflow: hidden; pointer-events: none;
+        }
+
+        .ambient-bubble {
+            position: absolute;
+            background: radial-gradient(circle, var(--purple-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: endlessFloat 12s infinite ease-in-out;
+            opacity: 0.5;
+        }
+
+        @keyframes endlessFloat {
+            0% { transform: translateY(105vh) scale(0.6) translateX(0); opacity: 0; }
+            30% { opacity: 0.7; }
+            70% { opacity: 0.4; }
+            100% { transform: translateY(-15vh) scale(1.2) translateX(40px); opacity: 0; }
+        }
+
+        /* --- Super Fast Circular Loader Screen --- */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(145deg, #0d0614, #140b24);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fast-loader-ring {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fast-loader-ring::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 5px solid rgba(255, 255, 255, 0.05);
+            border-top: 5px solid var(--accent-purple);
+            border-bottom: 5px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: superFastSpin 0.5s linear infinite;
+            box-shadow: 0 0 15px var(--purple-glow);
+        }
+
+        @keyframes superFastSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .blinking-dots-center { display: flex; gap: 6px; z-index: 10; }
+        .core-dot {
+            width: 10px; height: 10px;
+            background-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: fastPulseDot 0.6s infinite alternate;
+        }
+        .core-dot:nth-child(2) { background-color: var(--accent-purple); animation-delay: 0.2s; }
+        .core-dot:nth-child(3) { background-color: var(--accent-pink); animation-delay: 0.4s; }
+
+        @keyframes fastPulseDot {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        #welcome-title {
+            margin-top: 30px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .vortex-gate {
+            position: absolute;
+            width: 0vw; height: 0vh;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 20%, #0d0614 100%);
+            box-shadow: inset 0 0 100px rgba(191, 90, 242, 0.6);
+            z-index: 20; opacity: 0; pointer-events: none;
+        }
+
+        /* --- Main Layout --- */
+        .module-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 14px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(25px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .back-link, .theme-toggle, .about-toggle {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .back-link:active, .theme-toggle:active, .about-toggle:active { transform: scale(0.9); }
+
+        .module-title-block { text-align: right; }
+        .module-title-block h1 { 
+            font-size: 1.2rem; font-weight: 900;
+            background: linear-gradient(135deg, var(--text-main), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .module-title-block p { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;}
+
+        .forge-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 2;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .input-group label {
+            font-size: 0.8rem; font-weight: 800;
+            color: var(--accent-purple);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .text-field, .select-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text-main);
+            font-size: 0.95rem; font-weight: 600;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .text-field:focus, .select-field:focus {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 10px var(--purple-glow);
+        }
+
+        .select-field option {
+            background: #140b24; color: #ffffff;
+        }
+
+        .forge-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            border: none; padding: 16px; border-radius: 16px;
+            color: #ffffff; font-size: 1rem; font-weight: 900;
+            letter-spacing: 1px; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 8px 25px rgba(191, 90, 242, 0.25);
+            transition: transform 0.2s ease;
+        }
+
+        .forge-btn:active { transform: scale(0.97); }
+
+        .workspace-board {
+            background: #05020a;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 18px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .board-title {
+            font-size: 0.8rem; font-weight: 800;
+            text-transform: uppercase; color: var(--accent-cyan);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+        }
+
+        .typed-step {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem; font-weight: 600; line-height: 1.5;
+            white-space: pre-wrap; padding-left: 10px;
+            border-left: 2px solid #30d158; color: #30d158; margin-bottom: 6px;
+        }
+
+        .config-output-pane {
+            width: 100%; height: 200px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 12px;
+            color: var(--accent-cyan);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem; font-weight: 600;
+            resize: none; outline: none; margin-top: 10px;
+        }
+
+        .action-row {
+            display: flex; gap: 10px; margin-top: 10px;
+        }
+
+        .sub-btn {
+            flex: 1; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--glass-border);
+            padding: 12px; border-radius: 12px;
+            color: var(--text-main); font-size: 0.85rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .sub-btn:active { background: rgba(255,255,255,0.15); }
+
+        /* Authentic Communication Nodes Grid */
+        .contacts-section-title {
+            font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
+            color: var(--accent-pink); letter-spacing: 1px;
+            margin: 24px 0 12px 0; display: flex; align-items: center; gap: 6px;
+        }
+
+        .contacts-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px; width: 100%; margin-bottom: 30px;
+        }
+
+        .contact-card {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+            text-decoration: none; color: var(--text-main); transition: transform 0.2s ease;
+        }
+        .contact-card:active { transform: scale(0.93); }
+        .contact-card span { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+
+        .c-github { border-color: #24292e; } .c-github i { color: #ffffff; }
+        .c-tiktok { border-color: #010101; } .c-tiktok i { color: #00f2fe; }
+        .c-whatsapp { border-color: #128c7e; } .c-whatsapp i { color: #25d366; }
+        .c-telegram { border-color: #0088cc; } .c-telegram i { color: #37aee2; }
+        .c-instagram { border-color: #e1306c; } .c-instagram i { color: #f77737; }
+        .c-email { border-color: #db4437; } .c-email i { color: #f4b400; }
+
+        /* Slide Overlay Panel */
+        .about-overlay {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh;
+            background: var(--bg-color); border-top: 2px solid var(--glass-border);
+            border-top-left-radius: 28px; border-top-right-radius: 28px;
+            z-index: 500; padding: 24px;
+            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+        .about-overlay.open { bottom: 0; }
+        .about-handle { width: 50px; height: 5px; background: var(--text-muted); border-radius: 3px; margin: -10px auto 20px auto; opacity: 0.4; }
+
+        .feature-badge-list { display: flex; flex-direction: column; gap: 10px; }
+        .feature-badge-item {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 12px;
+        }
+        .feature-badge-item i { color: var(--accent-purple); }
+        .feature-badge-item h4 { font-size: 0.9rem; font-weight: 700; }
+        .feature-badge-item p { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Toast Box Notification */
+        .toast-box {
+            position: fixed; top: 20px; left: 20px; right: 20px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-left: 4px solid #30d158; padding: 14px; border-radius: 14px;
+            font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 10px;
+            transform: translateY(-120px); opacity: 0; transition: all 0.3s ease;
+            z-index: 99999; backdrop-filter: blur(20px);
+        }
+        .toast-box.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg-container" id="ambient-container"></div>
+
+    <div id="loading-screen">
+        <div class="fast-loader-ring">
+            <div class="blinking-dots-center">
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+            </div>
+        </div>
+        <div id="welcome-title">Tunnel Core Pipeline</div>
+        <div class="vortex-gate" id="vortex-gate"></div>
+    </div>
+
+    <div class="module-header">
+        <a href="index.html" class="back-link"><i data-lucide="arrow-left"></i></a>
+        <div class="module-title-block">
+            <h1>Proxy Tunnel Forge</h1>
+            <p>Module // Network Engine</p>
+        </div>
+        <div class="header-controls-right" style="display:flex; gap:8px;">
+            <button class="theme-toggle" onclick="toggleInterfaceTheme()"><i data-lucide="sun" id="theme-icon"></i></button>
+            <button class="about-toggle" onclick="toggleAboutOverlay()"><i data-lucide="info"></i></button>
+        </div>
+    </div>
+
+    <div class="forge-container">
+
+        <div class="input-group">
+            <label for="tunnel-protocol">Injection Protocol Method</label>
+            <select id="tunnel-protocol" class="select-field">
+                <option value="HTTP">HTTP Custom (Payload Injector)</option>
+                <option value="SSL">SSL/TLS (SNI Host Spoofing)</option>
+                <option value="DIRECT">Direct SSH (No Proxy)</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="target-host">Target SNI / Bug Host</label>
+            <input type="text" id="target-host" class="text-field" placeholder="e.g. static.cdn.net, api.whatsapp.com">
+        </div>
+
+        <div class="input-group">
+            <label for="proxy-addr">Remote Proxy Server & Port</label>
+            <input type="text" id="proxy-addr" class="text-field" placeholder="e.g. 104.244.42.1:8080">
+        </div>
+
+        <button class="forge-btn" onclick="executeTunnelCompilation()">
+            <i data-lucide="terminal"></i> Build Tunnel Configuration
+        </button>
+
+        <div class="workspace-board">
+            <div class="board-title"><i data-lucide="cpu" style="width:14px;"></i>Realtime Diagnostics Stream</div>
+            <div id="forge-steps"></div>
+            
+            <textarea id="config-output" class="config-output-pane" readonly placeholder="[Output Configuration Matrices Will Populate Here...]"></textarea>
+            
+            <div class="action-row">
+                <button class="sub-btn" onclick="copyConfigToClipboard()"><i data-lucide="copy"></i> Copy Config</button>
+                <button class="sub-btn" onclick="downloadConfigAsset()"><i data-lucide="download"></i> Export (.txt)</button>
+            </div>
+        </div>
+
+        <div class="contacts-section-title"><i data-lucide="message-square"></i>Developer Communications Endpoint</div>
+        <div class="contacts-grid">
+            <a href="https://github.com/xbotmanager-cell" target="_blank" class="contact-card c-github">
+                <i data-lucide="github"></i><span>GitHub</span>
+            </a>
+            <a href="https://www.tiktok.com/@mrlupin76_" target="_blank" class="contact-card c-tiktok">
+                <i data-lucide="layers"></i><span>TikTok</span>
+            </a>
+            <a href="https://wa.me/255780470905?text=Hello%20Lupin,%20I%20have%20a%20feedback%20about%20Tunnel%20Forge." target="_blank" class="contact-card c-whatsapp">
+                <i data-lucide="message-circle"></i><span>WhatsApp</span>
+            </a>
+            <a href="https://t.me/+255780470905?text=Hello%20Lupin,%20I%20have%20a%20feedback%20about%20Tunnel%20Forge." target="_blank" class="contact-card c-telegram">
+                <i data-lucide="send"></i><span>Telegram</span>
+            </a>
+            <a href="https://www.instagram.com/maskedvoice_tz" target="_blank" class="contact-card c-instagram">
+                <i data-lucide="instagram"></i><span>Instagram</span>
+            </a>
+            <a href="mailto:lupinstarnley009@gmail.com" class="contact-card c-email">
+                <i data-lucide="mail"></i><span>Official Email</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="about-overlay" id="about-panel">
+        <div class="about-handle" onclick="toggleAboutOverlay()"></div>
+        <div class="about-content">
+            <h2 style="color:var(--accent-purple); margin-bottom:12px; font-weight:900;">Tunnel Matrix Parameters</h2>
+            <div class="feature-badge-list">
+                <div class="feature-badge-item">
+                    <i data-lucide="git-branch"></i>
+                    <div>
+                        <h4>Standardized Header Architecture</h4>
+                        <p>Implements structural HTTP/1.1 payload generation strings compatible with modern standard SSH tunneling clients.</p>
+                    </div>
+                </div>
+                <div class="feature-badge-item">
+                    <i data-lucide="shield"></i>
+                    <div>
+                        <h4>Sandbox Security</h4>
+                        <p>Processes all conversions locally inside your mobile browser environment without relying on external cloud vectors.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-box" id="systemToast">
+        <i data-lucide="check-circle" style="color:#30d158" id="toastIcon"></i>
+        <span id="toastMsg">Action Accomplished Successfully</span>
+    </div>
+
+    <script>
+        // Init Lucide Icons System
+        lucide.createIcons();
+
+        // Render Ambient Background Particles
+        function initBackgroundGlow() {
+            const container = document.getElementById('ambient-container');
+            for(let i=0; i<12; i++) {
+                let element = document.createElement('div');
+                element.className = 'ambient-bubble';
+                element.style.left = Math.random() * 100 + 'vw';
+                element.style.width = element.style.height = (Math.random() * 50 + 20) + 'px';
+                element.style.animationDelay = (Math.random() * 5) + 's';
+                element.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                container.appendChild(element);
+            }
+        }
+        initBackgroundGlow();
+
+        // Execution of Loader Display Trigger
+        window.addEventListener('load', () => {
+            const screen = document.getElementById('loading-screen');
+            const vortex = document.getElementById('vortex-gate');
+            let randomLoaderDuration = Math.floor(Math.random() * (3500 - 2000 + 1)) + 2000;
+
+            setTimeout(() => {
+                vortex.style.opacity = '1';
+                vortex.style.width = '250vw'; vortex.style.height = '250vw';
+                vortex.style.transition = 'width 1.2s ease, height 1.2s ease, opacity 0.6s ease';
+                setTimeout(() => {
+                    screen.style.opacity = '0';
+                    screen.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => screen.remove(), 500);
+                }, 900);
+            }, randomLoaderDuration);
+        });
+
+        // Theme Switch Processor 
+        function toggleInterfaceTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            body.classList.toggle('light-theme');
+            icon.setAttribute('data-lucide', body.classList.contains('light-theme') ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+
+        function toggleAboutOverlay() {
+            document.getElementById('about-panel').classList.toggle('open');
+        }
+
+        function triggerSystemToast(message, isError = false) {
+            const toast = document.getElementById('systemToast');
+            const msgSpan = document.getElementById('toastMsg');
+            const icon = document.getElementById('toastIcon');
+
+            msgSpan.innerText = message;
+            toast.style.borderLeftColor = isError ? "#ff3b30" : "#30d158";
+            icon.setAttribute('data-lucide', isError ? 'alert-triangle' : 'check-circle');
+            
+            lucide.createIcons();
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        async function writeDiagnosticSteps(lines) {
+            const box = document.getElementById('forge-steps');
+            box.innerHTML = '';
+            for(let text of lines) {
+                let div = document.createElement('div');
+                div.className = 'typed-step';
+                box.appendChild(div);
+                await new Promise(resolve => {
+                    let idx = 0;
+                    function type() {
+                        if(idx < text.length) {
+                            div.innerHTML += text.charAt(idx);
+                            idx++; 
+                            setTimeout(type, 15);
+                        } else {
+                            resolve();
+                        }
+                    }
+                    type();
+                });
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+
+        // Functional Proxy Configuration Generator Algorithm
+        async function executeTunnelCompilation() {
+            const protocol = document.getElementById('tunnel-protocol').value;
+            const host = document.getElementById('target-host').value.trim();
+            const proxy = document.getElementById('proxy-addr').value.trim();
+            const outputPane = document.getElementById('config-output');
+
+            if(!host) {
+                triggerSystemToast("Execution Failure: Target Bug Host Field Missing", true);
+                return;
+            }
+
+            let logStream = [
+                `[SYSTEM]: Map initialization for protocol schema [${protocol}]...`,
+                `[SYSTEM]: Validating host sequence parameters...`,
+                `[SYSTEM]: Compiling structural structural block headers...`
+            ];
+            await writeDiagnosticSteps(logStream);
+
+            let builtConfig = "";
+            let generatedTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+            if(protocol === "HTTP") {
+                let targetProxy = proxy === "" ? "127.0.0.1:8080" : proxy;
+                builtConfig = `========================================\n` +
+                              ` BUNNY ENGINE - HTTP INJECTOR PROFILE   \n` +
+                              ` Generated: ${generatedTimestamp}     \n` +
+                              `========================================\n\n` +
+                              `[REMARK]\n` +
+                              `Bunny Engine Mobile Core Profile V1\n\n` +
+                              `[PROXY_SERVER]\n` +
+                              `${targetProxy}\n\n` +
+                              `[RAW_PAYLOAD]\n` +
+                              `GET http://${host}/ HTTP/1.1[crlf]` +
+                              `Host: ${host}[crlf]` +
+                              `Connection: Keep-Alive[crlf]` +
+                              `User-Agent: [ua][crlf]` +
+                              `Referer: http://${host}/[crlf][crlf]\n\n` +
+                              `========================================`;
+            } else if(protocol === "SSL") {
+                builtConfig = `========================================\n` +
+                              ` BUNNY ENGINE - DIRECT SSL/SNI PROFILE  \n` +
+                              ` Generated: ${generatedTimestamp}     \n` +
+                              `========================================\n\n` +
+                              `[TRANSPORT_PROTOCOL] -> TLS/SSL\n` +
+                              `[SNI_SPOOF_HOST]      -> ${host}\n` +
+                              `[SERVER_PORT]         -> 443\n\n` +
+                              `[CLIENT_HANDSHAKE_SETTINGS]\n` +
+                              `Force-TLSv1.3: True\n` +
+                              `Keep-Alive: Enabled\n` +
+                              `========================================`;
+            } else {
+                builtConfig = `========================================\n` +
+                              ` BUNNY ENGINE - DIRECT SSH PROFILE      \n` +
+                              ` Generated: ${generatedTimestamp}     \n` +
+                              `========================================\n\n` +
+                              `[CONNECTION_MODE] -> DIRECT_SSH\n` +
+                              `[REMOTE_HOST]     -> ${host}\n` +
+                              `[LOCAL_PORT]      -> 22\n\n` +
+                              `[TUNNEL_FLAGS]\n` +
+                              `Disable-Compression: False\n` +
+                              `Enable-TCP-KeepAlive: True\n` +
+                              `========================================`;
+            }
+
+            outputPane.value = builtConfig;
+            triggerSystemToast("Tunnel Payload Matrix Formatted Successfully");
+        }
+
+        function copyConfigToClipboard() {
+            const data = document.getElementById('config-output').value;
+            if(!data) {
+                triggerSystemToast("Operation Denied: Output Workspace Is Vacant", true);
+                return;
+            }
+            navigator.clipboard.writeText(data);
+            triggerSystemToast("Config Copied To Device Clip Buffer");
+        }
+
+        function downloadConfigAsset() {
+            const data = document.getElementById('config-output').value;
+            if(!data) {
+                triggerSystemToast("Operation Denied: Output Workspace Is Vacant", true);
+                return;
+            }
+            const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "bunny_tunnel_config.txt";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            triggerSystemToast("Config Exported onto Node Filesystem Storage");
+        }
+    </script>
+</body>
+</html>
