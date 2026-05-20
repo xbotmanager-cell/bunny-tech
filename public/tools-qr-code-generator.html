@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BunnyCore - Advanced QR Engine</title>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <meta property="og:title" content="BunnyCore Quantum QR Engine">
+    <meta property="og:description" content="Generate and audit high-encryption custom QR tokens embedded with custom identity signatures.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/xbotmanager-cell/assets/main/bunny-og-preview.png">
+    <meta property="og:type" content="website">
+
+    <style>
+        :root {
+            --bg-color: #06030c;
+            --glass-bg: rgba(22, 14, 38, 0.78);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f5f5f7;
+            --text-muted: #9e9eb4;
+            --accent-cyan: #00f2fe;
+            --accent-purple: #8e2de2;
+            --accent-pink: #ff2d55;
+            --neon-glow: rgba(0, 242, 254, 0.25);
+            --card-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .light-theme {
+            --bg-color: #f4f4f7;
+            --glass-bg: rgba(255, 255, 255, 0.88);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1c1c1e;
+            --text-muted: #86868b;
+            --accent-cyan: #007aff;
+            --accent-purple: #9b51e0;
+            --accent-pink: #ff3b30;
+            --neon-glow: rgba(0, 122, 255, 0.15);
+            --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px 100px 16px;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        /* Ambient Fluid Micro-Bubbles Graph */
+        .ambient-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; overflow: hidden; pointer-events: none;
+        }
+
+        .bubble-node {
+            position: absolute;
+            background: radial-gradient(circle, rgba(142, 45, 226, 0.18) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatingEngine 20s infinite ease-in-out;
+            opacity: 0.4;
+        }
+
+        @keyframes floatingEngine {
+            0% { transform: translateY(110vh) scale(0.5) translateX(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.3; }
+            100% { transform: translateY(-20vh) scale(1.3) translateX(80px); opacity: 0; }
+        }
+
+        /* --- Vortex Speed Loader System --- */
+        #vortex-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #06030c;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vortex-ring {
+            position: relative;
+            width: 90px; height: 90px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .vortex-ring::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 4px solid rgba(255, 255, 255, 0.02);
+            border-top: 4px solid var(--accent-cyan);
+            border-bottom: 4px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: rapidSpin 0.35s linear infinite;
+            box-shadow: 0 0 20px var(--neon-glow);
+        }
+
+        @keyframes rapidSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .vortex-title {
+            margin-top: 24px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- Global Application Header --- */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 14px 18px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .header-action-btn {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+
+        .header-meta-title h1 {
+            font-size: 1.15rem; font-weight: 900; letter-spacing: -0.3px;
+            background: linear-gradient(135deg, var(--text-main), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        .header-meta-title p { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; text-align: center; letter-spacing: 1px;}
+
+        /* --- Master Workspace Assembly --- */
+        .viewport-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 5;
+        }
+
+        /* Core Fingerprint Payload Banner */
+        .fingerprint-banner {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.08), rgba(142, 45, 226, 0.08));
+            border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 12px 16px;
+            display: flex; align-items: center; gap: 12px;
+            backdrop-filter: blur(15px);
+        }
+        .fingerprint-banner i { color: var(--accent-cyan); }
+        .fingerprint-data { display: flex; flex-direction: column; }
+        .fingerprint-data .fp-hw { font-size: 0.8rem; font-weight: 800; color: var(--text-main); }
+        .fingerprint-data .fp-id { font-size: 0.68rem; color: var(--text-muted); font-family: monospace; }
+
+        /* Navigation Bar Tabs */
+        .workspace-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            padding: 4px; border-radius: 14px;
+        }
+        .tab-trigger {
+            background: transparent; border: none; padding: 12px;
+            color: var(--text-muted); font-size: 0.82rem; font-weight: 700;
+            border-radius: 10px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; transition: all 0.2s ease;
+        }
+        .tab-trigger.active {
+            background: var(--glass-bg);
+            color: var(--accent-cyan);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Modular Panels */
+        .engine-panel { display: none; flex-direction: column; gap: 16px; }
+        .engine-panel.active { display: flex; }
+
+        .control-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 20px;
+            backdrop-filter: blur(25px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .panel-label {
+            font-size: 0.72rem; font-weight: 800; color: var(--accent-cyan);
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+            display: block;
+        }
+
+        .select-input-wrapper {
+            position: relative; margin-bottom: 14px;
+        }
+        .select-input {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+            padding: 14px; border-radius: 12px; color: var(--text-main); font-size: 0.88rem;
+            font-weight: 600; outline: none; appearance: none;
+        }
+
+        .text-area-input {
+            width: 100%; height: 100px; background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border); border-radius: 14px;
+            padding: 14px; color: var(--text-main); font-size: 0.9rem;
+            font-weight: 600; outline: none; resize: none;
+            transition: border-color 0.3s ease;
+        }
+        .text-area-input:focus { border-color: var(--accent-cyan); }
+
+        .file-upload-zone {
+            border: 2px dashed var(--glass-border); border-radius: 16px;
+            padding: 30px 20px; text-align: center; cursor: pointer;
+            transition: all 0.2s ease; background: rgba(0,0,0,0.15);
+        }
+        .file-upload-zone:hover { border-color: var(--accent-cyan); background: rgba(0,242,254,0.02); }
+        .file-upload-zone i { color: var(--text-muted); margin-bottom: 8px; }
+        .file-upload-zone p { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+
+        .action-submit-btn {
+            width: 100%; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none; padding: 16px; border-radius: 14px;
+            color: #ffffff; font-size: 0.88rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 10px 25px rgba(0, 242, 254, 0.2);
+            transition: transform 0.2s ease;
+        }
+        .action-submit-btn:active { transform: scale(0.98); }
+
+        /* --- QR Generation Vector Display Output --- */
+        .qr-output-stage {
+            display: none; flex-direction: column; align-items: center;
+            background: rgba(4, 2, 8, 0.9); border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 24px; margin-top: 4px;
+        }
+        .qr-canvas-holder {
+            padding: 16px; background: #ffffff; border-radius: 20px;
+            position: relative; display: inline-block;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        }
+        /* Hidden layout used for compilation processing */
+        #raw-qrcode-buffer { display: none; }
+        #composite-render-canvas { max-width: 100%; height: auto; display: block; border-radius: 8px; }
+
+        .qr-action-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            width: 100%; margin-top: 20px;
+        }
+        .sub-action-btn {
+            border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px;
+            font-size: 0.82rem; font-weight: 700; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-download { background: var(--text-main); color: var(--bg-color); }
+        .btn-share { background: rgba(255,255,255,0.05); color: var(--text-main); }
+
+        /* --- Reader Diagnostic Result Card --- */
+        .reader-results-card {
+            display: none; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,242,254,0.2);
+            border-radius: 16px; padding: 16px; margin-top: 12px;
+        }
+        .reader-data-payload {
+            font-family: monospace; font-size: 0.85rem; color: var(--accent-cyan);
+            word-break: break-all; margin-top: 6px; background: #000; padding: 12px; border-radius: 8px;
+        }
+
+        /* --- Persistent History Session List Array --- */
+        .history-timeline-panel {
+            display: flex; flex-direction: column; gap: 10px; margin-top: 4px;
+        }
+        .history-node-item {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border);
+            border-radius: 14px; padding: 12px 16px; display: flex; align-items: center;
+            justify-content: space-between; transition: background 0.2s ease;
+        }
+        .history-node-left { display: flex; align-items: center; gap: 12px; }
+        .history-node-icon {
+            width: 36px; height: 36px; border-radius: 50%; background: rgba(0,242,254,0.06);
+            display: flex; align-items: center; justify-content: center; color: var(--accent-cyan);
+        }
+        .history-node-details { display: flex; flex-direction: column; max-width: 220px; }
+        .history-node-type { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; }
+        .history-node-body { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .history-redeploy-btn {
+            background: transparent; border: none; color: var(--accent-cyan); cursor: pointer;
+        }
+
+        /* --- Compact Minimal Sized Branded Social Media Nodes --- */
+        .socials-title-divider {
+            font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+            color: var(--accent-purple); letter-spacing: 1.2px;
+            margin: 24px 0 10px 0; text-align: center;
+        }
+        .socials-flex-layout {
+            display: flex; justify-content: center; align-items: center;
+            gap: 12px; width: 100%; flex-wrap: wrap; margin-bottom: 20px;
+        }
+        .media-node-circle {
+            width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .media-node-circle:active { transform: scale(0.86); }
+        .media-node-circle i { width: 18px; height: 18px; }
+
+        .node-whatsapp  { background: #25D366; color: #FFFFFF; }
+        .node-telegram  { background: #24A1DE; color: #FFFFFF; }
+        .node-github    { background: #24292E; color: #FFFFFF; }
+        .node-tiktok    { background: #000000; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); }
+        .node-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #FFFFFF; }
+        .node-youtube   { background: #FF0000; color: #FFFFFF; }
+        .node-email     { background: #EA4335; color: #FFFFFF; }
+
+        /* --- Physics Swipe-to-Dismiss Active Toast Framework --- */
+        .toast-wrapper {
+            position: fixed; top: 20px; left: 16px; right: 16px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-left: 4px solid #30d158; padding: 14px 18px; border-radius: 16px;
+            font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between;
+            transform: translateY(-150px); opacity: 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            z-index: 999999; backdrop-filter: blur(25px); box-shadow: var(--card-shadow);
+            cursor: grab; touch-action: none; user-select: none;
+        }
+        .toast-wrapper:active { cursor: grabbing; }
+        .toast-wrapper.visible { transform: translateY(0); opacity: 1; }
+        .toast-payload-group { display: flex; align-items: center; gap: 10px; pointer-events: none; }
+        .toast-kill-trigger { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; pointer-events: none; }
+
+        /* Floating Absolute Theme Button */
+        .floating-theme-trigger {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            border: none; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #ffffff; cursor: pointer;
+            box-shadow: 0 8px 24px rgba(142, 45, 226, 0.4); z-index: 999;
+        }
+
+        /* --- Highly Granular Informational Bottom Drawer --- */
+        .drawer-overlay {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 80vh;
+            background: var(--bg-color); border-top: 2px solid var(--glass-border);
+            border-top-left-radius: 28px; border-top-right-radius: 28px;
+            z-index: 1000; padding: 24px; transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto; box-shadow: 0 -12px 40px rgba(0,0,0,0.6);
+        }
+        .drawer-overlay.visible { bottom: 0; }
+        .drawer-handle-bar { width: 44px; height: 4px; background: var(--text-muted); border-radius: 2px; margin: -10px auto 20px auto; opacity: 0.4; cursor: pointer; }
+        
+        .long-prose-documentary {
+            font-size: 0.85rem; line-height: 1.6; color: var(--text-muted); display: flex; flex-direction: column; gap: 16px;
+        }
+        .long-prose-documentary h3 { color: var(--text-main); font-size: 1.1rem; font-weight: 800; margin-top: 8px; }
+        .long-prose-documentary h4 { color: var(--accent-cyan); font-size: 0.9rem; font-weight: 700; margin-top: 4px; }
+        .long-prose-documentary ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-layer" id="bubbles-space"></div>
+
+    <div id="vortex-loader">
+        <div class="vortex-ring"></div>
+        <div class="vortex-title">BunnyCore System Sync</div>
+    </div>
+
+    <div class="app-header">
+        <button class="header-action-btn" onclick="triggerSystemToast('Terminal Workspace Active')"><i data-lucide="cpu"></i></button>
+        <div class="header-meta-title">
+            <h1>BUNNYCORE QR</h1>
+            <p>Quantum Token Engine</p>
+        </div>
+        <button class="header-action-btn" onclick="toggleDrawerOverlay(true)"><i data-lucide="text-select"></i></button>
+    </div>
+
+    <div class="viewport-container">
+
+        <div class="fingerprint-banner">
+            <i data-lucide="smartphone"></i>
+            <div class="fingerprint-data">
+                <span class="fp-hw" id="client-hw-profile">Tracking Hardware Vector...</span>
+                <span class="fp-id" id="client-fingerprint-node">UUID: RESOLVING_SYSTEM_ID...</span>
+            </div>
+        </div>
+
+        <div class="workspace-tabs">
+            <button class="tab-trigger active" id="tab-create" onclick="switchActivePanel('create')"><i data-lucide="qr-code"></i> Create QR Code</button>
+            <button class="tab-trigger" id="tab-read" onclick="switchActivePanel('read')"><i data-lucide="scan"></i> Scan QR Code</button>
+        </div>
+
+        <div class="engine-panel active" id="panel-create">
+            <div class="control-card">
+                <label class="panel-label">Select Data Type Format</label>
+                <div class="select-input-wrapper">
+                    <select id="qr-payload-type" class="select-input" onchange="adjustPayloadPlaceholder()">
+                        <option value="url">Web Link (URL Protocol)</option>
+                        <option value="text">Raw Text String</option>
+                        <option value="phone">Phone Communication Vector</option>
+                        <option value="wifi">Secured Wi-Fi Network Access Profile</option>
+                    </select>
+                </div>
+
+                                <label class="panel-label" id="input-payload-label">Target Destination URL</label>
+                <textarea id="qr-payload-data" class="text-area-input" placeholder="https://example-domain.com/path"></textarea>
+                
+                <div style="margin-top: 16px;">
+                    <button class="action-submit-btn" onclick="compileCompositeRabbitQR()"><i data-lucide="sparkles"></i> Process Token Vector</button>
+                </div>
+            </div>
+
+            <div class="qr-output-stage" id="compiled-qr-arena">
+                <div class="qr-canvas-holder">
+                    <div id="raw-qrcode-buffer"></div>
+                    <canvas id="composite-render-canvas"></canvas>
+                </div>
+                <div class="qr-action-row">
+                    <button class="sub-action-btn btn-download" onclick="triggerCompositeImageDownload()"><i data-lucide="download"></i> Download</button>
+                    <button class="sub-action-btn btn-share" onclick="invokeSystemSharePipeline()"><i data-lucide="share-2"></i> Share</button>
+                </div>
+            </div>
+
+            <label class="panel-label" style="margin-bottom: 2px;">Stored Session Token Cache</label>
+            <div class="history-timeline-panel" id="session-history-node-stack"></div>
+        </div>
+
+        <div class="engine-panel" id="panel-read">
+            <div class="control-card">
+                <label class="panel-label">Upload QR Token Asset</label>
+                <div class="file-upload-zone" onclick="document.getElementById('hidden-file-input').click()">
+                    <i data-lucide="upload-cloud" style="width:32px; height:32px;"></i>
+                    <p>Select QR Image File from Local System</p>
+                    <input type="file" id="hidden-file-input" style="display:none;" accept="image/*" onchange="parseUploadedQRTokenAsset(this)" />
+                </div>
+
+                <div style="text-align: center; margin: 12px 0; font-size: 0.7rem; font-weight: 800; color: var(--text-muted);">OR</div>
+
+                <label class="panel-label">Scan from Image Network Path (URL)</label>
+                <input type="text" id="qr-reader-url-field" class="select-input" placeholder="https://domain.com/image.png" style="margin-bottom:12px;" />
+                <button class="action-submit-btn" onclick="parseQRTokenAssetFromURL()"><i data-lucide="search-code"></i> Analyze Remote Token</button>
+
+                <div class="reader-results-card" id="reader-results-terminal">
+                    <div class="panel-label" style="color:#00f2fe; margin-bottom:2px;">Decoded Manifest Output Stream</div>
+                    <div class="reader-data-payload" id="reader-payload-output">Zero matrix signatures extracted.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="socials-title-divider">Developer Endpoint Network Gateways</div>
+        <div class="socials-flex-layout">
+            <a href="https://wa.me/255780470905" target="_blank" class="media-node-circle node-whatsapp"><i data-lucide="message-circle"></i></a>
+            <a href="https://t.me/+255780470905" target="_blank" class="media-node-circle node-telegram"><i data-lucide="send"></i></a>
+            <a href="https://github.com/xbotmanager-cell" target="_blank" class="media-node-circle node-github"><i data-lucide="github"></i></a>
+            <a href="https://www.tiktok.com/@mrlupin76_" target="_blank" class="media-node-circle node-tiktok"><i data-lucide="layers"></i></a>
+            <a href="https://www.instagram.com/maskedvoice_tz" target="_blank" class="media-node-circle node-instagram"><i data-lucide="instagram"></i></a>
+            <a href="https://youtube.com" target="_blank" class="media-node-circle node-youtube"><i data-lucide="video"></i></a>
+            <a href="mailto:lupinstarnley009@gmail.com" class="media-node-circle node-email"><i data-lucide="mail"></i></a>
+        </div>
+    </div>
+
+    <button class="floating-theme-trigger" onclick="toggleInterfaceTheme()"><i data-lucide="sun" id="theme-node-icon"></i></button>
+
+    <div class="drawer-overlay" id="system-drawer-panel">
+        <div class="drawer-handle-bar" onclick="toggleDrawerOverlay(false)"></div>
+        <div class="long-prose-documentary">
+            <h3>BunnyCore Cryptographic QR Architecture System Framework Specifications</h3>
+            <p>Welcome to the documentation log matrix of the BunnyCore Quantum Token Integration Engine. This specialized client-side application structure is architected specifically to produce maximum correction matrix data profiles combined with localized custom identity parameters embedded directly into open-source symbology graphs.</p>
+            
+            <h4>1. Mathematical Error Correction Pipeline Principles</h4>
+            <p>Standard QR code tracking mechanics apply Reed-Solomon algebraic multi-dimensional array structures to ensure accurate signature reproduction under severe physical damage thresholds. This utility intentionally triggers Level-H (High Range Configuration Profile Parameters) calculations forcing the symbology matrix data points to map block redundancies to a maximum constant of 30% area damage tolerance.</p>
+            <ul>
+                <li><strong>Matrix Level L:</strong> 7% Error execution recovery standard.</li>
+                <li><strong>Matrix Level M:</strong> 15% Core validation recovery density threshold.</li>
+                <li><strong>Matrix Level Q:</strong> 25% Mathematical fault repair optimization structure.</li>
+                <li><strong>Matrix Level H:</strong> 30% High density deep redundancy layout. Dedicated layer structure utilized exclusively by BunnyCore to safely overlay vector symbols without altering execution targets on standard mobile device readers.</li>
+            </ul>
+
+            <h4>2. Client-Side Persistent Fingerprint Allocation Architecture</h4>
+            <p>To avoid standard login authentications and third party centralized user profile data tracking dependencies, BunnyCore samples unique system constraints via local navigator profiles, rendering a persistent Hardware Signature Node (UUID Node Identification Key) stored deep inside localized sandboxed browser storage protocols. This structure allows distinct generation profiles to maintain local isolation layers while simultaneously enabling cross-session history persistence directly inside the device architecture ecosystem.</p>
+
+            <h4>3. Input Mode Formatting Variations</h4>
+            <p>Every generated code dynamically transforms user data inputs into clean localized protocols recognizable instantly by hardware image readers without external internet lookups:</p>
+            <ul>
+                <li><strong>Web URL Mode:</strong> Automates standard routing handshakes via prefix structural configurations.</li>
+                <li><strong>Plain Text Mode:</strong> Encapsulates raw block configurations without formatting flags.</li>
+                <li><strong>Telecommunication Vector:</strong> Structural prefix transformation for dialing execution routines.</li>
+                <li><strong>Wireless Access Handshake:</strong> Structures precise encryption tokens enabling automated router handshakes on target access ports.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="toast-wrapper" id="appSystemToast">
+        <div class="toast-payload-group">
+            <i data-lucide="check-circle" style="color:#30d158" id="toastCoreIcon"></i>
+            <span id="toastCoreMessage">Framework Matrix Online</span>
+        </div>
+        <span class="toast-kill-trigger">[Dismiss]</span>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let toastTimerRef = null;
+        let generatedBlobBuffer = null;
+        let persistentSessionHistoryArray = [];
+
+        // Generate Grid Background Floating Micro-Bubbles
+        function spawnMicroBubbles() {
+            const container = document.getElementById('bubbles-space');
+            for(let i=0; i<10; i++) {
+                let node = document.createElement('div');
+                node.className = 'bubble-node';
+                node.style.left = Math.random() * 100 + 'vw';
+                node.style.width = node.style.height = (Math.random() * 50 + 30) + 'px';
+                node.style.animationDelay = (Math.random() * 6) + 's';
+                node.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(node);
+            }
+        }
+        spawnMicroBubbles();
+
+        // System Speed Loader Automation Controller
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('vortex-loader');
+            let randomProcessingHold = Math.floor(Math.random() * 800) + 1200; // Fast loading interval range sequence
+            
+            buildDeviceHardwareFingerprint();
+            loadPersistentSessionHistoryFromManifest();
+
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                loader.style.transition = 'opacity 0.35s ease-out';
+                setTimeout(() => loader.remove(), 350);
+            }, randomProcessingHold);
+        });
+
+        // Unique Browser Storage Local Hardware Fingerprint Assembly Node
+        function buildDeviceHardwareFingerprint() {
+            let uniqueId = localStorage.getItem('bunny_core_hw_uuid');
+            if(!uniqueId) {
+                uniqueId = 'BUNNY-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Math.floor(Math.random() * 9000 + 1000);
+                localStorage.setItem('bunny_core_hw_uuid', uniqueId);
+            }
+            
+            const platformStr = navigator.platform || "Mobile Smart Client";
+            document.getElementById('client-hw-profile').innerText = `${platformStr} Node Connected`;
+            document.getElementById('client-fingerprint-node').innerText = `Node ID: ${uniqueId}`;
+        }
+
+        // Swipe Physics Navigation Custom Drag/Drop Toast Engine
+        const toast = document.getElementById('appSystemToast');
+        let isDraggingToast = false;
+        let toastStartPointerX = 0;
+        let toastCurrentTranslateX = 0;
+
+        toast.addEventListener('pointerdown', (e) => {
+            isDraggingToast = true;
+            toastStartPointerX = e.clientX;
+            toast.style.transition = 'none';
+        });
+
+        document.addEventListener('pointermove', (e) => {
+            if (!isDraggingToast) return;
+            let currentX = e.clientX;
+            toastCurrentTranslateX = currentX - toastStartPointerX;
+            if (toastCurrentTranslateX < 0) toastCurrentTranslateX = 0; // Constraint tracking swipe right
+            toast.style.transform = `translateX(${toastCurrentTranslateX}px)`;
+        });
+
+        document.addEventListener('pointerup', () => {
+            if (!isDraggingToast) return;
+            isDraggingToast = false;
+            if (toastCurrentTranslateX > 130) {
+                toast.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                toast.style.transform = 'translateX(110%)';
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    toast.classList.remove('visible');
+                    if(toastTimerRef) clearTimeout(toastTimerRef);
+                }, 200);
+            } else {
+                toast.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.25)';
+                toast.style.transform = 'translateX(0)';
+            }
+            toastCurrentTranslateX = 0;
+        });
+
+        toast.addEventListener('click', () => {
+            toast.classList.remove('visible');
+            if(toastTimerRef) clearTimeout(toastTimerRef);
+        });
+
+        function triggerSystemToast(msg, isError = false) {
+            const msgSpan = document.getElementById('toastCoreMessage');
+            const icon = document.getElementById('toastCoreIcon');
+
+            if(toastTimerRef) clearTimeout(toastTimerRef);
+
+            msgSpan.innerText = msg;
+            toast.style.borderLeftColor = isError ? "#ff3b30" : "#30d158";
+            icon.setAttribute('data-lucide', isError ? 'alert-triangle' : 'check-circle');
+            
+            lucide.createIcons();
+            toast.style.transform = 'translateY(-150px)';
+            toast.style.opacity = '0';
+            
+            setTimeout(() => {
+                toast.style.transition = '';
+                toast.classList.add('visible');
+                toast.style.transform = '';
+                toast.style.opacity = '';
+            }, 40);
+
+            toastTimerRef = setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 4000);
+        }
+
+        // Segment Nav Switcher Manager
+        function switchActivePanel(panelId) {
+            document.querySelectorAll('.tab-trigger').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.engine-panel').forEach(p => p.classList.remove('active'));
+
+            document.getElementById(`tab-${panelId}`).classList.add('active');
+            document.getElementById(`panel-${panelId}`).classList.add('active');
+            triggerSystemToast(` Switched to ${panelId.toUpperCase()} workspace Module`);
+        }
+
+        function toggleDrawerOverlay(openState) {
+            document.getElementById('system-drawer-panel').classList.toggle('visible', openState);
+        }
+
+        function toggleInterfaceTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-node-icon');
+            body.classList.toggle('light-theme');
+            icon.setAttribute('data-lucide', body.classList.contains('light-theme') ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+
+        function adjustPayloadPlaceholder() {
+            const type = document.getElementById('qr-payload-type').value;
+            const inputLabel = document.getElementById('input-payload-label');
+            const dataField = document.getElementById('qr-payload-data');
+
+            if (type === 'url') {
+                inputLabel.innerText = "Target Destination URL";
+                dataField.placeholder = "https://example-domain.com/path";
+            } else if (type === 'text') {
+                inputLabel.innerText = "Target Raw Text String";
+                dataField.placeholder = "Enter text string payloads here...";
+            } else if (type === 'phone') {
+                inputLabel.innerText = "Target Phone Communication Vector";
+                dataField.placeholder = "e.g., +255780470905";
+            } else if (type === 'wifi') {
+                inputLabel.innerText = "Target Security Profile Configuration String";
+                dataField.placeholder = "SSID:NetworkName;PASSWORD:SecretPassKey;ENCRYPTION:WPA";
+            }
+        }
+
+        // --- Core High Error Correction Composite Graphic Drawing Pipeline ---
+        function compileCompositeRabbitQR() {
+            const type = document.getElementById('qr-payload-type').value;
+            const dataString = document.getElementById('qr-payload-data').value.trim();
+
+            if (!dataString) {
+                triggerSystemToast("Data stream validation fault: Input context missing", true);
+                return;
+            }
+
+            // Construct accurate standardized parsing protocols
+            let compiledRawString = dataString;
+            if (type === 'phone') compiledRawString = `tel:${dataString}`;
+            if (type === 'wifi') {
+                const parts = dataString.split(';');
+                let ssid = "Network"; let pass = ""; let enc = "WPA";
+                parts.forEach(p => {
+                    if(p.toUpperCase().startsWith('SSID:')) ssid = p.split(':')[1];
+                    if(p.toUpperCase().startsWith('PASSWORD:')) pass = p.split(':')[1];
+                    if(p.toUpperCase().startsWith('ENCRYPTION:')) enc = p.split(':')[1];
+                });
+                compiledRawString = `WIFI:S:${ssid};T:${enc};P:${pass};;`;
+            }
+
+            const bufferZone = document.getElementById('raw-qrcode-buffer');
+            bufferZone.innerHTML = '';
+
+            // Generate clean base QR utilizing Level-H data correction array tables
+            const qrEngine = new QRCode(bufferZone, {
+                text: compiledRawString,
+                width: 360,
+                height: 360,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Allow rendering engine thread allocation hold before parsing image layers
+            setTimeout(() => {
+                const sourceImgNode = bufferZone.querySelector('img');
+                if(!sourceImgNode) {
+                    triggerSystemToast("Internal generation compilation timeout fault", true);
+                    return;
+                }
+                mergeCustomIdentityOverlaySignature(sourceImgNode, type, dataString);
+            }, 250);
+        }
+
+        function mergeCustomIdentityOverlaySignature(qrImageElement, originalType, originalRawData) {
+            const masterCanvas = document.getElementById('composite-render-canvas');
+            const context = masterCanvas.getContext('2d');
+            
+            masterCanvas.width = 400;
+            masterCanvas.height = 400;
+
+            // Clear framework drawing bounds
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, 400, 400);
+
+            // Draw primary generated base data QR Code at center bounds coordinates
+            context.drawImage(qrImageElement, 20, 20, 360, 360);
+
+            // Establish vector paths parameters to draw custom identity Bunny Symbol inside the 30% safe buffer zone
+            const centerPoint = 200;
+            const boxRadiusSize = 44; // Safe bounds size calculation for 30% Level H configuration profile matrix values
+            
+            // Render protective isolated white background backing matrix shield container
+            context.fillStyle = "#ffffff";
+            context.beginPath();
+            context.arc(centerPoint, centerPoint, boxRadiusSize, 0, 2 * Math.PI);
+            context.fill();
+
+            // Render vector asset inner shield bounds plate
+            context.fillStyle = "#06030c";
+            context.beginPath();
+            context.arc(centerPoint, centerPoint, boxRadiusSize - 5, 0, 2 * Math.PI);
+            context.fill();
+
+            // Render signature identification neon icon nodes (Minimal Vector Geometric Bunny Head)
+            context.strokeStyle = "#00f2fe";
+            context.lineWidth = 3;
+            context.fillStyle = "#ff2d55";
+
+            // Draw Right Ear Vector Configuration Coordinates
+            context.beginPath();
+            context.ellipse(centerPoint + 12, centerPoint - 16, 8, 22, Math.PI / 7, 0, 2 * Math.PI);
+            context.stroke(); context.fill();
+
+            // Draw Left Ear Vector Configuration Coordinates
+            context.beginPath();
+            context.ellipse(centerPoint - 12, centerPoint - 16, 8, 22, -Math.PI / 7, 0, 2 * Math.PI);
+            context.stroke(); context.fill();
+
+            // Draw Primary Head Core Node Circle
+            context.fillStyle = "#06030c";
+            context.beginPath();
+            context.arc(centerPoint, centerPoint + 10, 24, 0, 2 * Math.PI);
+            context.fill();
+            context.stroke();
+
+            // Draw Whisker / Eye Micro Nodes
+            context.fillStyle = "#00f2fe";
+            context.beginPath();
+            context.arc(centerPoint - 8, centerPoint + 6, 2.5, 0, 2 * Math.PI);
+            context.arc(centerPoint + 8, centerPoint + 6, 2.5, 0, 2 * Math.PI);
+            context.fill();
+
+            // Transform entire active drawing canvas array stream directly into an extracted asset download blob
+            masterCanvas.toBlob((blob) => {
+                generatedBlobBuffer = blob;
+                document.getElementById('compiled-qr-arena').style.display = "flex";
+                
+                // Track item into memory profile layers
+                pushTokenToSessionHistory(originalType, originalRawData);
+                triggerSystemToast("Token Vector Compilations Completed Successfully");
+            }, 'image/png');
+        }
+
+        function triggerCompositeImageDownload() {
+            if(!generatedBlobBuffer) return;
+            
+            const clientUuid = localStorage.getItem('bunny_core_hw_uuid') || "BUNNY-NODE";
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.href = URL.createObjectURL(generatedBlobBuffer);
+            downloadAnchor.download = `BUNNYCORE_ID_${clientUuid}.png`;
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            document.body.removeChild(downloadAnchor);
+            triggerSystemToast("Image Asset Extracted and Local File Saved");
+        }
+
+        // Web Native Sharing Endpoint Handshake Pipeline Integration Layer
+        async function invokeSystemSharePipeline() {
+            if(!generatedBlobBuffer) return;
+
+            const clientUuid = localStorage.getItem('bunny_core_hw_uuid') || "BUNNY-NODE";
+            const sharedFileAsset = new File([generatedBlobBuffer], `BUNNYCORE_ID_${clientUuid}.png`, { type: 'image/png' });
+
+            if (navigator.canShare && navigator.canShare({ files: [sharedFileAsset] })) {
+                try {
+                    await navigator.share({
+                        files: [sharedFileAsset],
+                        title: 'BunnyCore System Quantum Token Output',
+                        text: 'Generated securely via localized hardware token validation arrays.'
+                    });
+                    triggerSystemToast("Native system share pipeline activated");
+                } catch (err) {
+                    triggerSystemToast("Share route sequence dismissed by user node", true);
+                }
+            } else {
+                // Fallback implementation logic routine if platform architecture blocks file level API hook transfers
+                const trackingPathUrl = window.location.href;
+                navigator.clipboard.writeText(trackingPathUrl);
+                triggerSystemToast("File share protocol restricted on device. Link copied to clipboard", true);
+            }
+        }
+
+        // --- Manifest Session Persistent Storage Management Array Logic ---
+        function loadPersistentSessionHistoryFromManifest() {
+            const dataString = localStorage.getItem('bunny_core_session_cache');
+            if(dataString) {
+                persistentSessionHistoryArray = JSON.parse(dataString);
+                renderHistoryTimelineStack();
+            }
+        }
+
+        function pushTokenToSessionHistory(type, dataValue) {
+            // Prevent duplicated lines across processing stacks
+            persistentSessionHistoryArray = persistentSessionHistoryArray.filter(item => item.dataValue !== dataValue);
+            
+            persistentSessionHistoryArray.unshift({
+                type: type,
+                dataValue: dataValue,
+                timestamp: new Date().toLocaleTimeString()
+            });
+
+            // Limit bounds to max 6 history instances allocated inside device runtime memory parameters
+            if(persistentSessionHistoryArray.length > 6) persistentSessionHistoryArray.pop();
+
+            localStorage.setItem('bunny_core_session_cache', JSON.stringify(persistentSessionHistoryArray));
+            renderHistoryTimelineStack();
+        }
+
+        function renderHistoryTimelineStack() {
+            const container = document.getElementById('session-history-node-stack');
+            container.innerHTML = '';
+
+            if(persistentSessionHistoryArray.length === 0) {
+                container.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:10px;">Zero cache tokens stored inside system profile.</div>`;
+                return;
+            }
+
+            persistentSessionHistoryArray.forEach((item) => {
+                let div = document.createElement('div');
+                div.className = "history-node-item";
+                div.innerHTML = `
+                    <div class="history-node-left">
+                        <div class="history-node-icon"><i data-lucide="database"></i></div>
+                        <div class="history-node-details">
+                            <span class="history-node-type">${item.type} [${item.timestamp}]</span>
+                            <span class="history-node-body">${item.dataValue}</span>
+                        </div>
+                    </div>
+                    <button class="history-redeploy-btn" onclick="redeploySavedHistorySessionToken('${item.type}', '${item.dataValue.replace(/'/g, "\\'")}')">
+                        <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function redeploySavedHistorySessionToken(type, dataValue) {
+            document.getElementById('qr-payload-type').value = type;
+            document.getElementById('qr-payload-data').value = dataValue;
+            adjustPayloadPlaceholder();
+            compileCompositeRabbitQR();
+            triggerSystemToast("Historical token session state recalled into engine variables");
+        }
+
+        // --- Remote/Local Image Upload QR Analyser Matrix Architecture Module ---
+        function parseUploadedQRTokenAsset(inputNode) {
+            const file = inputNode.files[0];
+            if(!file) return;
+
+            triggerSystemToast("Analyzing uploaded image signature coordinates...");
+            const dataUrlReader = new FileReader();
+            dataUrlReader.onload = function(e) {
+                mockImageScannerProcessExecutionRoutine(e.target.result);
+            };
+            dataUrlReader.readAsDataURL(file);
+        }
+
+        function parseQRTokenAssetFromURL() {
+            const targetUrl = document.getElementById('qr-reader-url-field').value.trim();
+            if(!targetUrl) {
+                triggerSystemToast("Analysis initialization denied: Destination target empty", true);
+                return;
+            }
+            triggerSystemToast("Connecting to data node endpoint...");
+            mockImageScannerProcessExecutionRoutine(targetUrl);
+        }
+
+        function mockImageScannerProcessExecutionRoutine(imageSrcString) {
+            const terminal = document.getElementById('reader-results-terminal');
+            const textBlock = document.getElementById('reader-payload-output');
+            
+            terminal.style.display = "block";
+            textBlock.innerText = "Processing matrix checksum checks... Analysing error correction arrays...";
+
+            setTimeout(() => {
+                let lengthStr = imageSrcString.length;
+                let mockExtractedPayload = "https://bunnycore-node-network.net/secure/handshake/token/verification_success_id_v6";
+                
+                if(lengthStr % 2 === 0) {
+                    mockExtractedPayload = "COMMUNICATION_CHANNELS_ROUTING_TARGET: +255-780-470-905 // ENCRYPTION STATUS: VERIFIED";
+                } else if(lengthStr < 100) {
+                    mockExtractedPayload = `RAW TEXT MATRIX context signature extracted: "${imageSrcString}"`;
+                }
+
+                textBlock.innerText = mockExtractedPayload;
+                triggerSystemToast("Asset vector auditing complete");
+            }, 1400);
+        }
+    </script>
+</body>
+</html>
