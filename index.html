@@ -6,10 +6,9 @@
     <title>Bunny Ultimate Dashboard</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#bf5af2">
-    
-    <!-- Lucide Icons for Premium Clean Real Icons -->
+
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     <style>
         :root {
             --bg-color: #0d0614;
@@ -503,7 +502,6 @@
 <body>
 
     <div class="app-container">
-        <!-- Header -->
         <header>
             <div class="brand">
                 <img src="https://i.ibb.co/LDMjMYyy/file-00000000855c71f89fb70f5f8bebc2b2.png" alt="Logo" class="brand-logo">
@@ -517,9 +515,7 @@
             </div>
         </header>
 
-        <!-- Main Viewport Shell -->
         <main>
-            <!-- VIEW: HOME -->
             <div id="view-home" class="view-section active">
                 <div class="welcome-card">
                     <h1 id="greeting">Welcome</h1>
@@ -563,29 +559,24 @@
                 </div>
             </div>
 
-            <!-- VIEW: TOOLS -->
             <div id="view-tools" class="view-section">
                 <div class="section-title"><i data-lucide="sliders"></i>Available Utilities</div>
                 <div class="items-grid" id="tools-container">
-                    <!-- Automated population via filesystem parsing structural mapping -->
-                </div>
+                    </div>
             </div>
 
-            <!-- VIEW: MEDIA -->
             <div id="view-media" class="view-section">
                 <div class="section-title"><i data-lucide="play-circle"></i>Entertainment & Downloader Hub</div>
                 <div class="items-grid" id="media-container">
-                    <!-- Automated population via filesystem parsing structural mapping -->
-                </div>
+                    </div>
             </div>
 
-            <!-- VIEW: ABOUT/HELP -->
             <div id="view-about" class="view-section">
                 <div class="section-title"><i data-lucide="help-circle"></i>Documentation Shell</div>
                 <div class="about-content">
                     <h2>Bunny Dashboard Architecture</h2>
                     <p>An elite, automated dashboard environment designed entirely around absolute decentralization and structural transparency. The core framework relies entirely on client-parsed manifest logic, enabling limitless expansion without static main-thread configurations.</p>
-                    
+
                     <h2>Key Structural Capabilities</h2>
                     <div class="feature-badge-list">
                         <div class="feature-badge"><i data-lucide="check-circle-2"></i>Asynchronous HTML Parsing</div>
@@ -596,26 +587,22 @@
                     </div>
 
                     <h2>Operational Procedures</h2>
-                    <p>To scale this architecture, deploy standalone HTML files directly into the <code>/public</code> file subsystem directory via the repository workspace. Each workspace document auto-declares structural orientation parameters via targeted internal meta tokens, allowing the dashboard runtime engine to dynamically register navigational items on boot execution sequences.</p>
+                    <p>To scale this architecture, deploy standalone HTML files directly into the <code>/public</code> file subsystem directory via the repository workspace. Each workspace document auto--declares structural orientation parameters via targeted internal meta tokens, allowing the dashboard runtime engine to dynamically register navigational items on boot execution sequences.</p>
                 </div>
             </div>
         </main>
 
-        <!-- Toast Alert Hub Wrapper -->
         <div class="toast-container" id="toastContainer"></div>
 
-        <!-- Floating Notification Drawer Component -->
         <div class="notification-drawer" id="notifDrawer">
             <div class="drawer-header">
                 <h2>Notifications</h2>
                 <button class="icon-btn" id="closeNotifBtn"><i data-lucide="x"></i></button>
             </div>
             <div class="notification-list" id="notifList">
-                <!-- Session tracking stream alerts appended programmatically -->
-            </div>
+                </div>
         </div>
 
-        <!-- Floating Nav Rail Footer Area -->
         <nav class="bottom-nav">
             <button class="nav-item active" data-target="view-home"><i data-lucide="layout-dashboard"></i></button>
             <button class="nav-item" data-target="view-tools"><i data-lucide="cpu"></i></button>
@@ -627,7 +614,7 @@
     <script>
         // System Config Variables 
         let deferredPrompt;
-        const GITHUB_REPO_API = "https://api.github.com/repos/xbotmanager-cell/bunny-dashboard/contents/public";
+        const GITHUB_REPO_API = "https://api.github.com/repos/xbotmanager-cell/bunny-tech/contents/public";
         
         // Render Initializing System Icons
         lucide.createIcons();
@@ -824,7 +811,6 @@
                 console.error("Scanning Error:", error);
                 showToast("System Files Engine Mounted In Offline Standalone State.", "info");
                 
-                // Fallback Layout Display items when decoupled or limit reached
                 document.getElementById('tools-container').innerHTML = `
                     <div style="padding:20px; text-align:center; color:var(--text-muted); font-size:0.85rem;">
                         No dynamic elements indexed. Append HTML modules via repository files interface to display.
@@ -838,10 +824,11 @@
 
         // Register Service Worker Loop directly to core app wrapper safely
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('sw.js')
                 .then(() => console.log("Engine Service Pipeline Active"))
                 .catch(err => console.log("Pipeline Offline Context Enabled", err));
         }
     </script>
 </body>
 </html>
+
