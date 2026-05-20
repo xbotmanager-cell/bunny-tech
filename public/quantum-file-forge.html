@@ -241,6 +241,38 @@
             border-color: var(--accent-purple);
         }
 
+        /* Forge Action Execution Terminal Board */
+        .workspace-board {
+            background: rgba(13, 6, 20, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 4px;
+            min-height: 100px;
+        }
+
+        .board-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .typed-step {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #30d158;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            border-left: 2px solid rgba(48, 209, 88, 0.3);
+            padding-left: 10px;
+            margin-bottom: 8px;
+        }
+
         /* Micro-action Config Controls */
         .forge-btn {
             width: 100%;
@@ -371,7 +403,7 @@
     </div>
 
     <div class="forge-container">
-        
+
         <div class="input-group">
             <label for="file-name-input">Target Document Identifier (Filename & Ext)</label>
             <input type="text" id="file-name-input" class="text-field" placeholder="e.g. ping.js, Dockerfile, server.py, script">
@@ -386,6 +418,11 @@
             <i data-lucide="hard-drive-download"></i> Compile & Download Asset
         </button>
 
+        <div class="workspace-board">
+            <div class="board-title"><i data-lucide="cpu" style="width:14px;"></i>Asynchronous Solution Stream</div>
+            <div id="forge-steps"></div>
+        </div>
+
     </div>
 
     <div class="about-overlay" id="about-panel">
@@ -393,7 +430,7 @@
         <div class="about-content">
             <h2>About Quantum File Forge</h2>
             <p>Quantum File Forge is a low-latency Client-Side Document Matrix Compiler engineered inside the Bunny Dashboard suite. It enables immediate translation of volatile text vectors into solid system files ready for custom environment deployments natively on smartphone hardware ecosystems.</p>
-            
+
             <div class="feature-badge-list">
                 <div class="feature-badge-item">
                     <i data-lucide="file-type-2"></i>
@@ -461,7 +498,7 @@
                 vortex.style.width = '250vw';
                 vortex.style.height = '250vw';
                 vortex.style.transition = 'width 1.2s cubic-bezier(0.7, 0, 0.3, 1), height 1.2s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease';
-                
+
                 setTimeout(() => {
                     screen.style.opacity = '0';
                     screen.style.transition = 'opacity 0.5s ease';
@@ -472,8 +509,37 @@
         }
         window.addEventListener('load', initializeQuantumCoreSequence);
 
+        // --- Streaming Animation Typewriter Parser Engine ---
+        async function queueAnimatedSteps(stepsArray) {
+            const container = document.getElementById('forge-steps');
+            container.innerHTML = ''; 
+
+            for (let i = 0; i < stepsArray.length; i++) {
+                let div = document.createElement('div');
+                div.className = 'typed-step';
+                container.appendChild(div);
+
+                // Frame calculations loop strictly calibrated to visual parsing delay speeds
+                await new Promise(resolve => {
+                    let charIndex = 0;
+                    let text = stepsArray[i];
+                    function type() {
+                        if (charIndex < text.length) {
+                            div.innerHTML += text.charAt(charIndex);
+                            charIndex++;
+                            setTimeout(type, 20);
+                        } else {
+                            resolve();
+                        }
+                    }
+                    type();
+                });
+                await new Promise(r => setTimeout(r, 300));
+            }
+        }
+
         // --- Core File Compilation Engine ---
-        function executeQuantumFileDownload() {
+        async function executeQuantumFileDownload() {
             const nameInput = document.getElementById('file-name-input').value.trim();
             const rawPayload = document.getElementById('file-payload-area').value;
             const toast = document.getElementById('forgeToast');
@@ -481,30 +547,45 @@
 
             // Enforce default fallback configuration asset parameters if identifier block is empty
             let structuredFilename = nameInput === "" ? "untitled_payload" : nameInput;
+            let steps = [];
+
+                        steps.push(`[SYSTEM LOG]: Initializing Quantum File Forge Compilation...`);
+            steps.push(`Step 1: Extracted Target Identifier: "${structuredFilename}"`);
+            steps.push(`Step 2: Calculating text vector matrix payload stream length: ${rawPayload.length} bytes`);
+            steps.push(`Step 3: Allocating clean binary client memory blob structures...`);
 
             try {
                 // Initialize clean client memory binary allocation blob
                 const dataBlobMemoryBlock = new Blob([rawPayload], { type: 'text/plain;charset=utf-8' });
-                
+
                 // Construct virtual dynamic DOM anchor reference download port
                 const downloadAnchorPort = document.createElement('a');
                 downloadAnchorPort.href = URL.createObjectURL(dataBlobMemoryBlock);
                 downloadAnchorPort.download = structuredFilename;
+
+                steps.push(`Step 4: Executing Lossless Blob Encoding mapping interfaces...`);
+                steps.push(`>> Matrix Compiled Successfully. Routing pipeline download trigger.`);
                 
+                await queueAnimatedSteps(steps);
+
                 // Fire silent compilation download sequence triggering local file system save dialogs
                 document.body.appendChild(downloadAnchorPort);
                 downloadAnchorPort.click();
-                
+
                 // Wipe structural references immediately to clear device RAM overheads
                 document.body.removeChild(downloadAnchorPort);
                 URL.revokeObjectURL(downloadAnchorPort.href);
 
                 // Flash confirmation feedback metrics onto screen
                 toastMsg.innerText = `Compiled: ${structuredFilename}`;
+                toast.style.borderLeftColor = "#30d158";
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 3500);
 
             } catch (systemCompilationFault) {
+                steps.push(`>> Error: Compilation Matrix Pipeline Intercept Faulted.`);
+                await queueAnimatedSteps(steps);
+
                 toastMsg.innerText = "Compilation Matrix Failure Detected";
                 toast.style.borderLeftColor = "#ff3b30";
                 toast.classList.add('show');
