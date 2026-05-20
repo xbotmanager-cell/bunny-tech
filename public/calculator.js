@@ -133,7 +133,7 @@
             overflow: hidden;
         }
 
-        #calc-history {
+        #calcc-history {
             font-size: 0.85rem;
             color: var(--text-muted);
             min-height: 18px;
