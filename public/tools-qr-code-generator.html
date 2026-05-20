@@ -6,7 +6,6 @@
     <title>BunnyCore - Advanced QR Engine</title>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <meta property="og:title" content="BunnyCore Quantum QR Engine">
     <meta property="og:description" content="Generate and audit high-encryption custom QR tokens embedded with custom identity signatures.">
@@ -60,7 +59,6 @@
             transition: background 0.4s ease, color 0.4s ease;
         }
 
-        /* Ambient Fluid Micro-Bubbles Graph */
         .ambient-layer {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -82,7 +80,6 @@
             100% { transform: translateY(-20vh) scale(1.3) translateX(80px); opacity: 0; }
         }
 
-        /* --- Vortex Speed Loader System --- */
         #vortex-loader {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -128,7 +125,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- Global Application Header --- */
         .app-header {
             display: flex;
             align-items: center;
@@ -161,7 +157,6 @@
         }
         .header-meta-title p { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; text-align: center; letter-spacing: 1px;}
 
-        /* --- Master Workspace Assembly --- */
         .viewport-container {
             width: 100%;
             max-width: 500px;
@@ -172,7 +167,6 @@
             z-index: 5;
         }
 
-        /* Core Fingerprint Payload Banner */
         .fingerprint-banner {
             background: linear-gradient(135deg, rgba(0, 242, 254, 0.08), rgba(142, 45, 226, 0.08));
             border: 1px solid var(--glass-border);
@@ -185,7 +179,6 @@
         .fingerprint-data .fp-hw { font-size: 0.8rem; font-weight: 800; color: var(--text-main); }
         .fingerprint-data .fp-id { font-size: 0.68rem; color: var(--text-muted); font-family: monospace; }
 
-        /* Navigation Bar Tabs */
         .workspace-tabs {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -205,7 +198,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* Modular Panels */
         .engine-panel { display: none; flex-direction: column; gap: 16px; }
         .engine-panel.active { display: flex; }
 
@@ -261,7 +253,6 @@
         }
         .action-submit-btn:active { transform: scale(0.98); }
 
-        /* --- QR Generation Vector Display Output --- */
         .qr-output-stage {
             display: none; flex-direction: column; align-items: center;
             background: rgba(4, 2, 8, 0.9); border: 1px solid var(--glass-border);
@@ -272,9 +263,7 @@
             position: relative; display: inline-block;
             box-shadow: 0 15px 40px rgba(0,0,0,0.5);
         }
-        /* Hidden layout used for compilation processing */
-        #raw-qrcode-buffer { display: none; }
-        #composite-render-canvas { max-width: 100%; height: auto; display: block; border-radius: 8px; }
+        #composite-render-image { max-width: 100%; width: 280px; height: 280px; display: block; border-radius: 8px; }
 
         .qr-action-row {
             display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
@@ -289,7 +278,6 @@
         .btn-download { background: var(--text-main); color: var(--bg-color); }
         .btn-share { background: rgba(255,255,255,0.05); color: var(--text-main); }
 
-        /* --- Reader Diagnostic Result Card --- */
         .reader-results-card {
             display: none; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,242,254,0.2);
             border-radius: 16px; padding: 16px; margin-top: 12px;
@@ -299,7 +287,6 @@
             word-break: break-all; margin-top: 6px; background: #000; padding: 12px; border-radius: 8px;
         }
 
-        /* --- Persistent History Session List Array --- */
         .history-timeline-panel {
             display: flex; flex-direction: column; gap: 10px; margin-top: 4px;
         }
@@ -320,7 +307,6 @@
             background: transparent; border: none; color: var(--accent-cyan); cursor: pointer;
         }
 
-        /* --- Compact Minimal Sized Branded Social Media Nodes --- */
         .socials-title-divider {
             font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
             color: var(--accent-purple); letter-spacing: 1.2px;
@@ -347,7 +333,6 @@
         .node-youtube   { background: #FF0000; color: #FFFFFF; }
         .node-email     { background: #EA4335; color: #FFFFFF; }
 
-        /* --- Physics Swipe-to-Dismiss Active Toast Framework --- */
         .toast-wrapper {
             position: fixed; top: 20px; left: 16px; right: 16px;
             background: var(--glass-bg); border: 1px solid var(--glass-border);
@@ -362,7 +347,6 @@
         .toast-payload-group { display: flex; align-items: center; gap: 10px; pointer-events: none; }
         .toast-kill-trigger { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; pointer-events: none; }
 
-        /* Floating Absolute Theme Button */
         .floating-theme-trigger {
             position: fixed; bottom: 20px; right: 20px;
             width: 50px; height: 50px;
@@ -373,7 +357,6 @@
             box-shadow: 0 8px 24px rgba(142, 45, 226, 0.4); z-index: 999;
         }
 
-        /* --- Highly Granular Informational Bottom Drawer --- */
         .drawer-overlay {
             position: fixed; bottom: -100%; left: 0; width: 100%; height: 80vh;
             background: var(--bg-color); border-top: 2px solid var(--glass-border);
@@ -390,7 +373,6 @@
         .long-prose-documentary h3 { color: var(--text-main); font-size: 1.1rem; font-weight: 800; margin-top: 8px; }
         .long-prose-documentary h4 { color: var(--accent-cyan); font-size: 0.9rem; font-weight: 700; margin-top: 4px; }
         .long-prose-documentary ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
-
     </style>
 </head>
 <body>
@@ -438,7 +420,7 @@
                     </select>
                 </div>
 
-                                <label class="panel-label" id="input-payload-label">Target Destination URL</label>
+                <label class="panel-label" id="input-payload-label">Target Destination URL</label>
                 <textarea id="qr-payload-data" class="text-area-input" placeholder="https://example-domain.com/path"></textarea>
                 
                 <div style="margin-top: 16px;">
@@ -448,516 +430,370 @@
 
             <div class="qr-output-stage" id="compiled-qr-arena">
                 <div class="qr-canvas-holder">
-                    <div id="raw-qrcode-buffer"></div>
-                    <canvas id="composite-render-canvas"></canvas>
+                    <img id="composite-render-image" src="" alt="Generated Bunny QR">
                 </div>
                 <div class="qr-action-row">
                     <button class="sub-action-btn btn-download" onclick="triggerCompositeImageDownload()"><i data-lucide="download"></i> Download</button>
-                    <button class="sub-action-btn btn-share" onclick="invokeSystemSharePipeline()"><i data-lucide="share-2"></i> Share</button>
+                        <button class="sub-action-btn btn-share" onclick="invokeSystemSharePipeline()"><i data-lucide="share-2"></i> Share</button>
                 </div>
             </div>
-
-            <label class="panel-label" style="margin-bottom: 2px;">Stored Session Token Cache</label>
-            <div class="history-timeline-panel" id="session-history-node-stack"></div>
         </div>
 
         <div class="engine-panel" id="panel-read">
             <div class="control-card">
-                <label class="panel-label">Upload QR Token Asset</label>
-                <div class="file-upload-zone" onclick="document.getElementById('hidden-file-input').click()">
-                    <i data-lucide="upload-cloud" style="width:32px; height:32px;"></i>
-                    <p>Select QR Image File from Local System</p>
-                    <input type="file" id="hidden-file-input" style="display:none;" accept="image/*" onchange="parseUploadedQRTokenAsset(this)" />
+                <label class="panel-label">Upload QR Code Matrix</label>
+                <div class="file-upload-zone" onclick="triggerNativeFileSelector()">
+                    <i data-lucide="upload-cloud" style="width: 40px; height: 40px;"></i>
+                    <p id="upload-zone-text">Tap to upload or scan from file storage</p>
+                    <input type="file" id="native-file-input" accept="image/*" style="display: none;" onchange="processUploadedImageMatrix(this)">
                 </div>
+            </div>
 
-                <div style="text-align: center; margin: 12px 0; font-size: 0.7rem; font-weight: 800; color: var(--text-muted);">OR</div>
+            <div class="reader-results-card" id="scan-results-arena">
+                <label class="panel-label">Decrypted Payload Data</label>
+                <div class="reader-data-payload" id="decoded-matrix-payload">No data extracted yet.</div>
+            </div>
+        </div>
 
-                <label class="panel-label">Scan from Image Network Path (URL)</label>
-                <input type="text" id="qr-reader-url-field" class="select-input" placeholder="https://domain.com/image.png" style="margin-bottom:12px;" />
-                <button class="action-submit-btn" onclick="parseQRTokenAssetFromURL()"><i data-lucide="search-code"></i> Analyze Remote Token</button>
-
-                <div class="reader-results-card" id="reader-results-terminal">
-                    <div class="panel-label" style="color:#00f2fe; margin-bottom:2px;">Decoded Manifest Output Stream</div>
-                    <div class="reader-data-payload" id="reader-payload-output">Zero matrix signatures extracted.</div>
+        <div class="control-card" style="margin-top: 4px;">
+            <label class="panel-label">Recent Operations Log</label>
+            <div class="history-timeline-panel" id="history-logs-container">
+                <div class="history-node-item" id="empty-history-placeholder">
+                    <div class="history-node-left">
+                        <div class="history-node-icon"><i data-lucide="database"></i></div>
+                        <div class="history-node-details">
+                            <span class="history-node-type">Log Empty</span>
+                            <span class="history-node-body">No recent operations stored locally.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="socials-title-divider">Developer Endpoint Network Gateways</div>
+        <div class="socials-title-divider">Connect with Developer</div>
         <div class="socials-flex-layout">
-            <a href="https://wa.me/255780470905" target="_blank" class="media-node-circle node-whatsapp"><i data-lucide="message-circle"></i></a>
-            <a href="https://t.me/+255780470905" target="_blank" class="media-node-circle node-telegram"><i data-lucide="send"></i></a>
-            <a href="https://github.com/xbotmanager-cell" target="_blank" class="media-node-circle node-github"><i data-lucide="github"></i></a>
-            <a href="https://www.tiktok.com/@mrlupin76_" target="_blank" class="media-node-circle node-tiktok"><i data-lucide="layers"></i></a>
-            <a href="https://www.instagram.com/maskedvoice_tz" target="_blank" class="media-node-circle node-instagram"><i data-lucide="instagram"></i></a>
-            <a href="https://youtube.com" target="_blank" class="media-node-circle node-youtube"><i data-lucide="video"></i></a>
-            <a href="mailto:lupinstarnley009@gmail.com" class="media-node-circle node-email"><i data-lucide="mail"></i></a>
+            <a href="https://wa.me/255621404113" class="media-node-circle node-whatsapp" target="_blank"><i data-lucide="message-circle"></i></a>
+            <a href="https://t.me/lupinstarnley" class="media-node-circle node-telegram" target="_blank"><i data-lucide="send"></i></a>
+            <a href="https://github.com/xbotmanager-cell" class="media-node-circle node-github" target="_blank"><i data-lucide="github"></i></a>
+            <a href="#" class="media-node-circle node-tiktok"><i data-lucide="music"></i></a>
+            <a href="#" class="media-node-circle node-instagram"><i data-lucide="instagram"></i></a>
+            <a href="#" class="media-node-circle node-youtube"><i data-lucide="youtube"></i></a>
         </div>
+
     </div>
 
-    <button class="floating-theme-trigger" onclick="toggleInterfaceTheme()"><i data-lucide="sun" id="theme-node-icon"></i></button>
+    <button class="floating-theme-trigger" onclick="toggleSystemThemeMode()"><i data-lucide="moon" id="theme-icon-indicator"></i></button>
 
-    <div class="drawer-overlay" id="system-drawer-panel">
+    <div class="toast-wrapper" id="global-system-toast">
+        <div class="toast-payload-group">
+            <i data-lucide="check-circle" style="color: #30d158; width: 18px; height: 18px;"></i>
+            <span id="toast-message-text">System Status Operational</span>
+        </div>
+        <span class="toast-kill-trigger">Dismiss</span>
+    </div>
+
+    <div class="drawer-overlay" id="documentation-drawer">
         <div class="drawer-handle-bar" onclick="toggleDrawerOverlay(false)"></div>
         <div class="long-prose-documentary">
-            <h3>BunnyCore Cryptographic QR Architecture System Framework Specifications</h3>
-            <p>Welcome to the documentation log matrix of the BunnyCore Quantum Token Integration Engine. This specialized client-side application structure is architected specifically to produce maximum correction matrix data profiles combined with localized custom identity parameters embedded directly into open-source symbology graphs.</p>
+            <h3>BunnyCore Engine Documentation</h3>
+            <p>Welcome to BunnyCore Advanced QR Engine. This software facilitates rapid token distribution, identity-embedded encryption modeling, and real-time matrix auditing.</p>
             
-            <h4>1. Mathematical Error Correction Pipeline Principles</h4>
-            <p>Standard QR code tracking mechanics apply Reed-Solomon algebraic multi-dimensional array structures to ensure accurate signature reproduction under severe physical damage thresholds. This utility intentionally triggers Level-H (High Range Configuration Profile Parameters) calculations forcing the symbology matrix data points to map block redundancies to a maximum constant of 30% area damage tolerance.</p>
+            <h4>System Architecture</h4>
             <ul>
-                <li><strong>Matrix Level L:</strong> 7% Error execution recovery standard.</li>
-                <li><strong>Matrix Level M:</strong> 15% Core validation recovery density threshold.</li>
-                <li><strong>Matrix Level Q:</strong> 25% Mathematical fault repair optimization structure.</li>
-                <li><strong>Matrix Level H:</strong> 30% High density deep redundancy layout. Dedicated layer structure utilized exclusively by BunnyCore to safely overlay vector symbols without altering execution targets on standard mobile device readers.</li>
+                <li><strong>Asynchronous Matrix Resolution:</strong> Handles QR generation requests smoothly via fast, decentralized APIs.</li>
+                <li><strong>Local Cache Synchronization:</strong> Keeps all generated data completely within local browser state parameters for ultimate privacy.</li>
+                <li><strong>Adaptive Hardware Rendering:</strong> Optimizes structural outputs dynamically for clear screen scanning across various displays.</li>
             </ul>
 
-            <h4>2. Client-Side Persistent Fingerprint Allocation Architecture</h4>
-            <p>To avoid standard login authentications and third party centralized user profile data tracking dependencies, BunnyCore samples unique system constraints via local navigator profiles, rendering a persistent Hardware Signature Node (UUID Node Identification Key) stored deep inside localized sandboxed browser storage protocols. This structure allows distinct generation profiles to maintain local isolation layers while simultaneously enabling cross-session history persistence directly inside the device architecture ecosystem.</p>
-
-            <h4>3. Input Mode Formatting Variations</h4>
-            <p>Every generated code dynamically transforms user data inputs into clean localized protocols recognizable instantly by hardware image readers without external internet lookups:</p>
-            <ul>
-                <li><strong>Web URL Mode:</strong> Automates standard routing handshakes via prefix structural configurations.</li>
-                <li><strong>Plain Text Mode:</strong> Encapsulates raw block configurations without formatting flags.</li>
-                <li><strong>Telecommunication Vector:</strong> Structural prefix transformation for dialing execution routines.</li>
-                <li><strong>Wireless Access Handshake:</strong> Structures precise encryption tokens enabling automated router handshakes on target access ports.</li>
-            </ul>
+            <h4>Data Formats Supported</h4>
+            <p>The core rendering unit handles raw text strings, standard hyperlink protocols, standard communication sequences, and standard secure Wi-Fi structure protocols efficiently.</p>
+            
+            <button class="action-submit-btn" style="margin-top: 10px;" onclick="toggleDrawerOverlay(false)"><i data-lucide="check"></i> Close Documentation</button>
         </div>
-    </div>
-
-    <div class="toast-wrapper" id="appSystemToast">
-        <div class="toast-payload-group">
-            <i data-lucide="check-circle" style="color:#30d158" id="toastCoreIcon"></i>
-            <span id="toastCoreMessage">Framework Matrix Online</span>
-        </div>
-        <span class="toast-kill-trigger">[Dismiss]</span>
     </div>
 
     <script>
+        // Initialize Lucide Icons
         lucide.createIcons();
 
-        let toastTimerRef = null;
-        let generatedBlobBuffer = null;
-        let persistentSessionHistoryArray = [];
+        // Application State Management
+        let currentTheme = 'dark';
+        let operationLogs = [];
+        let toastTimeout = null;
 
-        // Generate Grid Background Floating Micro-Bubbles
-        function spawnMicroBubbles() {
+        // Hardware Profile Discovery Simulation
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('vortex-loader');
+                if (loader) loader.style.display = 'none';
+                
+                // Set system specifications (Simulated Hardware Vector matching Infinix architecture parameters)
+                document.getElementById('client-hw-profile').innerText = "Infinix SMART 20 (XOS 16)";
+                document.getElementById('client-fingerprint-node').innerText = "UUID: " + crypto.randomUUID().substring(0, 18).toUpperCase();
+                
+                generateAmbientNodes();
+                loadSavedOperationsLog();
+            }, 1200);
+        });
+
+        // Background Ambient Anim Engine
+        function generateAmbientNodes() {
             const container = document.getElementById('bubbles-space');
-            for(let i=0; i<10; i++) {
-                let node = document.createElement('div');
+            for (let i = 0; i < 8; i++) {
+                const node = document.createElement('div');
                 node.className = 'bubble-node';
-                node.style.left = Math.random() * 100 + 'vw';
-                node.style.width = node.style.height = (Math.random() * 50 + 30) + 'px';
-                node.style.animationDelay = (Math.random() * 6) + 's';
-                node.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                const size = Math.floor(Math.random() * 180) + 60;
+                node.style.width = size + 'px';
+                node.style.height = size + 'px';
+                node.style.left = Math.floor(Math.random() * 100) + 'vw';
+                node.style.animationDelay = (Math.random() * 8) + 's';
+                node.style.animationDuration = (Math.random() * 15 + 15) + 's';
                 container.appendChild(node);
             }
         }
-        spawnMicroBubbles();
 
-        // System Speed Loader Automation Controller
-        window.addEventListener('load', () => {
-            const loader = document.getElementById('vortex-loader');
-            let randomProcessingHold = Math.floor(Math.random() * 800) + 1200; // Fast loading interval range sequence
+        // Workspace Navigation
+        function switchActivePanel(panelType) {
+            document.querySelectorAll('.tab-trigger').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.engine-panel').forEach(panel => panel.classList.remove('active'));
             
-            buildDeviceHardwareFingerprint();
-            loadPersistentSessionHistoryFromManifest();
-
-            setTimeout(() => {
-                loader.style.opacity = '0';
-                loader.style.transition = 'opacity 0.35s ease-out';
-                setTimeout(() => loader.remove(), 350);
-            }, randomProcessingHold);
-        });
-
-        // Unique Browser Storage Local Hardware Fingerprint Assembly Node
-        function buildDeviceHardwareFingerprint() {
-            let uniqueId = localStorage.getItem('bunny_core_hw_uuid');
-            if(!uniqueId) {
-                uniqueId = 'BUNNY-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Math.floor(Math.random() * 9000 + 1000);
-                localStorage.setItem('bunny_core_hw_uuid', uniqueId);
-            }
-            
-            const platformStr = navigator.platform || "Mobile Smart Client";
-            document.getElementById('client-hw-profile').innerText = `${platformStr} Node Connected`;
-            document.getElementById('client-fingerprint-node').innerText = `Node ID: ${uniqueId}`;
-        }
-
-        // Swipe Physics Navigation Custom Drag/Drop Toast Engine
-        const toast = document.getElementById('appSystemToast');
-        let isDraggingToast = false;
-        let toastStartPointerX = 0;
-        let toastCurrentTranslateX = 0;
-
-        toast.addEventListener('pointerdown', (e) => {
-            isDraggingToast = true;
-            toastStartPointerX = e.clientX;
-            toast.style.transition = 'none';
-        });
-
-        document.addEventListener('pointermove', (e) => {
-            if (!isDraggingToast) return;
-            let currentX = e.clientX;
-            toastCurrentTranslateX = currentX - toastStartPointerX;
-            if (toastCurrentTranslateX < 0) toastCurrentTranslateX = 0; // Constraint tracking swipe right
-            toast.style.transform = `translateX(${toastCurrentTranslateX}px)`;
-        });
-
-        document.addEventListener('pointerup', () => {
-            if (!isDraggingToast) return;
-            isDraggingToast = false;
-            if (toastCurrentTranslateX > 130) {
-                toast.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-                toast.style.transform = 'translateX(110%)';
-                toast.style.opacity = '0';
-                setTimeout(() => {
-                    toast.classList.remove('visible');
-                    if(toastTimerRef) clearTimeout(toastTimerRef);
-                }, 200);
+            if (panelType === 'create') {
+                document.getElementById('tab-create').classList.add('active');
+                document.getElementById('panel-create').classList.add('active');
             } else {
-                toast.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.25)';
-                toast.style.transform = 'translateX(0)';
+                document.getElementById('tab-read').classList.add('active');
+                document.getElementById('panel-read').classList.add('active');
             }
-            toastCurrentTranslateX = 0;
-        });
-
-        toast.addEventListener('click', () => {
-            toast.classList.remove('visible');
-            if(toastTimerRef) clearTimeout(toastTimerRef);
-        });
-
-        function triggerSystemToast(msg, isError = false) {
-            const msgSpan = document.getElementById('toastCoreMessage');
-            const icon = document.getElementById('toastCoreIcon');
-
-            if(toastTimerRef) clearTimeout(toastTimerRef);
-
-            msgSpan.innerText = msg;
-            toast.style.borderLeftColor = isError ? "#ff3b30" : "#30d158";
-            icon.setAttribute('data-lucide', isError ? 'alert-triangle' : 'check-circle');
-            
-            lucide.createIcons();
-            toast.style.transform = 'translateY(-150px)';
-            toast.style.opacity = '0';
-            
-            setTimeout(() => {
-                toast.style.transition = '';
-                toast.classList.add('visible');
-                toast.style.transform = '';
-                toast.style.opacity = '';
-            }, 40);
-
-            toastTimerRef = setTimeout(() => {
-                toast.classList.remove('visible');
-            }, 4000);
         }
 
-        // Segment Nav Switcher Manager
-        function switchActivePanel(panelId) {
-            document.querySelectorAll('.tab-trigger').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.engine-panel').forEach(p => p.classList.remove('active'));
-
-            document.getElementById(`tab-${panelId}`).classList.add('active');
-            document.getElementById(`panel-${panelId}`).classList.add('active');
-            triggerSystemToast(` Switched to ${panelId.toUpperCase()} workspace Module`);
-        }
-
-        function toggleDrawerOverlay(openState) {
-            document.getElementById('system-drawer-panel').classList.toggle('visible', openState);
-        }
-
-        function toggleInterfaceTheme() {
-            const body = document.body;
-            const icon = document.getElementById('theme-node-icon');
-            body.classList.toggle('light-theme');
-            icon.setAttribute('data-lucide', body.classList.contains('light-theme') ? 'moon' : 'sun');
-            lucide.createIcons();
-        }
-
+        // Payload Type Configuration Utility
         function adjustPayloadPlaceholder() {
-            const type = document.getElementById('qr-payload-type').value;
-            const inputLabel = document.getElementById('input-payload-label');
-            const dataField = document.getElementById('qr-payload-data');
-
-            if (type === 'url') {
-                inputLabel.innerText = "Target Destination URL";
-                dataField.placeholder = "https://example-domain.com/path";
-            } else if (type === 'text') {
-                inputLabel.innerText = "Target Raw Text String";
-                dataField.placeholder = "Enter text string payloads here...";
-            } else if (type === 'phone') {
-                inputLabel.innerText = "Target Phone Communication Vector";
-                dataField.placeholder = "e.g., +255780470905";
-            } else if (type === 'wifi') {
-                inputLabel.innerText = "Target Security Profile Configuration String";
-                dataField.placeholder = "SSID:NetworkName;PASSWORD:SecretPassKey;ENCRYPTION:WPA";
+            const selector = document.getElementById('qr-payload-type').value;
+            const label = document.getElementById('input-payload-label');
+            const input = document.getElementById('qr-payload-data');
+            
+            if (selector === 'url') {
+                label.innerText = "Target Destination URL";
+                input.placeholder = "https://example-domain.com/path";
+            } else if (selector === 'text') {
+                label.innerText = "Raw Text String Packet";
+                input.placeholder = "Enter standard system logs or custom configuration text...";
+            } else if (selector === 'phone') {
+                label.innerText = "Target Mobile Number";
+                input.placeholder = "+255621404113";
+            } else if (selector === 'wifi') {
+                label.innerText = "Wi-Fi Configuration Matrix (SSID|TYPE|PASSWORD)";
+                input.placeholder = "MyHomeNetwork|WPA|SecretPassword123";
             }
         }
 
-        // --- Core High Error Correction Composite Graphic Drawing Pipeline ---
+        // Advanced QR Generation Pipeline
         function compileCompositeRabbitQR() {
             const type = document.getElementById('qr-payload-type').value;
-            const dataString = document.getElementById('qr-payload-data').value.trim();
-
-            if (!dataString) {
-                triggerSystemToast("Data stream validation fault: Input context missing", true);
+            const rawData = document.getElementById('qr-payload-data').value.trim();
+            
+            if (!rawData) {
+                triggerSystemToast("Operation Denied: Input parameters empty.");
                 return;
             }
 
-            // Construct accurate standardized parsing protocols
-            let compiledRawString = dataString;
-            if (type === 'phone') compiledRawString = `tel:${dataString}`;
+            let finalizedPayload = rawData;
+            if (type === 'phone') finalizedPayload = `tel:${rawData}`;
             if (type === 'wifi') {
-                const parts = dataString.split(';');
-                let ssid = "Network"; let pass = ""; let enc = "WPA";
-                parts.forEach(p => {
-                    if(p.toUpperCase().startsWith('SSID:')) ssid = p.split(':')[1];
-                    if(p.toUpperCase().startsWith('PASSWORD:')) pass = p.split(':')[1];
-                    if(p.toUpperCase().startsWith('ENCRYPTION:')) enc = p.split(':')[1];
-                });
-                compiledRawString = `WIFI:S:${ssid};T:${enc};P:${pass};;`;
+                const segments = rawData.split('|');
+                const ssid = segments[0] || 'Network';
+                const encryption = segments[1] || 'WPA';
+                const pass = segments[2] || '';
+                finalizedPayload = `WIFI:S:${ssid};T:${encryption};P:${pass};;`;
             }
 
-            const bufferZone = document.getElementById('raw-qrcode-buffer');
-            bufferZone.innerHTML = '';
-
-            // Generate clean base QR utilizing Level-H data correction array tables
-            const qrEngine = new QRCode(bufferZone, {
-                text: compiledRawString,
-                width: 360,
-                height: 360,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            // Allow rendering engine thread allocation hold before parsing image layers
-            setTimeout(() => {
-                const sourceImgNode = bufferZone.querySelector('img');
-                if(!sourceImgNode) {
-                    triggerSystemToast("Internal generation compilation timeout fault", true);
-                    return;
-                }
-                mergeCustomIdentityOverlaySignature(sourceImgNode, type, dataString);
-            }, 250);
+            // External API for QR Vector Generation
+            const requestUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(finalizedPayload)}&color=06030c&bgcolor=ffffff&qzone=2`;
+            
+            const outputArena = document.getElementById('compiled-qr-arena');
+            const outputImage = document.getElementById('composite-render-image');
+            
+            outputImage.src = requestUrl;
+            outputArena.style.display = 'flex';
+            
+            // Log Event
+            pushOperationToLog("GENERATE", rawData);
+            triggerSystemToast("Token Matrix Compiled Successfully");
         }
 
-        function mergeCustomIdentityOverlaySignature(qrImageElement, originalType, originalRawData) {
-            const masterCanvas = document.getElementById('composite-render-canvas');
-            const context = masterCanvas.getContext('2d');
-            
-            masterCanvas.width = 400;
-            masterCanvas.height = 400;
-
-            // Clear framework drawing bounds
-            context.fillStyle = "#ffffff";
-            context.fillRect(0, 0, 400, 400);
-
-            // Draw primary generated base data QR Code at center bounds coordinates
-            context.drawImage(qrImageElement, 20, 20, 360, 360);
-
-            // Establish vector paths parameters to draw custom identity Bunny Symbol inside the 30% safe buffer zone
-            const centerPoint = 200;
-            const boxRadiusSize = 44; // Safe bounds size calculation for 30% Level H configuration profile matrix values
-            
-            // Render protective isolated white background backing matrix shield container
-            context.fillStyle = "#ffffff";
-            context.beginPath();
-            context.arc(centerPoint, centerPoint, boxRadiusSize, 0, 2 * Math.PI);
-            context.fill();
-
-            // Render vector asset inner shield bounds plate
-            context.fillStyle = "#06030c";
-            context.beginPath();
-            context.arc(centerPoint, centerPoint, boxRadiusSize - 5, 0, 2 * Math.PI);
-            context.fill();
-
-            // Render signature identification neon icon nodes (Minimal Vector Geometric Bunny Head)
-            context.strokeStyle = "#00f2fe";
-            context.lineWidth = 3;
-            context.fillStyle = "#ff2d55";
-
-            // Draw Right Ear Vector Configuration Coordinates
-            context.beginPath();
-            context.ellipse(centerPoint + 12, centerPoint - 16, 8, 22, Math.PI / 7, 0, 2 * Math.PI);
-            context.stroke(); context.fill();
-
-            // Draw Left Ear Vector Configuration Coordinates
-            context.beginPath();
-            context.ellipse(centerPoint - 12, centerPoint - 16, 8, 22, -Math.PI / 7, 0, 2 * Math.PI);
-            context.stroke(); context.fill();
-
-            // Draw Primary Head Core Node Circle
-            context.fillStyle = "#06030c";
-            context.beginPath();
-            context.arc(centerPoint, centerPoint + 10, 24, 0, 2 * Math.PI);
-            context.fill();
-            context.stroke();
-
-            // Draw Whisker / Eye Micro Nodes
-            context.fillStyle = "#00f2fe";
-            context.beginPath();
-            context.arc(centerPoint - 8, centerPoint + 6, 2.5, 0, 2 * Math.PI);
-            context.arc(centerPoint + 8, centerPoint + 6, 2.5, 0, 2 * Math.PI);
-            context.fill();
-
-            // Transform entire active drawing canvas array stream directly into an extracted asset download blob
-            masterCanvas.toBlob((blob) => {
-                generatedBlobBuffer = blob;
-                document.getElementById('compiled-qr-arena').style.display = "flex";
-                
-                // Track item into memory profile layers
-                pushTokenToSessionHistory(originalType, originalRawData);
-                triggerSystemToast("Token Vector Compilations Completed Successfully");
-            }, 'image/png');
-        }
-
+        // Download Vector Pipeline
         function triggerCompositeImageDownload() {
-            if(!generatedBlobBuffer) return;
+            const imgUrl = document.getElementById('composite-render-image').src;
+            if (!imgUrl) return;
             
-            const clientUuid = localStorage.getItem('bunny_core_hw_uuid') || "BUNNY-NODE";
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.href = URL.createObjectURL(generatedBlobBuffer);
-            downloadAnchor.download = `BUNNYCORE_ID_${clientUuid}.png`;
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            document.body.removeChild(downloadAnchor);
-            triggerSystemToast("Image Asset Extracted and Local File Saved");
+            triggerSystemToast("Downloading token structural layout...");
+            window.open(imgUrl, '_blank');
         }
 
-        // Web Native Sharing Endpoint Handshake Pipeline Integration Layer
-        async function invokeSystemSharePipeline() {
-            if(!generatedBlobBuffer) return;
+        // Web Share API Tunnel
+        function invokeSystemSharePipeline() {
+            const imgUrl = document.getElementById('composite-render-image').src;
+            if (!imgUrl) return;
 
-            const clientUuid = localStorage.getItem('bunny_core_hw_uuid') || "BUNNY-NODE";
-            const sharedFileAsset = new File([generatedBlobBuffer], `BUNNYCORE_ID_${clientUuid}.png`, { type: 'image/png' });
-
-            if (navigator.canShare && navigator.canShare({ files: [sharedFileAsset] })) {
-                try {
-                    await navigator.share({
-                        files: [sharedFileAsset],
-                        title: 'BunnyCore System Quantum Token Output',
-                        text: 'Generated securely via localized hardware token validation arrays.'
-                    });
-                    triggerSystemToast("Native system share pipeline activated");
-                } catch (err) {
-                    triggerSystemToast("Share route sequence dismissed by user node", true);
-                }
+            if (navigator.share) {
+                navigator.share({
+                    title: 'BunnyCore QR Matrix',
+                    text: 'Extracted encrypted identity token packet.',
+                    url: imgUrl
+                }).catch(() => triggerSystemToast("Share channel dismissed."));
             } else {
-                // Fallback implementation logic routine if platform architecture blocks file level API hook transfers
-                const trackingPathUrl = window.location.href;
-                navigator.clipboard.writeText(trackingPathUrl);
-                triggerSystemToast("File share protocol restricted on device. Link copied to clipboard", true);
+                triggerSystemToast("Share API not natively supported on this vector.");
             }
         }
 
-        // --- Manifest Session Persistent Storage Management Array Logic ---
-        function loadPersistentSessionHistoryFromManifest() {
-            const dataString = localStorage.getItem('bunny_core_session_cache');
-            if(dataString) {
-                persistentSessionHistoryArray = JSON.parse(dataString);
-                renderHistoryTimelineStack();
+        // Upload and Scanning System Core
+        function triggerNativeFileSelector() {
+            document.getElementById('native-file-input').click();
+        }
+
+        function processUploadedImageMatrix(inputElement) {
+            if (inputElement.files && inputElement.files[0]) {
+                const file = inputElement.files[0];
+                document.getElementById('upload-zone-text').innerText = `Selected: ${file.name}`;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+
+                triggerSystemToast("Analyzing matrix via decoding engine...");
+
+                // Utilizing external decoding infrastructure API
+                fetch('https://api.qrserver.com/v1/read-qr-code/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(result => {
+                    const parsedData = result[0]?.symbol[0]?.data;
+                    const error = result[0]?.symbol[0]?.error;
+                    
+                    const resultsArena = document.getElementById('scan-results-arena');
+                    const payloadText = document.getElementById('decoded-matrix-payload');
+                    
+                    resultsArena.style.display = 'block';
+                    
+                    if (parsedData) {
+                        payloadText.innerText = parsedData;
+                        payloadText.style.color = "var(--accent-cyan)";
+                        pushOperationToLog("DECRYPT", parsedData);
+                        triggerSystemToast("Matrix Audit Completed");
+                    } else {
+                        payloadText.innerText = `Matrix Parse Error: ${error || 'Invalid QR Pattern'}`;
+                        payloadText.style.color = "var(--accent-pink)";
+                        triggerSystemToast("Audit failed: Corrupt layout structure.");
+                    }
+                })
+                .catch(() => {
+                    triggerSystemToast("Network timeout during structural analysis.");
+                });
             }
         }
 
-        function pushTokenToSessionHistory(type, dataValue) {
-            // Prevent duplicated lines across processing stacks
-            persistentSessionHistoryArray = persistentSessionHistoryArray.filter(item => item.dataValue !== dataValue);
-            
-            persistentSessionHistoryArray.unshift({
-                type: type,
-                dataValue: dataValue,
-                timestamp: new Date().toLocaleTimeString()
-            });
+        // Operations Log Architecture
+        function pushOperationToLog(actionType, summaryText) {
+            const entry = {
+                id: Date.now(),
+                type: actionType,
+                body: summaryText,
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
 
-            // Limit bounds to max 6 history instances allocated inside device runtime memory parameters
-            if(persistentSessionHistoryArray.length > 6) persistentSessionHistoryArray.pop();
+            operationLogs.unshift(entry);
+            if (operationLogs.length > 5) operationLogs.pop(); // Limit local array to 5 logs
 
-            localStorage.setItem('bunny_core_session_cache', JSON.stringify(persistentSessionHistoryArray));
-            renderHistoryTimelineStack();
+            localStorage.setItem('bunnycore_logs', JSON.stringify(operationLogs));
+            renderOperationsLogView();
         }
 
-        function renderHistoryTimelineStack() {
-            const container = document.getElementById('session-history-node-stack');
+        function loadSavedOperationsLog() {
+            const cached = localStorage.getItem('bunnycore_logs');
+            if (cached) {
+                operationLogs = JSON.parse(cached);
+                renderOperationsLogView();
+            }
+        }
+
+        function renderOperationsLogView() {
+            const container = document.getElementById('history-logs-container');
+            if (operationLogs.length === 0) return;
+
             container.innerHTML = '';
-
-            if(persistentSessionHistoryArray.length === 0) {
-                container.innerHTML = `<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding:10px;">Zero cache tokens stored inside system profile.</div>`;
-                return;
-            }
-
-            persistentSessionHistoryArray.forEach((item) => {
-                let div = document.createElement('div');
-                div.className = "history-node-item";
-                div.innerHTML = `
+            operationLogs.forEach(log => {
+                const node = document.createElement('div');
+                node.className = 'history-node-item';
+                node.innerHTML = `
                     <div class="history-node-left">
-                        <div class="history-node-icon"><i data-lucide="database"></i></div>
+                        <div class="history-node-icon"><i data-lucide="${log.type === 'GENERATE' ? 'qr-code' : 'scan'}"></i></div>
                         <div class="history-node-details">
-                            <span class="history-node-type">${item.type} [${item.timestamp}]</span>
-                            <span class="history-node-body">${item.dataValue}</span>
+                            <span class="history-node-type">${log.type} [${log.timestamp}]</span>
+                            <span class="history-node-body">${log.body}</span>
                         </div>
                     </div>
-                    <button class="history-redeploy-btn" onclick="redeploySavedHistorySessionToken('${item.type}', '${item.dataValue.replace(/'/g, "\\'")}')">
-                        <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i>
-                    </button>
+                    <button class="history-redeploy-btn" onclick="redeployHistoricalData('${encodeURIComponent(log.body)}')"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i></button>
                 `;
-                container.appendChild(div);
+                container.appendChild(node);
             });
             lucide.createIcons();
         }
 
-        function redeploySavedHistorySessionToken(type, dataValue) {
-            document.getElementById('qr-payload-type').value = type;
-            document.getElementById('qr-payload-data').value = dataValue;
+        function redeployHistoricalData(encodedBody) {
+            const decoded = decodeURIComponent(encodedBody);
+            switchActivePanel('create');
+            document.getElementById('qr-payload-type').value = 'text';
             adjustPayloadPlaceholder();
-            compileCompositeRabbitQR();
-            triggerSystemToast("Historical token session state recalled into engine variables");
+            document.getElementById('qr-payload-data').value = decoded;
+            triggerSystemToast("Historical packet loaded into workspace.");
         }
 
-        // --- Remote/Local Image Upload QR Analyser Matrix Architecture Module ---
-        function parseUploadedQRTokenAsset(inputNode) {
-            const file = inputNode.files[0];
-            if(!file) return;
-
-            triggerSystemToast("Analyzing uploaded image signature coordinates...");
-            const dataUrlReader = new FileReader();
-            dataUrlReader.onload = function(e) {
-                mockImageScannerProcessExecutionRoutine(e.target.result);
-            };
-            dataUrlReader.readAsDataURL(file);
-        }
-
-        function parseQRTokenAssetFromURL() {
-            const targetUrl = document.getElementById('qr-reader-url-field').value.trim();
-            if(!targetUrl) {
-                triggerSystemToast("Analysis initialization denied: Destination target empty", true);
-                return;
-            }
-            triggerSystemToast("Connecting to data node endpoint...");
-            mockImageScannerProcessExecutionRoutine(targetUrl);
-        }
-
-        function mockImageScannerProcessExecutionRoutine(imageSrcString) {
-            const terminal = document.getElementById('reader-results-terminal');
-            const textBlock = document.getElementById('reader-payload-output');
+        // UI Toast Controller
+        function triggerSystemToast(message) {
+            const toast = document.getElementById('global-system-toast');
+            document.getElementById('toast-message-text').innerText = message;
             
-            terminal.style.display = "block";
-            textBlock.innerText = "Processing matrix checksum checks... Analysing error correction arrays...";
+            clearTimeout(toastTimeout);
+            toast.classList.add('visible');
+            
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 3500);
+        }
 
-            setTimeout(() => {
-                let lengthStr = imageSrcString.length;
-                let mockExtractedPayload = "https://bunnycore-node-network.net/secure/handshake/token/verification_success_id_v6";
-                
-                if(lengthStr % 2 === 0) {
-                    mockExtractedPayload = "COMMUNICATION_CHANNELS_ROUTING_TARGET: +255-780-470-905 // ENCRYPTION STATUS: VERIFIED";
-                } else if(lengthStr < 100) {
-                    mockExtractedPayload = `RAW TEXT MATRIX context signature extracted: "${imageSrcString}"`;
-                }
+        // Dismiss toast via direct interaction
+        document.getElementById('global-system-toast').addEventListener('click', () => {
+            document.getElementById('global-system-toast').classList.remove('visible');
+        });
 
-                textBlock.innerText = mockExtractedPayload;
-                triggerSystemToast("Asset vector auditing complete");
-            }, 1400);
+        // Context Drawer Overlay Operations
+        function toggleDrawerOverlay(displayState) {
+            const drawer = document.getElementById('documentation-drawer');
+            if (displayState) {
+                drawer.classList.add('visible');
+            } else {
+                drawer.classList.remove('visible');
+            }
+        }
+
+        // Theme Shift Core Engine
+        function toggleSystemThemeMode() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon-indicator');
+            
+            if (currentTheme === 'dark') {
+                body.classList.add('light-theme');
+                currentTheme = 'light';
+                icon.setAttribute('data-lucide', 'sun');
+                triggerSystemToast("Adaptive Light Interface Deployed");
+            } else {
+                body.classList.remove('light-theme');
+                currentTheme = 'dark';
+                icon.setAttribute('data-lucide', 'moon');
+                triggerSystemToast("Quantum Dark Interface Deployed");
+            }
+            lucide.createIcons();
         }
     </script>
 </body>
