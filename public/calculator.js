@@ -200,7 +200,7 @@
             box-shadow: 0 0 15px rgba(191, 90, 242, 0.25);
         }
 
-        /* Modern Custom Toast Container */
+        /* Modern Customc Toast Container */
         .toast-box {
             position: fixed;
             top: 25px;
