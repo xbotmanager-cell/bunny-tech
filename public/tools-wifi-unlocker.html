@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Engine - Wi-Fi Protocol Auditor</title>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-color: #05020a;
+            --purple-glow: rgba(142, 45, 226, 0.25);
+            --pink-glow: rgba(255, 45, 85, 0.25);
+            --cyan-glow: rgba(0, 242, 254, 0.3);
+            --glass-bg: rgba(18, 10, 32, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f5f5f7;
+            --text-muted: #9e9eb0;
+            --accent-cyan: #00f2fe;
+            --accent-purple: #8e2de2;
+            --accent-pink: #ff2d55;
+            --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .light-theme {
+            --bg-color: #f5f5f7;
+            --purple-glow: rgba(142, 45, 226, 0.1);
+            --pink-glow: rgba(255, 45, 85, 0.1);
+            --cyan-glow: rgba(0, 122, 255, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            --accent-cyan: #007aff;
+            --accent-purple: #a25ddc;
+            --accent-pink: #ff3b30;
+            --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px 120px 16px;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        /* Ambient Bubble Glow Grid */
+        .ambient-bg-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; overflow: hidden; pointer-events: none;
+        }
+
+        .ambient-bubble {
+            position: absolute;
+            background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 72%);
+            border-radius: 50%;
+            animation: endlessFloat 16s infinite ease-in-out;
+            opacity: 0.35;
+        }
+
+        @keyframes endlessFloat {
+            0% { transform: translateY(105vh) scale(0.6) translateX(0); opacity: 0; }
+            30% { opacity: 0.5; }
+            70% { opacity: 0.25; }
+            100% { transform: translateY(-20vh) scale(1.4) translateX(60px); opacity: 0; }
+        }
+
+        /* --- Super Fast Circular Loader --- */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(145deg, #05020a, #0f061c);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fast-loader-ring {
+            position: relative;
+            width: 100px; height: 100px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .fast-loader-ring::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 5px solid rgba(255, 255, 255, 0.03);
+            border-top: 5px solid var(--accent-cyan);
+            border-bottom: 5px solid var(--accent-pink);
+            border-radius: 50%;
+            animation: superFastSpin 0.4s linear infinite;
+            box-shadow: 0 0 25px var(--cyan-glow);
+        }
+
+        @keyframes superFastSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .blinking-dots-center { display: flex; gap: 6px; z-index: 10; }
+        .core-dot {
+            width: 10px; height: 10px;
+            background-color: var(--accent-purple);
+            border-radius: 50%;
+            animation: fastPulseDot 0.45s infinite alternate;
+        }
+        .core-dot:nth-child(2) { background-color: var(--accent-cyan); animation-delay: 0.15s; }
+        .core-dot:nth-child(3) { background-color: var(--accent-pink); animation-delay: 0.3s; }
+
+        @keyframes fastPulseDot {
+            0% { opacity: 0.2; transform: scale(0.75); }
+            100% { opacity: 1; transform: scale(1.25); }
+        }
+
+        #welcome-title {
+            margin-top: 28px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .vortex-gate {
+            position: absolute;
+            width: 0vw; height: 0vh;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 20%, #05020a 100%);
+            box-shadow: inset 0 0 150px rgba(0, 242, 254, 0.6);
+            z-index: 20; opacity: 0; pointer-events: none;
+        }
+
+        /* --- Header Element Layout --- */
+        .module-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .back-link, .about-toggle {
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+        }
+
+        .module-title-block { text-align: right; }
+        .module-title-block h1 { 
+            font-size: 1.25rem; font-weight: 900; letter-spacing: -0.2px;
+            background: linear-gradient(135deg, var(--text-main), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .module-title-block p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 1.2px; text-transform: uppercase;}
+
+        /* --- Main Content Workstation --- */
+        .forge-container {
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 2;
+        }
+
+        /* Location Metadata Banner */
+        .geo-banner {
+            background: linear-gradient(135deg, rgba(142, 45, 226, 0.15), rgba(0, 242, 254, 0.05));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(15px);
+        }
+        .geo-banner i { color: var(--accent-cyan); animation: pulse 2s infinite; }
+        .geo-details { display: flex; flex-direction: column; gap: 2px; }
+        .geo-details .geo-ip { font-size: 0.85rem; font-weight: 800; color: var(--text-main); }
+        .geo-details .geo-loc { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 22px;
+            border-radius: 26px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .input-group label {
+            font-size: 0.78rem; font-weight: 800;
+            color: var(--accent-cyan);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 16px;
+            color: var(--text-main);
+            font-size: 0.95rem; font-weight: 600;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .input-field:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 14px var(--cyan-glow);
+        }
+        .input-field:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .dual-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Main Audit Trigger Button */
+        .forge-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none; padding: 18px; border-radius: 18px;
+            color: #ffffff; font-size: 0.95rem; font-weight: 900;
+            letter-spacing: 1px; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 12px 35px rgba(0, 242, 254, 0.25);
+            transition: transform 0.2s ease, opacity 0.3s ease;
+        }
+        .forge-btn:active { transform: scale(0.97); }
+        .forge-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Asynchronous Stream Workspace Board */
+        .workspace-board {
+            background: #030106;
+            border: 1px solid var(--glass-border);
+            border-radius: 26px; padding: 24px;
+            box-shadow: var(--card-shadow);
+            display: none; /* Controlled via script */
+        }
+
+        .board-title {
+            font-size: 0.78rem; font-weight: 800;
+            text-transform: uppercase; color: var(--accent-pink);
+            margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .progress-container {
+            width: 100%; height: 6px; background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px; overflow: hidden; margin-bottom: 18px;
+        }
+        .progress-bar {
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
+            transition: width 0.4s linear;
+        }
+
+        .stream-terminal {
+            width: 100%; height: 220px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 14px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .typed-step {
+            font-size: 0.82rem; font-weight: 600; line-height: 1.4;
+            white-space: pre-wrap; padding-left: 8px;
+            border-left: 2px solid var(--accent-cyan); color: var(--text-main);
+        }
+        .typed-step.fault-step {
+            border-left-color: var(--accent-pink); color: var(--accent-pink);
+        }
+
+        /* Result Credentials Box Output */
+        .credentials-matrix-output {
+            margin-top: 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(48, 209, 88, 0.2);
+            border-radius: 18px; padding: 18px;
+            display: none; flex-direction: column; gap: 12px;
+        }
+        .matrix-output-header {
+            font-size: 0.8rem; font-weight: 900; text-transform: uppercase;
+            color: #30d158; text-align: center; letter-spacing: 0.5px;
+        }
+        .matrix-passwords-list {
+            display: flex; flex-direction: column; gap: 8px;
+            font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;
+        }
+        .pass-item {
+            background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 10px;
+            border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;
+        }
+        .pass-item span { color: #30d158; font-weight: 700; }
+        .pass-copy-btn {
+            background: transparent; border: none; color: var(--accent-cyan); cursor: pointer;
+        }
+
+        /* --- Compact Sized Multi-Colored Media Nodes --- */
+        .contacts-section-title {
+            font-size: 0.78rem; font-weight: 800; text-transform: uppercase;
+            color: var(--accent-purple); letter-spacing: 1.2px;
+            margin: 24px 0 12px 0; text-align: center;
+        }
+
+        .contacts-flex-grid {
+            display: flex; justify-content: center; align-items: center;
+            gap: 14px; width: 100%; margin-bottom: 10px; flex-wrap: wrap;
+        }
+
+        .compact-node-card {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .compact-node-card:active { transform: scale(0.88); }
+        .compact-node-card i { width: 20px; height: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        /* Standardized Authentic Brand Color Configurations */
+        .brand-whatsapp  { background: #25D366; color: #FFFFFF; }
+        .brand-telegram  { background: #24A1DE; color: #FFFFFF; }
+        .brand-github    { background: #24292E; color: #FFFFFF; }
+        .brand-tiktok    { background: #000000; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.1); }
+        .brand-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #FFFFFF; }
+        .brand-youtube   { background: #FF0000; color: #FFFFFF; }
+        .brand-email     { background: #EA4335; color: #FFFFFF; }
+
+        /* --- Drag/Swipe Capable Custom System Toast Notification Box --- */
+        .toast-box {
+            position: fixed; top: 24px; left: 16px; right: 16px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-left: 4px solid #30d158; padding: 16px; border-radius: 18px;
+            font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between;
+            transform: translateY(-140px); opacity: 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            z-index: 999999; backdrop-filter: blur(25px);
+            box-shadow: var(--card-shadow);
+            cursor: grab; touch-action: none;
+            user-select: none;
+        }
+        .toast-box:active { cursor: grabbing; }
+        .toast-box.show { transform: translateY(0); opacity: 1; }
+        .toast-left-content { display: flex; align-items: center; gap: 10px; pointer-events: none; }
+        .toast-dismiss-hint { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; pointer-events: none; }
+
+        /* Floating Theme Switch Engine Node */
+        .floating-theme-hub {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            border: none; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #ffffff; cursor: pointer;
+            box-shadow: 0 8px 25px rgba(142, 45, 226, 0.4);
+            z-index: 999;
+        }
+        .floating-theme-hub:active { transform: scale(0.9); }
+
+        /* About Sheet Drawer Overlay */
+        .about-overlay {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh;
+            background: var(--bg-color); border-top: 2px solid var(--glass-border);
+            border-top-left-radius: 32px; border-top-right-radius: 32px;
+            z-index: 1000; padding: 24px;
+            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+        }
+        .about-overlay.open { bottom: 0; }
+        .about-handle { width: 50px; height: 5px; background: var(--text-muted); border-radius: 3px; margin: -10px auto 24px auto; opacity: 0.3; }
+        .feature-badge-list { display: flex; flex-direction: column; gap: 12px; }
+        .feature-badge-item {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 14px;
+        }
+        .feature-badge-item i { color: var(--accent-cyan); }
+        .feature-badge-item h4 { font-size: 0.9rem; font-weight: 700; }
+        .feature-badge-item p { font-size: 0.75rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg-container" id="ambient-container"></div>
+
+    <div id="loading-screen">
+        <div class="fast-loader-ring">
+            <div class="blinking-dots-center">
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+            </div>
+        </div>
+        <div id="welcome-title">AirCore Protocol Monitor</div>
+        <div class="vortex-gate" id="vortex-gate"></div>
+    </div>
+
+    <div class="module-header">
+        <a href="index.html" class="back-link"><i data-lucide="arrow-left"></i></a>
+        <div class="module-title-block">
+            <h1>AirCore Decoder</h1>
+            <p>Module // Protocol Auditor</p>
+        </div>
+        <button class="about-toggle" onclick="toggleAboutOverlay()"><i data-lucide="info"></i></button>
+    </div>
+
+    <div class="forge-container">
+
+        <div class="geo-banner">
+            <i data-lucide="map-pin"></i>
+            <div class="geo-details">
+                <span class="geo-ip" id="node-ip-addr">Detecting Client Node...</span>
+                <span class="geo-loc" id="node-geo-loc">Resolving Geo-Matrix Coordinates...</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <div class="dual-columns">
+                <div>
+                    <label>Default Local Gateway</label>
+                    <input type="text" class="input-field" value="192.168.1.1" disabled />
+                </div>
+                <div>
+                    <label>Target DNS Matrix</label>
+                    <input type="text" class="input-field" value="8.8.8.8 // 1.1.1.1" disabled />
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="wifi-target-ssid">Target Access Point Identifier (SSID)</label>
+            <input type="text" id="wifi-target-ssid" class="input-field" placeholder="e.g., Home_Network_Private" />
+        </div>
+
+        <button class="forge-btn" id="audit-trigger-btn" onclick="initializeProtocolAudit()">
+            <i data-lucide="radio"></i> Discover Wi-Fi Password Stream
+        </button>
+
+        <div class="workspace-board" id="audit-workspace">
+            <div class="board-title">
+                <span><i data-lucide="terminal" style="width:12px; display:inline; margin-right:4px;"></i> Audit Stream Pipeline</span>
+                <span id="timer-countdown">05:00 Remaining</span>
+            </div>
+            
+                        <div class="progress-container">
+                <div class="progress-bar" id="audit-progress"></div>
+            </div>
+
+            <div class="stream-terminal" id="terminal-stream-log"></div>
+
+            <div class="credentials-matrix-output" id="credentials-output-block">
+                <div class="matrix-output-header">Brute Force by Bunny Under Lupin Starnley Succeeded!</div>
+                <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-bottom:10px;">Select derived encryption token vector candidate to try:</p>
+                <div class="matrix-passwords-list" id="passwords-injector-node"></div>
+            </div>
+        </div>
+
+        <div class="contacts-section-title">Developer Verification Endpoints</div>
+        <div class="contacts-flex-grid">
+            <a href="https://wa.me/255780470905?text=Hello%20Lupin,%20AirCore%20System%20verified." target="_blank" class="compact-node-card brand-whatsapp">
+                <i data-lucide="message-circle"></i>
+            </a>
+            <a href="https://t.me/+255780470905" target="_blank" class="compact-node-card brand-telegram">
+                <i data-lucide="send"></i>
+            </a>
+            <a href="https://github.com/xbotmanager-cell" target="_blank" class="compact-node-card brand-github">
+                <i data-lucide="github"></i>
+            </a>
+            <a href="https://www.tiktok.com/@mrlupin76_" target="_blank" class="compact-node-card brand-tiktok">
+                <i data-lucide="layers"></i>
+            </a>
+            <a href="https://www.instagram.com/maskedvoice_tz" target="_blank" class="compact-node-card brand-instagram">
+                <i data-lucide="instagram"></i>
+            </a>
+            <a href="https://youtube.com" target="_blank" class="compact-node-card brand-youtube">
+                <i data-lucide="video"></i>
+            </a>
+            <a href="mailto:lupinstarnley009@gmail.com" class="compact-node-card brand-email">
+                <i data-lucide="mail"></i>
+            </a>
+        </div>
+    </div>
+
+    <button class="floating-theme-hub" onclick="toggleInterfaceTheme()"><i data-lucide="sun" id="theme-icon"></i></button>
+
+    <div class="about-overlay" id="about-panel">
+        <div class="about-handle" onclick="toggleAboutOverlay()"></div>
+        <div class="about-content">
+            <h2 style="color:var(--accent-cyan); margin-bottom:14px; font-weight:900;">AirCore Diagnostics Core</h2>
+            <div class="feature-badge-list">
+                <div class="feature-badge-item">
+                    <i data-lucide="shield-alert"></i>
+                    <div>
+                        <h4>Handshake Simulation</h4>
+                        <p>Processes cryptographic standard simulation parameters to analyze structural password entropy thresholds locally.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-box" id="systemToast">
+        <div class="toast-left-content">
+            <i data-lucide="check-circle" style="color:#30d158" id="toastIcon"></i>
+            <span id="toastMsg">Notification Channel Synchronized</span>
+        </div>
+        <span class="toast-dismiss-hint">[Dismiss]</span>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let toastTimerReference = null;
+        let auditIntervalReference = null;
+        const TOTAL_AUDIT_DURATION_SECONDS = 300; // 5 Full Minutes Clock Sequence
+
+        // Generate Ambient Floating Background Elements
+        function initBackgroundBubbles() {
+            const container = document.getElementById('ambient-container');
+            for(let i=0; i<12; i++) {
+                let element = document.createElement('div');
+                element.className = 'ambient-bubble';
+                element.style.left = Math.random() * 100 + 'vw';
+                element.style.width = element.style.height = (Math.random() * 65 + 25) + 'px';
+                element.style.animationDelay = (Math.random() * 5) + 's';
+                element.style.animationDuration = (Math.random() * 8 + 8) + 's';
+                container.appendChild(element);
+            }
+        }
+        initBackgroundBubbles();
+
+        // Loading Screen Management Engine
+        window.addEventListener('load', () => {
+            const screen = document.getElementById('loading-screen');
+            const vortex = document.getElementById('vortex-gate');
+            let randomLoaderDuration = Math.floor(Math.random() * (2600 - 1500 + 1)) + 1500;
+
+            fetchGeoLocationPayload();
+
+            setTimeout(() => {
+                vortex.style.opacity = '1';
+                vortex.style.width = '240vw'; vortex.style.height = '240vw';
+                vortex.style.transition = 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1), height 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease';
+                setTimeout(() => {
+                    screen.style.opacity = '0';
+                    screen.style.transition = 'opacity 0.4s ease';
+                    setTimeout(() => {
+                        screen.remove();
+                        checkManifestSessionRecovery();
+                    }, 400);
+                }, 800);
+            }, randomLoaderDuration);
+        });
+
+        // Pull Real Location Metadata using Client IP Protocol Nodes
+        function fetchGeoLocationPayload() {
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.ip) {
+                        document.getElementById('node-ip-addr').innerText = `Node IP: ${data.ip}`;
+                        document.getElementById('node-geo-loc').innerText = `Loc: ${data.city || 'Unknown'}, ${data.region || 'Unknown Region'}, ${data.country_name || 'Tanzania'}`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('node-ip-addr').innerText = "Node IP: 197.250.224.81";
+                    document.getElementById('node-geo-loc').innerText = "Loc: Dar es Salaam, Kinondoni, Tanzania";
+                });
+        }
+
+        // Custom Rigid Draggable Toast Event Physics Engine
+        const toast = document.getElementById('systemToast');
+        let isDraggingToast = false;
+        let toastStartPointerX = 0;
+        let toastCurrentTranslateX = 0;
+
+        toast.addEventListener('pointerdown', (e) => {
+            isDraggingToast = true;
+            toastStartPointerX = e.clientX;
+            toast.style.transition = 'none';
+        });
+
+        document.addEventListener('pointermove', (e) => {
+            if (!isDraggingToast) return;
+            let currentX = e.clientX;
+            toastCurrentTranslateX = currentX - toastStartPointerX;
+            if (toastCurrentTranslateX < 0) toastCurrentTranslateX = 0; // Swipe rightwards constraint preference
+            toast.style.transform = `translateX(${toastCurrentTranslateX}px)`;
+        });
+
+        document.addEventListener('pointerup', () => {
+            if (!isDraggingToast) return;
+            isDraggingToast = false;
+            if (toastCurrentTranslateX > 140) {
+                // Fling/Throw animation away threshold fulfilled
+                toast.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+                toast.style.transform = 'translateX(120%)';
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    if(toastTimerReference) clearTimeout(toastTimerReference);
+                }, 250);
+            } else {
+                // Return to snap baseline position parameters
+                toast.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                toast.style.transform = 'translateX(0)';
+            }
+            toastCurrentTranslateX = 0;
+        });
+
+        toast.addEventListener('click', () => {
+            toast.classList.remove('show');
+            if(toastTimerReference) clearTimeout(toastTimerReference);
+        });
+
+        function triggerSystemToast(message, isError = false) {
+            const msgSpan = document.getElementById('toastMsg');
+            const icon = document.getElementById('toastIcon');
+
+            if(toastTimerReference) clearTimeout(toastTimerReference);
+
+            msgSpan.innerText = message;
+            toast.style.borderLeftColor = isError ? "#ff3b30" : "#30d158";
+            icon.setAttribute('data-lucide', isError ? 'alert-triangle' : 'check-circle');
+            
+            lucide.createIcons();
+            toast.style.transform = 'translateY(-140px)';
+            toast.style.opacity = '0';
+            
+            setTimeout(() => {
+                toast.style.transition = '';
+                toast.classList.add('show');
+                toast.style.transform = '';
+                toast.style.opacity = '';
+            }, 50);
+
+            toastTimerReference = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4500);
+        }
+
+        function toggleInterfaceTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            body.classList.toggle('light-theme');
+            icon.setAttribute('data-lucide', body.classList.contains('light-theme') ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+
+        function toggleAboutOverlay() {
+            document.getElementById('about-panel').classList.toggle('open');
+        }
+
+        // Compilation 14 Sequence Diagnostic Blocks Text Stream Database
+        const AUDIT_STEPS_CATALOG = [
+            { text: "[INIT]: Broad-spectrum wireless monitoring node initialized on channel interface wlan0mon...", fault: false },
+            { text: "[BEACON]: Captured beacon frames from designated access point router target. Signal strength -64dBm.", fault: false },
+            { text: "[ATTEMPT]: Initiating broadcast de-authentication streams to capture protocol handshake vector configuration...", fault: false },
+            { text: "[FAULT]: WPA2 handshake capture verification fault. Retrying handshake sync pipeline blocks...", fault: true },
+            { text: "[SUCCESS]: WPA2 Four-Way cryptographic authentication handshake acquired successfully. Initializing local database index lookups...", fault: false },
+            { text: "[ANALYSIS]: Extracting target SSID parameters and calculating custom local PMKID table strings...", fault: false },
+            { text: "[BRUTE_FORCE]: Executing parallelized dictionary matrix lookup routines via local worker thread stack...", fault: false },
+            { text: "[ATTEMPT]: Testing key candidate block range: 0x00000000 -> 0x00FFFFFF... Status: Zero matches. Pipeline re-indexed.", fault: true },
+            { text: "[BRUTE_FORCE]: Commencing specialized Bunny under Lupin system mutation rule variations against target hash criteria...", fault: false },
+            { text: "[ATTEMPT]: Evaluating passkey array index alpha-numeric strings: [FAILED KEY VALIDATION MATCH]", fault: true },
+            { text: "[SYNC]: Re-calibrating hardware thread clocks to mitigate router credential throttling mechanisms...", fault: false },
+            { text: "[ATTEMPT]: Injecting custom brute matrix combinations... [INTEGRITY CHECKSUM FAULT: PASSKEY MISMATCH]", fault: true },
+            { text: "[BRUTE_FORCE]: Deep sector algorithmic translation ongoing. Permutating alphanumeric special token variations...", fault: false },
+            { text: "[COMPLETED]: Password stream matching parameters matched within internal lookup dictionary cache arrays.", fault: false }
+        ];
+
+        // Core Trigger Core Engine Logic
+        function initializeProtocolAudit() {
+            const ssid = document.getElementById('wifi-target-ssid').value.trim();
+            if(!ssid) {
+                triggerSystemToast("Operation Denied: SSID Identity Input Required", true);
+                return;
+            }
+
+            document.getElementById('audit-trigger-btn').disabled = true;
+            document.getElementById('wifi-target-ssid').disabled = true;
+            
+            const sessionState = {
+                ssid: ssid,
+                elapsedSeconds: 0,
+                isCompleted: false
+            };
+            localStorage.setItem('bunny_wifi_session', JSON.stringify(sessionState));
+            
+            startAuditExecutionPipeline(0);
+        }
+
+        function startAuditExecutionPipeline(startFromSeconds) {
+            document.getElementById('audit-workspace').style.display = "block";
+            
+            let currentSecondsElapsed = startFromSeconds;
+            updateInterfaceProgress(currentSecondsElapsed);
+
+            auditIntervalReference = setInterval(() => {
+                currentSecondsElapsed++;
+                
+                // Track state inside persistent manifests
+                const savedSession = JSON.parse(localStorage.getItem('bunny_wifi_session'));
+                if(savedSession) {
+                    savedSession.elapsedSeconds = currentSecondsElapsed;
+                    localStorage.setItem('bunny_wifi_session', JSON.stringify(savedSession));
+                }
+
+                updateInterfaceProgress(currentSecondsElapsed);
+
+                if(currentSecondsElapsed >= TOTAL_AUDIT_DURATION_SECONDS) {
+                    clearInterval(auditIntervalReference);
+                    finalizeAuditOutcome();
+                }
+            }, 1000);
+        }
+
+        function updateInterfaceProgress(elapsed) {
+            const progressPct = (elapsed / TOTAL_AUDIT_DURATION_SECONDS) * 100;
+            document.getElementById('audit-progress').style.width = `${progressPct}%`;
+
+            const totalLeft = TOTAL_AUDIT_DURATION_SECONDS - elapsed;
+            const minutes = Math.floor(totalLeft / 60);
+            const seconds = totalLeft % 60;
+            document.getElementById('timer-countdown').innerText = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} Remaining`;
+
+            // Calculate precise log line index according to duration completion curve distribution
+            const stepIndexToDisplay = Math.floor((elapsed / TOTAL_AUDIT_DURATION_SECONDS) * AUDIT_STEPS_CATALOG.length);
+            renderTerminalLogsUpTo(stepIndexToDisplay);
+        }
+
+        function renderTerminalLogsUpTo(indexLimit) {
+            const terminal = document.getElementById('terminal-stream-log');
+            terminal.innerHTML = '';
+            
+            const finalIndex = Math.min(indexLimit, AUDIT_STEPS_CATALOG.length);
+            for(let i = 0; i < finalIndex; i++) {
+                const step = AUDIT_STEPS_CATALOG[i];
+                let div = document.createElement('div');
+                div.className = `typed-step ${step.fault ? 'fault-step' : ''}`;
+                div.innerText = step.text;
+                terminal.appendChild(div);
+            }
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function finalizeAuditOutcome() {
+            const savedSession = JSON.parse(localStorage.getItem('bunny_wifi_session'));
+            if(savedSession) {
+                savedSession.isCompleted = true;
+                localStorage.setItem('bunny_wifi_session', JSON.stringify(savedSession));
+            }
+
+            document.getElementById('credentials-output-block').style.display = "flex";
+            
+            const passwordsArray = [
+                "Admin_Secure#2026",
+                "LupinStarnley@99",
+                "MatrixNetBypass!!",
+                "Wpa2_Protocol77X",
+                "BunnyEngineTokens"
+            ];
+
+            const containers = document.getElementById('passwords-injector-node');
+            containers.innerHTML = '';
+
+            passwordsArray.forEach(pass => {
+                let div = document.createElement('div');
+                div.className = "pass-item";
+                div.innerHTML = `<span>${pass}</span><button class="pass-copy-btn" onclick="copyPasswordToken('${pass}')"><i data-lucide="copy" style="width:14px;"></i></button>`;
+                containers.appendChild(div);
+            });
+            
+            lucide.createIcons();
+            triggerSystemToast("All Credential Candidates Restructured Successfully");
+        }
+
+        function checkManifestSessionRecovery() {
+            const stored = localStorage.getItem('bunny_wifi_session');
+            if(!stored) return;
+
+            const session = JSON.parse(stored);
+            document.getElementById('wifi-target-ssid').value = session.ssid;
+            document.getElementById('wifi-target-ssid').disabled = true;
+            document.getElementById('audit-trigger-btn').disabled = true;
+
+            triggerSystemToast("Active Manifest Core Session State Restored");
+
+            if(session.isCompleted || session.elapsedSeconds >= TOTAL_AUDIT_DURATION_SECONDS) {
+                document.getElementById('audit-workspace').style.display = "block";
+                updateInterfaceProgress(TOTAL_AUDIT_DURATION_SECONDS);
+                finalizeAuditOutcome();
+            } else {
+                startAuditExecutionPipeline(session.elapsedSeconds);
+            }
+        }
+
+        function copyPasswordToken(text) {
+            navigator.clipboard.writeText(text);
+            triggerSystemToast("Token Extracted to Clipboard Storage Location");
+        }
+    </script>
+</body>
+</html>
