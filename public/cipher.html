@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Engine - Quantum Text Cipher</title>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-color: #0d0614;
+            --purple-glow: rgba(191, 90, 242, 0.15);
+            --pink-glow: rgba(255, 55, 127, 0.15);
+            --cyan-glow: rgba(50, 215, 255, 0.2);
+            --glass-bg: rgba(25, 15, 38, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f2f2f7;
+            --text-muted: #aeaeae;
+            --accent-cyan: #32d7ff;
+            --accent-purple: #bf5af2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: var(--purple-glow);
+            filter: blur(130px);
+            bottom: -10%;
+            left: -10%;
+            z-index: -1;
+        }
+
+        /* --- Quantum Atom Loader Engine --- */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(145deg, #0d0614, #140b24);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle, rgba(50, 215, 255, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatUpward 7s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes floatUpward {
+            0% { transform: translateY(110vh) scale(0.4) translateX(0); opacity: 0; }
+            30% { opacity: 0.7; }
+            70% { opacity: 0.4; }
+            100% { transform: translateY(-15vh) scale(1.3) translateX(50px); opacity: 0; }
+        }
+
+        /* Atom Core Orbit Assembly */
+        .atom-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .atom-nucleus {
+            width: 14px;
+            height: 14px;
+            background: #32d7ff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #32d7ff, 0 0 40px #bf5af2;
+            z-index: 6;
+        }
+
+        .atom-orbit {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(191, 90, 242, 0.35);
+            border-radius: 50%;
+        }
+
+        .orbit-1 { transform: rotateX(75deg) rotateY(15deg); animation: orbitSpin1 1s linear infinite; }
+        .orbit-2 { transform: rotateX(75deg) rotateY(65deg); animation: orbitSpin2 1s linear infinite; }
+        .orbit-3 { transform: rotateX(75deg) rotateY(115deg); animation: orbitSpin3 1s linear infinite; }
+
+        @keyframes orbitSpin1 { 0% { transform: rotateX(75deg) rotateY(15deg) rotateZ(0deg); } 100% { transform: rotateX(75deg) rotateY(15deg) rotateZ(360deg); } }
+        @keyframes orbitSpin2 { 0% { transform: rotateX(75deg) rotateY(65deg) rotateZ(120deg); } 100% { transform: rotateX(75deg) rotateY(65deg) rotateZ(480deg); } }
+        @keyframes orbitSpin3 { 0% { transform: rotateX(75deg) rotateY(115deg) rotateZ(240deg); } 100% { transform: rotateX(75deg) rotateY(115deg) rotateZ(600deg); } }
+
+        /* Smooth Vortex Entrance System */
+        .vortex-gate {
+            position: absolute;
+            width: 0vw; height: 0vh;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 20%, #0d0614 100%);
+            box-shadow: inset 0 0 100px rgba(191, 90, 242, 0.6);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #welcome-title {
+            margin-top: 30px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #f2f2f7;
+            opacity: 0;
+            transform: translateY(15px);
+            z-index: 5;
+            text-align: center;
+        }
+
+        /* --- Main App UI Layout --- */
+        .module-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .back-link, .about-toggle {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:active, .about-toggle:active {
+            transform: scale(0.92);
+            border-color: var(--accent-cyan);
+        }
+
+        .module-title-block { text-align: right; }
+        .module-title-block h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+        .module-title-block p { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Forge Control Panel */
+        .forge-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 2;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-left: 4px;
+        }
+
+        .text-field {
+            width: 100%;
+            background: rgba(13, 6, 20, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.25s ease;
+        }
+
+        .text-field:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        /* Mode Selector Container */
+        .mode-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .mode-btn {
+            flex: 1;
+            background: rgba(25, 15, 38, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mode-btn.active {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(50, 215, 255, 0.05);
+        }
+
+        .code-editor-pane {
+            width: 100%;
+            height: 180px;
+            background: rgba(10, 4, 15, 0.85);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+            color: #32d7ff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        .code-editor-pane:focus {
+            border-color: var(--accent-purple);
+        }
+
+        /* Forge Action Execution Terminal Board */
+        .workspace-board {
+            background: rgba(13, 6, 20, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 4px;
+            min-height: 100px;
+        }
+
+        .board-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .typed-step {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #30d158;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            border-left: 2px solid rgba(48, 209, 88, 0.3);
+            padding-left: 10px;
+            margin-bottom: 8px;
+        }
+
+        /* Micro-action Config Controls */
+        .forge-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #32d7ff, #bf5af2);
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 25px rgba(50, 215, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .forge-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 4px 10px rgba(50, 215, 255, 0.1);
+        }
+
+        /* --- Interactive Slide-out About Overlay Panel --- */
+        .about-overlay {
+            position: fixed;
+            bottom: -100%; left: 0;
+            width: 100%; height: 85vh;
+            background: rgba(20, 11, 33, 0.96);
+            backdrop-filter: blur(25px);
+            border-top: 1px solid var(--glass-border);
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            z-index: 500;
+            padding: 30px 24px;
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+            overflow-y: auto;
+        }
+
+        .about-overlay.open {
+            bottom: 0;
+        }
+
+        .about-handle {
+            width: 50px; height: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            margin: -15px auto 25px auto;
+        }
+
+        .about-content h2 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: var(--accent-cyan);
+        }
+
+        .about-content p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .feature-badge-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature-badge-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-badge-item i { color: #bf5af2; }
+        .feature-badge-item div h4 { font-size: 0.85rem; font-weight: 600; }
+        .feature-badge-item div p { font-size: 0.75rem; margin-bottom: 0; color: #8e8e93; }
+
+        /* Notification Engine Toast toast container system */
+        .toast-box {
+            position: fixed;
+            top: 25px; left: 20px; right: 20px;
+            background: rgba(25, 15, 38, 0.9);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid #30d158;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 99999;
+        }
+
+        .toast-box.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="atom-container">
+            <div class="atom-nucleus"></div>
+            <div class="atom-orbit orbit-1"></div>
+            <div class="atom-orbit orbit-2"></div>
+            <div class="atom-orbit orbit-3"></div>
+        </div>
+        <div id="welcome-title">Welcome to Cipher Forge</div>
+        <div class="vortex-gate" id="vortex-gate"></div>
+    </div>
+
+    <div class="module-header">
+        <a href="../index.html" class="back-link"><i data-lucide="arrow-left"></i></a>
+        <div class="module-title-block">
+            <h1>Quantum Text Cipher</h1>
+            <p>Category // Core Security</p>
+        </div>
+        <button class="about-toggle" onclick="toggleAboutOverlay()"><i data-lucide="info"></i></button>
+    </div>
+
+    <div class="forge-container">
+
+        <div class="input-group">
+            <label>Operation Engine Mode</label>
+            <div class="mode-container">
+                <button id="mode-encrypt" class="mode-btn active" onclick="setCipherMode('encrypt')">Encrypt</button>
+                <button id="mode-decrypt" class="mode-btn" onclick="setCipherMode('decrypt')">Decrypt</button>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="cipher-key-input">Secret Cryptographic Key / Shift Factor</label>
+            <input type="text" id="cipher-key-input" class="text-field" placeholder="e.g. 7, secure_key, bunny">
+        </div>
+
+        <div class="input-group">
+            <label for="cipher-payload-area">Raw Data String / Ciphertext Target</label>
+            <textarea id="cipher-payload-area" class="code-editor-pane" placeholder="// Insert payload raw string text here to compute matrix transformation parameters immediately..."></textarea>
+        </div>
+
+        <button class="forge-btn" onclick="executeQuantumCipherProcess()">
+            <i data-lucide="shield-alert"></i> Process Vector Stream
+        </button>
+
+        <div class="workspace-board">
+            <div class="board-title"><i data-lucide="cpu" style="width:14px;"></i>Asynchronous Solution Stream</div>
+            <div id="forge-steps"></div>
+        </div>
+
+    </div>
+
+    <div class="about-overlay" id="about-panel">
+        <div class="about-handle" onclick="toggleAboutOverlay()"></div>
+        <div class="about-content">
+            <h2>About Quantum Text Cipher</h2>
+            <p>Quantum Text Cipher is a low-latency Client-Side Cryptographic String Processor engineered inside the Bunny Dashboard suite. It enables instant multi-layered transformation mechanics of volatile data matrices directly inside device runtime operations securely.</p>
+
+            <div class="feature-badge-list">
+                <div class="feature-badge-item">
+                    <i data-lucide="binary"></i>
+                    <div>
+                        <h4>Dynamic Algorithmic Mapping</h4>
+                        <p>Utilizes custom shift logic mechanics parsing alphabet and numeric sequences natively on local memory scopes.</p>
+                    </div>
+                </div>
+                <div class="feature-badge-item">
+                    <i data-lucide="zap"></i>
+                    <div>
+                        <h4>Zero-Server Processing Pipeline</h4>
+                        <p>Compilation happens purely inside internal client memory blocks without submitting metrics over network structures, accelerating executions.</p>
+                    </div>
+                </div>
+                <div class="feature-badge-item">
+                    <i data-lucide="shield-check"></i>
+                    <div>
+                        <h4>Lossless Blob Encoding</h4>
+                        <p>Preserves absolute formatting architecture parameters, spaces, strings, symbols, and tabs without code execution line drops.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-box" id="forgeToast">
+        <i data-lucide="check-circle" style="color:#30d158"></i>
+        <span id="toastMsg">String Vectors Processed Successfully</span>
+    </div>
+
+    <script>
+        // Mount Vectors
+        lucide.createIcons();
+
+        let currentCipherMode = 'encrypt';
+
+        // --- Multi-Interval Smooth Vortex Loader Routine ---
+        function initializeQuantumCoreSequence() {
+            const screen = document.getElementById('loading-screen');
+            const title = document.getElementById('welcome-title');
+            const vortex = document.getElementById('vortex-gate');
+
+            // Generate Ambient Micro Floating Quantum Orbs
+            for(let i=0; i<18; i++) {
+                let orb = document.createElement('div');
+                orb.className = 'bubble';
+                orb.style.left = Math.random() * 100 + 'vw';
+                orb.style.width = orb.style.height = (Math.random() * 50 + 15) + 'px';
+                orb.style.animationDelay = (Math.random() * 3.5) + 's';
+                screen.appendChild(orb);
+            }
+
+            // Calibrate random loader life cycle duration between 6 and 11 seconds
+            let systemDelayDuration = Math.floor(Math.random() * (11000 - 6000 + 1)) + 6000;
+
+            // Animate welcoming text visibility matrix halfway through
+            setTimeout(() => {
+                title.style.opacity = '1';
+                title.style.transform = 'translateY(0)';
+                title.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+            }, systemDelayDuration / 2);
+
+            // Execute vortex zoom out transitions without visual breakages
+            setTimeout(() => {
+                vortex.style.opacity = '1';
+                vortex.style.width = '250vw';
+                vortex.style.height = '250vw';
+                vortex.style.transition = 'width 1.2s cubic-bezier(0.7, 0, 0.3, 1), height 1.2s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease';
+
+                setTimeout(() => {
+                    screen.style.opacity = '0';
+                    screen.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => screen.remove(), 500);
+                }, 1000);
+
+            }, systemDelayDuration);
+        }
+        window.addEventListener('load', initializeQuantumCoreSequence);
+
+        // Toggle Operation Modes
+        function setCipherMode(mode) {
+            currentCipherMode = mode;
+            document.getElementById('mode-encrypt').classList.toggle('active', mode === 'encrypt');
+            document.getElementById('mode-decrypt').classList.toggle('active', mode === 'decrypt');
+        }
+
+        // --- Streaming Animation Typewriter Parser Engine ---
+        async function queueAnimatedSteps(stepsArray) {
+            const container = document.getElementById('forge-steps');
+            container.innerHTML = ''; 
+
+            for (let i = 0; i < stepsArray.length; i++) {
+                let div = document.createElement('div');
+                div.className = 'typed-step';
+                container.appendChild(div);
+
+                                await new Promise(resolve => {
+                    let charIndex = 0;
+                    let text = stepsArray[i];
+                    function type() {
+                        if (charIndex < text.length) {
+                            div.innerHTML += text.charAt(charIndex);
+                            charIndex++;
+                            setTimeout(type, 15);
+                        } else {
+                            resolve();
+                        }
+                    }
+                    type();
+                });
+                await new Promise(r => setTimeout(r, 200));
+            }
+        }
+
+        // --- Core Cipher Calculation Processing Engine ---
+        async function executeQuantumCipherProcess() {
+            const rawKey = document.getElementById('cipher-key-input').value;
+            const payload = document.getElementById('cipher-payload-area').value;
+            const toast = document.getElementById('forgeToast');
+            const toastMsg = document.getElementById('toastMsg');
+
+            if (!payload) {
+                toastMsg.innerText = "Error: Text Payload Matrix Empty";
+                toast.style.borderLeftColor = "#ff3b30";
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3500);
+                return;
+            }
+
+            // Generate shift integer factor out of any inputted secret keys
+            let numericShift = 0;
+            if (rawKey === "") {
+                numericShift = 3; // Fallback seed standard factor
+            } else {
+                for (let i = 0; i < rawKey.length; i++) {
+                    numericShift += rawKey.charCodeAt(i);
+                }
+            }
+            if (currentCipherMode === 'decrypt') {
+                numericShift = -numericShift;
+            }
+
+            let steps = [];
+            steps.push(`[SYSTEM LOG]: Initializing Cryptographic Stream Engine...`);
+            steps.push(`Step 1: Operational Strategy Set To: ${currentCipherMode.toUpperCase()}`);
+            steps.push(`Step 2: Processing Matrix Vectors (${payload.length} units detected)`);
+            steps.push(`Step 3: Compiling seed factor configurations into alignment streams...`);
+
+            try {
+                // Algorithmic processing loop parsing structures natively inside RAM
+                let outputResult = "";
+                for (let k = 0; k < payload.length; k++) {
+                    let charCode = payload.charCodeAt(k);
+                    // Shift alpha-numeric blocks clean across baseline limits
+                    outputResult += String.fromCharCode((charCode + numericShift) % 65535);
+                }
+
+                steps.push(`Step 4: Realignment matrix transformation sequence executed successfully.`);
+                steps.push(`>> Output Generated Stream Block Saved to Workspace Payload Area.`);
+                
+                await queueAnimatedSteps(steps);
+
+                // Map output processing data structures directly back to user control frame
+                document.getElementById('cipher-payload-area').value = outputResult;
+
+                toastMsg.innerText = "Matrix Resynchronized Successfully";
+                toast.style.borderLeftColor = "#30d158";
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3500);
+
+            } catch (runtimeCipherFault) {
+                steps.push(`>> Error: Vector Pipeline Intercept Block Failure.`);
+                await queueAnimatedSteps(steps);
+
+                toastMsg.innerText = "Transformation Core Interface Error";
+                toast.style.borderLeftColor = "#ff3b30";
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3500);
+            }
+        }
+
+        // --- Sheet Slide Interaction Control Subsystems ---
+        function toggleAboutOverlay() {
+            document.getElementById('about-panel').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
