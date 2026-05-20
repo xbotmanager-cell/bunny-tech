@@ -10,15 +10,32 @@
     <style>
         :root {
             --bg-color: #0d0614;
-            --purple-glow: rgba(191, 90, 242, 0.15);
-            --pink-glow: rgba(255, 55, 127, 0.15);
-            --cyan-glow: rgba(50, 215, 255, 0.2);
-            --glass-bg: rgba(25, 15, 38, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --purple-glow: rgba(191, 90, 242, 0.35);
+            --pink-glow: rgba(255, 55, 127, 0.35);
+            --cyan-glow: rgba(50, 215, 255, 0.4);
+            --glass-bg: rgba(25, 15, 38, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.12);
             --text-main: #f2f2f7;
             --text-muted: #aeaeae;
             --accent-cyan: #32d7ff;
             --accent-purple: #bf5af2;
+            --accent-pink: #ff377f;
+            --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .light-theme {
+            --bg-color: #f5f5f7;
+            --purple-glow: rgba(191, 90, 242, 0.15);
+            --pink-glow: rgba(255, 55, 127, 0.15);
+            --cyan-glow: rgba(50, 215, 255, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1c1c1e;
+            --text-muted: #68686e;
+            --accent-cyan: #007aff;
+            --accent-purple: #8e2de2;
+            --accent-pink: #ff2d55;
+            --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
         }
 
         * {
@@ -35,25 +52,40 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 24px;
             overflow-x: hidden;
             position: relative;
+            transition: background 0.5s ease, color 0.5s ease;
         }
 
-        body::before {
-            content: '';
+        /* Continuous Ambient Background Bubbles */
+        .ambient-bg-container {
             position: fixed;
-            width: 350px;
-            height: 350px;
-            border-radius: 50%;
-            background: var(--purple-glow);
-            filter: blur(130px);
-            bottom: -10%;
-            left: -10%;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
         }
 
-        /* --- Quantum Atom Loader Engine --- */
+        .ambient-bubble {
+            position: absolute;
+            background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: endlessFloat 10s infinite ease-in-out;
+            opacity: 0.6;
+        }
+
+        @keyframes endlessFloat {
+            0% { transform: translateY(105vh) scale(0.5) translateX(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-15vh) scale(1.3) translateX(60px); opacity: 0; }
+        }
+
+        /* --- Super Fast Circular Loader Screen --- */
         #loading-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -66,315 +98,444 @@
             overflow: hidden;
         }
 
-        .bubble {
-            position: absolute;
-            background: radial-gradient(circle, rgba(50, 215, 255, 0.25) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: floatUpward 7s infinite ease-in-out;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        @keyframes floatUpward {
-            0% { transform: translateY(110vh) scale(0.4) translateX(0); opacity: 0; }
-            30% { opacity: 0.7; }
-            70% { opacity: 0.4; }
-            100% { transform: translateY(-15vh) scale(1.3) translateX(50px); opacity: 0; }
-        }
-
-        /* Atom Core Orbit Assembly */
-        .atom-container {
+        .fast-loader-ring {
             position: relative;
-            width: 120px;
-            height: 120px;
+            width: 110px;
+            height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 5;
         }
 
-        .atom-nucleus {
-            width: 14px;
-            height: 14px;
-            background: #32d7ff;
-            border-radius: 50%;
-            box-shadow: 0 0 20px #32d7ff, 0 0 40px #bf5af2;
-            z-index: 6;
-        }
-
-        .atom-orbit {
+        /* Circular Fast Spinner Border */
+        .fast-loader-ring::before {
+            content: '';
             position: absolute;
             width: 100%;
             height: 100%;
-            border: 2px solid rgba(191, 90, 242, 0.35);
+            border: 5px solid rgba(255, 255, 255, 0.05);
+            border-top: 5px solid var(--accent-cyan);
+            border-bottom: 5px solid var(--accent-purple);
             border-radius: 50%;
+            animation: superFastSpin 0.5s linear infinite;
+            box-shadow: 0 0 15px var(--cyan-glow), 0 0 30px var(--purple-glow);
         }
 
-        .orbit-1 { transform: rotateX(75deg) rotateY(15deg); animation: orbitSpin1 1s linear infinite; }
-        .orbit-2 { transform: rotateX(75deg) rotateY(65deg); animation: orbitSpin2 1s linear infinite; }
-        .orbit-3 { transform: rotateX(75deg) rotateY(115deg); animation: orbitSpin3 1s linear infinite; }
+        @keyframes superFastSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-        @keyframes orbitSpin1 { 0% { transform: rotateX(75deg) rotateY(15deg) rotateZ(0deg); } 100% { transform: rotateX(75deg) rotateY(15deg) rotateZ(360deg); } }
-        @keyframes orbitSpin2 { 0% { transform: rotateX(75deg) rotateY(65deg) rotateZ(120deg); } 100% { transform: rotateX(75deg) rotateY(65deg) rotateZ(480deg); } }
-        @keyframes orbitSpin3 { 0% { transform: rotateX(75deg) rotateY(115deg) rotateZ(240deg); } 100% { transform: rotateX(75deg) rotateY(115deg) rotateZ(600deg); } }
+        /* Centered Intermittent Flashing Core Dots */
+        .blinking-dots-center {
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
 
-        /* Smooth Vortex Entrance System */
+        .core-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-pink);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-pink);
+            animation: fastPulseDot 0.6s infinite alternate;
+        }
+
+        .core-dot:nth-child(2) {
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+            animation-delay: 0.2s;
+        }
+
+        .core-dot:nth-child(3) {
+            background-color: var(--accent-purple);
+            box-shadow: 0 0 10px var(--accent-purple);
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fastPulseDot {
+            0% { opacity: 0.1; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
         .vortex-gate {
             position: absolute;
             width: 0vw; height: 0vh;
             border-radius: 50%;
             background: radial-gradient(circle, transparent 20%, #0d0614 100%);
-            box-shadow: inset 0 0 100px rgba(191, 90, 242, 0.6);
-            z-index: 10;
+            box-shadow: inset 0 0 120px rgba(50, 215, 255, 0.6);
+            z-index: 20;
             opacity: 0;
             pointer-events: none;
         }
 
         #welcome-title {
-            margin-top: 30px;
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: 3px;
+            margin-top: 40px;
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            color: #f2f2f7;
+            background: linear-gradient(135deg, #32d7ff, #bf5af2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(50, 215, 255, 0.3);
             opacity: 0;
-            transform: translateY(15px);
+            transform: translateY(20px);
             z-index: 5;
             text-align: center;
         }
 
-        /* --- Main App UI Layout --- */
+        /* --- Main Layout Architecture --- */
         .module-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            padding: 16px 20px;
-            border-radius: 20px;
-            backdrop-filter: blur(20px);
+            padding: 18px 24px;
+            border-radius: 24px;
+            backdrop-filter: blur(25px);
+            box-shadow: var(--card-shadow);
         }
 
-        .back-link, .about-toggle {
-            color: var(--text-muted);
+        .back-link, .theme-toggle, .about-toggle {
+            color: var(--text-main);
             text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .back-link:active, .about-toggle:active {
-            transform: scale(0.92);
+        .back-link:active, .theme-toggle:active, .about-toggle:active {
+            transform: scale(0.9);
             border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        .header-controls-right {
+            display: flex;
+            gap: 12px;
         }
 
         .module-title-block { text-align: right; }
-        .module-title-block h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
-        .module-title-block p { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .module-title-block h1 { 
+            font-size: 1.4rem; 
+            font-weight: 900; 
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text-main), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px var(--cyan-glow);
+        }
+        .module-title-block p { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Forge Control Panel */
         .forge-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
             z-index: 2;
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
         }
 
         .input-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding-left: 4px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px var(--cyan-glow);
         }
 
         .text-field {
             width: 100%;
-            background: rgba(13, 6, 20, 0.6);
+            background: rgba(0, 0, 0, 0.2);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 14px 16px;
+            border-radius: 14px;
+            padding: 16px;
             color: var(--text-main);
-            font-size: 0.95rem;
+            font-size: 1rem;
+            font-weight: 600;
             outline: none;
-            transition: border-color 0.25s ease;
+            transition: all 0.3s ease;
         }
 
         .text-field:focus {
             border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px var(--cyan-glow);
         }
 
         .code-editor-pane {
             width: 100%;
-            height: 260px;
-            background: rgba(10, 4, 15, 0.85);
+            height: 220px;
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 16px;
             color: #32d7ff;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.6;
             resize: none;
             outline: none;
+            transition: border-color 0.3s ease;
         }
 
         .code-editor-pane:focus {
             border-color: var(--accent-purple);
+            box-shadow: 0 0 15px var(--purple-glow);
         }
 
-        /* Forge Action Execution Terminal Board */
-        .workspace-board {
-            background: rgba(13, 6, 20, 0.7);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 4px;
-            min-height: 100px;
-        }
-
-        .board-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--accent-cyan);
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .typed-step {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem;
-            color: #30d158;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            border-left: 2px solid rgba(48, 209, 88, 0.3);
-            padding-left: 10px;
-            margin-bottom: 8px;
-        }
-
-        /* Micro-action Config Controls */
         .forge-btn {
             width: 100%;
-            background: linear-gradient(135deg, #32d7ff, #bf5af2);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            background-size: 200% auto;
             border: none;
-            padding: 16px;
-            border-radius: 16px;
+            padding: 18px;
+            border-radius: 20px;
             color: #ffffff;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            box-shadow: 0 8px 25px rgba(50, 215, 255, 0.2);
-            transition: all 0.2s ease;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(191, 90, 242, 0.3);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: gradientMove 4s infinite alternate;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
         }
 
         .forge-btn:active {
             transform: scale(0.96);
-            box-shadow: 0 4px 10px rgba(50, 215, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(191, 90, 242, 0.2);
         }
 
-        /* --- Interactive Slide-out About Overlay Panel --- */
+        .workspace-board {
+            background: #000000;
+            border: 2px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .board-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            letter-spacing: 1.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 0 10px var(--cyan-glow);
+        }
+
+        .typed-step {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            padding-left: 14px;
+            border-left: 3px solid #30d158;
+            color: #30d158;
+            margin-bottom: 8px;
+        }
+
+        .info-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--card-shadow);
+            margin-top: 12px;
+        }
+
+        .info-panel h2 {
+            font-size: 1.3rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px var(--cyan-glow);
+        }
+
+        .info-panel p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+        }
+
+        /* True-Branded Authentic Contacts Nodes System Grid */
+        .contacts-section-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--accent-pink);
+            letter-spacing: 1.5px;
+            margin: 32px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 0 10px rgba(255, 55, 127, 0.2);
+        }
+
+        .contacts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .contact-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .contact-card i {
+            width: 28px;
+            height: 28px;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-card span {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        /* Authentic Brands Color Guidelines implementation */
+        .c-github { border-color: #24292e; }
+        .c-github i { color: #ffffff; }
+        .c-github:active { border-color: #ffffff; box-shadow: 0 0 15px rgba(255,255,255,0.4); }
+
+        .c-tiktok { border-color: #010101; }
+        .c-tiktok i { color: #00f2fe; }
+        .c-tiktok:active { border-color: #fe2c55; box-shadow: 0 0 15px rgba(254,44,85,0.4); }
+
+        .c-whatsapp { border-color: #128c7e; }
+        .c-whatsapp i { color: #25d366; }
+        .c-whatsapp:active { border-color: #25d366; box-shadow: 0 0 15px rgba(37,211,102,0.4); }
+
+        .c-telegram { border-color: #0088cc; }
+        .c-telegram i { color: #37aee2; }
+        .c-telegram:active { border-color: #37aee2; box-shadow: 0 0 15px rgba(55,174,226,0.4); }
+
+        .c-instagram { border-color: #e1306c; }
+        .c-instagram i { color: #f77737; }
+        .c-instagram:active { border-color: #e1306c; box-shadow: 0 0 15px rgba(225,48,108,0.4); }
+
+        .c-youtube { border-color: #282828; }
+        .c-youtube i { color: #ff0000; }
+        .c-youtube:active { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.4); }
+
+        .c-email { border-color: #db4437; }
+        .c-email i { color: #f4b400; }
+        .c-email:active { border-color: #db4437; box-shadow: 0 0 15px rgba(219,68,55,0.4); }
+
+        .contact-card:active {
+            transform: scale(0.92) translateY(-4px);
+        }
+
+        /* Slide Overlay Panel */
         .about-overlay {
             position: fixed;
             bottom: -100%; left: 0;
-            width: 100%; height: 85vh;
-            background: rgba(20, 11, 33, 0.96);
-            backdrop-filter: blur(25px);
-            border-top: 1px solid var(--glass-border);
-            border-top-left-radius: 30px;
-            border-top-right-radius: 30px;
+            width: 100%; height: 80vh;
+            background: var(--bg-color);
+            border-top: 2px solid var(--glass-border);
+            border-top-left-radius: 32px;
+            border-top-right-radius: 32px;
             z-index: 500;
-            padding: 30px 24px;
-            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+            padding: 32px 24px;
+            transition: bottom 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             overflow-y: auto;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
 
-        .about-overlay.open {
-            bottom: 0;
-        }
+        .about-overlay.open { bottom: 0; }
+        .about-handle { width: 60px; height: 6px; background: var(--text-muted); border-radius: 3px; margin: -16px auto 24px auto; opacity: 0.4; }
 
-        .about-handle {
-            width: 50px; height: 5px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            margin: -15px auto 25px auto;
-        }
-
-        .about-content h2 {
-            font-size: 1.4rem;
-            margin-bottom: 12px;
-            color: var(--accent-cyan);
-        }
-
-        .about-content p {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-        }
-
-        .feature-badge-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
+        .feature-badge-list { display: flex; flex-direction: column; gap: 14px; }
         .feature-badge-item {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            padding: 12px 16px;
+            border-radius: 16px;
+            padding: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
+        .feature-badge-item i { color: var(--accent-purple); }
+        .feature-badge-item h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; }
+        .feature-badge-item p { font-size: 0.8rem; color: var(--text-muted); }
 
-        .feature-badge-item i { color: #bf5af2; }
-        .feature-badge-item div h4 { font-size: 0.85rem; font-weight: 600; }
-        .feature-badge-item div p { font-size: 0.75rem; margin-bottom: 0; color: #8e8e93; }
-
-        /* Notification Engine Toast toast container system */
+        /* Toast Message Box */
         .toast-box {
             position: fixed;
-            top: 25px; left: 20px; right: 20px;
-            background: rgba(25, 15, 38, 0.9);
+            top: 30px; left: 24px; right: 24px;
+            background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-left: 4px solid #30d158;
-            padding: 14px 18px;
-            border-radius: 14px;
-            font-size: 0.85rem;
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 10px;
-            transform: translateY(-100px);
+            gap: 12px;
+            transform: translateY(-150px);
             opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 99999;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
         }
 
         .toast-box.show { transform: translateY(0); opacity: 1; }
@@ -382,14 +543,17 @@
 </head>
 <body>
 
+    <div class="ambient-bg-container" id="ambient-container"></div>
+
     <div id="loading-screen">
-        <div class="atom-container">
-            <div class="atom-nucleus"></div>
-            <div class="atom-orbit orbit-1"></div>
-            <div class="atom-orbit orbit-2"></div>
-            <div class="atom-orbit orbit-3"></div>
+        <div class="fast-loader-ring">
+            <div class="blinking-dots-center">
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+            </div>
         </div>
-        <div id="welcome-title">Welcome to File Forge</div>
+        <div id="welcome-title">Core Processing Pipeline</div>
         <div class="vortex-gate" id="vortex-gate"></div>
     </div>
 
@@ -397,9 +561,12 @@
         <a href="../index.html" class="back-link"><i data-lucide="arrow-left"></i></a>
         <div class="module-title-block">
             <h1>Quantum File Forge</h1>
-            <p>Category // Core Utility</p>
+            <p>Module // Core Utility</p>
         </div>
-        <button class="about-toggle" onclick="toggleAboutOverlay()"><i data-lucide="info"></i></button>
+        <div class="header-controls-right">
+            <button class="theme-toggle" onclick="toggleInterfaceTheme()"><i data-lucide="sun" id="theme-icon"></i></button>
+            <button class="about-toggle" onclick="toggleAboutOverlay()"><i data-lucide="info"></i></button>
+        </div>
     </div>
 
     <div class="forge-container">
@@ -419,8 +586,39 @@
         </button>
 
         <div class="workspace-board">
-            <div class="board-title"><i data-lucide="cpu" style="width:14px;"></i>Asynchronous Solution Stream</div>
+            <div class="board-title"><i data-lucide="cpu" style="width:16px;"></i>Asynchronous Solution Stream</div>
             <div id="forge-steps"></div>
+        </div>
+
+                <div class="info-panel">
+            <h2>About Quantum File Forge</h2>
+            <p>Quantum File Forge is a low-latency Client-Side Document Matrix Compiler engineered inside the Bunny Dashboard suite. It enables immediate translation of volatile text vectors into solid system files ready for custom environment deployments natively on smartphone hardware ecosystems.</p>
+        </div>
+
+        <div class="contacts-section-title"><i data-lucide="message-square"></i>Developer Node Communications & Feedback</div>
+        
+        <div class="contacts-grid">
+            <a href="https://github.com/xbotmanager-cell" target="_blank" class="contact-card c-github">
+                <i data-lucide="github"></i><span>GitHub</span>
+            </a>
+            <a href="https://www.tiktok.com/@mrlupin76_" target="_blank" class="contact-card c-tiktok">
+                <i data-lucide="layers"></i><span>TikTok</span>
+            </a>
+            <a href="https://wa.me/255780470905?text=Hello%20Lupin,%20I%20have%20a%20feedback/suggestion%20about%20the%20Quantum%20File%20Forge." target="_blank" class="contact-card c-whatsapp">
+                <i data-lucide="message-circle"></i><span>WhatsApp</span>
+            </a>
+            <a href="https://t.me/+255780470905?text=Hello%20Lupin,%20I%20have%20a%20feedback/suggestion%20about%20the%20Quantum%20File%20Forge." target="_blank" class="contact-card c-telegram">
+                <i data-lucide="send"></i><span>Telegram</span>
+            </a>
+            <a href="https://www.instagram.com/maskedvoice_tz" target="_blank" class="contact-card c-instagram">
+                <i data-lucide="instagram"></i><span>Instagram</span>
+            </a>
+            <a href="mailto:lupinstarnley009@gmail.com?subject=Quantum%20File%20Forge%20Feedback" class="contact-card c-youtube">
+                <i data-lucide="youtube"></i><span>YouTube Contact</span>
+            </a>
+            <a href="mailto:lupinstarnley@hotmail.com?subject=Quantum%20File%20Forge%20Inquiry" class="contact-card c-email">
+                <i data-lucide="mail"></i><span>Official Email</span>
+            </a>
         </div>
 
     </div>
@@ -428,9 +626,7 @@
     <div class="about-overlay" id="about-panel">
         <div class="about-handle" onclick="toggleAboutOverlay()"></div>
         <div class="about-content">
-            <h2>About Quantum File Forge</h2>
-            <p>Quantum File Forge is a low-latency Client-Side Document Matrix Compiler engineered inside the Bunny Dashboard suite. It enables immediate translation of volatile text vectors into solid system files ready for custom environment deployments natively on smartphone hardware ecosystems.</p>
-
+            <h2 style="color:var(--accent-cyan); margin-bottom:12px; font-weight:900;">Technical Capabilities</h2>
             <div class="feature-badge-list">
                 <div class="feature-badge-item">
                     <i data-lucide="file-type-2"></i>
@@ -458,58 +654,70 @@
     </div>
 
     <div class="toast-box" id="forgeToast">
-        <i data-lucide="check-circle" style="color:#30d158"></i>
+        <i data-lucide="check-circle" style="color:#30d158" id="toastIcon"></i>
         <span id="toastMsg">File Matrix Compiled Successfully</span>
     </div>
 
     <script>
-        // Mount Vectors
         lucide.createIcons();
 
-        // --- Multi-Interval Smooth Vortex Loader Routine ---
-        function initializeQuantumCoreSequence() {
+        function generateEndlessAmbientBubbles() {
+            const container = document.getElementById('ambient-container');
+            container.innerHTML = '';
+            const bubbleCount = 15;
+            for(let i=0; i<bubbleCount; i++) {
+                let bubble = document.createElement('div');
+                bubble.className = 'ambient-bubble';
+                bubble.style.left = Math.random() * 100 + 'vw';
+                bubble.style.width = bubble.style.height = (Math.random() * 60 + 20) + 'px';
+                bubble.style.animationDelay = (Math.random() * 6) + 's';
+                bubble.style.animationDuration = (Math.random() * 5 + 7) + 's';
+                container.appendChild(bubble);
+            }
+        }
+        generateEndlessAmbientBubbles();
+
+        function executeLoaderSequence() {
             const screen = document.getElementById('loading-screen');
             const title = document.getElementById('welcome-title');
             const vortex = document.getElementById('vortex-gate');
 
-            // Generate Ambient Micro Floating Quantum Orbs
-            for(let i=0; i<18; i++) {
-                let orb = document.createElement('div');
-                orb.className = 'bubble';
-                orb.style.left = Math.random() * 100 + 'vw';
-                orb.style.width = orb.style.height = (Math.random() * 50 + 15) + 'px';
-                orb.style.animationDelay = (Math.random() * 3.5) + 's';
-                screen.appendChild(orb);
-            }
+            let delayDuration = Math.floor(Math.random() * (9000 - 6000 + 1)) + 6000;
 
-            // Calibrate random loader life cycle duration between 6 and 11 seconds
-            let systemDelayDuration = Math.floor(Math.random() * (11000 - 6000 + 1)) + 6000;
-
-            // Animate welcoming text visibility matrix halfway through
             setTimeout(() => {
                 title.style.opacity = '1';
                 title.style.transform = 'translateY(0)';
-                title.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-            }, systemDelayDuration / 2);
+                title.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+            }, delayDuration / 2);
 
-            // Execute vortex zoom out transitions without visual breakages
             setTimeout(() => {
                 vortex.style.opacity = '1';
-                vortex.style.width = '250vw';
-                vortex.style.height = '250vw';
-                vortex.style.transition = 'width 1.2s cubic-bezier(0.7, 0, 0.3, 1), height 1.2s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease';
+                vortex.style.width = '260vw';
+                vortex.style.height = '260vw';
+                vortex.style.transition = 'width 1.4s cubic-bezier(0.7, 0, 0.3, 1), height 1.4s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease';
 
                 setTimeout(() => {
                     screen.style.opacity = '0';
-                    screen.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => screen.remove(), 500);
-                }, 1000);
-
-            }, systemDelayDuration);
+                    screen.style.transition = 'opacity 0.6s ease';
+                    setTimeout(() => screen.remove(), 600);
+                }, 1100);
+            }, delayDuration);
         }
-        window.addEventListener('load', initializeQuantumCoreSequence);
+        window.addEventListener('load', executeLoaderSequence);
 
-        // --- Streaming Animation Typewriter Parser Engine ---
+        function toggleInterfaceTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            body.classList.toggle('light-theme');
+            
+            if(body.classList.contains('light-theme')) {
+                icon.setAttribute('data-lucide', 'moon');
+            } else {
+                icon.setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        }
+
         async function queueAnimatedSteps(stepsArray) {
             const container = document.getElementById('forge-steps');
             container.innerHTML = ''; 
@@ -519,7 +727,6 @@
                 div.className = 'typed-step';
                 container.appendChild(div);
 
-                // Frame calculations loop strictly calibrated to visual parsing delay speeds
                 await new Promise(resolve => {
                     let charIndex = 0;
                     let text = stepsArray[i];
@@ -538,62 +745,65 @@
             }
         }
 
-        // --- Core File Compilation Engine ---
         async function executeQuantumFileDownload() {
             const nameInput = document.getElementById('file-name-input').value.trim();
             const rawPayload = document.getElementById('file-payload-area').value;
             const toast = document.getElementById('forgeToast');
             const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
 
-            // Enforce default fallback configuration asset parameters if identifier block is empty
-            let structuredFilename = nameInput === "" ? "untitled_payload" : nameInput;
-            let steps = [];
+            let structuredFilename = nameInput === "" ? "untitled_payload.txt" : nameInput;
+            const toastTime = 4000;
 
-                        steps.push(`[SYSTEM LOG]: Initializing Quantum File Forge Compilation...`);
-            steps.push(`Step 1: Extracted Target Identifier: "${structuredFilename}"`);
-            steps.push(`Step 2: Calculating text vector matrix payload stream length: ${rawPayload.length} bytes`);
-            steps.push(`Step 3: Allocating clean binary client memory blob structures...`);
+            if (!rawPayload) {
+                toastMsg.innerText = "Execution Interrupted: Content Workspace is Empty";
+                toast.style.borderLeftColor = "#ff3b30";
+                toastIcon.setAttribute('data-lucide', 'alert-triangle');
+                lucide.createIcons();
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), toastTime);
+                return;
+            }
+
+            let steps = [
+                `[SYSTEM LOG]: Initializing Quantum File Forge Compilation...`,
+                `Step 1: Extracted Target Identifier: "${structuredFilename}"`,
+                `Step 2: Processing localized text structures into volatile binary memory layers...`,
+                `Step 3: Instantiating client-side document stream allocation parameters...`,
+                `Step 4: Compiling complete. Injecting download vector payload directly into localized scope.`
+            ];
 
             try {
-                // Initialize clean client memory binary allocation blob
-                const dataBlobMemoryBlock = new Blob([rawPayload], { type: 'text/plain;charset=utf-8' });
+                await queueAnimatedSteps(steps);
 
-                // Construct virtual dynamic DOM anchor reference download port
-                const downloadAnchorPort = document.createElement('a');
-                downloadAnchorPort.href = URL.createObjectURL(dataBlobMemoryBlock);
-                downloadAnchorPort.download = structuredFilename;
-
-                steps.push(`Step 4: Executing Lossless Blob Encoding mapping interfaces...`);
-                steps.push(`>> Matrix Compiled Successfully. Routing pipeline download trigger.`);
+                const blobObject = new Blob([rawPayload], { type: 'text/plain;charset=utf-8' });
+                const transientAnchor = document.createElement('a');
+                transientAnchor.href = URL.createObjectURL(blobObject);
+                transientAnchor.download = structuredFilename;
                 
-                await queueAnimatedSteps(steps);
+                document.body.appendChild(transientAnchor);
+                transientAnchor.click();
+                
+                document.body.removeChild(transientAnchor);
+                URL.revokeObjectURL(transientAnchor.href);
 
-                // Fire silent compilation download sequence triggering local file system save dialogs
-                document.body.appendChild(downloadAnchorPort);
-                downloadAnchorPort.click();
-
-                // Wipe structural references immediately to clear device RAM overheads
-                document.body.removeChild(downloadAnchorPort);
-                URL.revokeObjectURL(downloadAnchorPort.href);
-
-                // Flash confirmation feedback metrics onto screen
-                toastMsg.innerText = `Compiled: ${structuredFilename}`;
+                toastMsg.innerText = "File Asset Generated and Synced onto Local Node Scope";
                 toast.style.borderLeftColor = "#30d158";
+                toastIcon.setAttribute('data-lucide', 'check-circle');
+                lucide.createIcons();
                 toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 3500);
+                setTimeout(() => toast.classList.remove('show'), toastTime);
 
-            } catch (systemCompilationFault) {
-                steps.push(`>> Error: Compilation Matrix Pipeline Intercept Faulted.`);
-                await queueAnimatedSteps(steps);
-
-                toastMsg.innerText = "Compilation Matrix Failure Detected";
+            } catch (faultEvent) {
+                toastMsg.innerText = "Fatal Error: Hardware Sandbox IO Compilation Interrupted";
                 toast.style.borderLeftColor = "#ff3b30";
+                toastIcon.setAttribute('data-lucide', 'shield-alert');
+                lucide.createIcons();
                 toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 3500);
+                setTimeout(() => toast.classList.remove('show'), toastTime);
             }
         }
 
-        // --- Sheet Slide Interaction Control Subsystems ---
         function toggleAboutOverlay() {
             document.getElementById('about-panel').classList.toggle('open');
         }
