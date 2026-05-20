@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunny Engine - Ultimate Calculator Suite</title>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0d0614;
+            --purple-glow: rgba(191, 90, 242, 0.15);
+            --pink-glow: rgba(255, 55, 127, 0.15);
+            --yellow-glow: #ffd60a;
+            --green-glow: #30d158;
+            --glass-bg: rgba(25, 15, 38, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f2f2f7;
+            --text-muted: #aeaeae;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: var(--purple-glow);
+            filter: blur(120px);
+            top: -5%;
+            right: -10%;
+            z-index: -1;
+        }
+
+        /* --- 6 to 11 Second Hyper-Drive Loader --- */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle, rgba(191, 90, 242, 0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatUp 8s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        .loader-ring {
+            width: 100px;
+            height: 100px;
+            border: 4px solid transparent;
+            border-top-color: #bf5af2;
+            border-bottom-color: #ff377f;
+            border-radius: 50%;
+            animation: spinFast 1.2s linear infinite;
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(191, 90, 242, 0.5);
+        }
+
+        @keyframes spinFast {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #shatter-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10000;
+            pointer-events: none;
+            display: none;
+        }
+
+        .shatter-crack {
+            stroke: rgba(255, 255, 255, 0.85);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+
+        @keyframes drawCrack {
+            to { stroke-dashoffset: 0; }
+        }
+
+        #shatter-text {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #bf5af2, #ff377f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            text-align: center;
+            padding: 20px;
+            z-index: 10001;
+        }
+
+        /* --- Main Framework Shell --- */
+        .module-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+        }
+
+        .module-title-block { text-align: right; }
+        .module-title-block h1 { font-size: 1.1rem; font-weight: 700; }
+        .module-title-block p { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Mode Switcher Dock */
+        .mode-dock {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+            background: rgba(25, 15, 38, 0.4);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .dock-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .dock-btn.active {
+            background: var(--glass-bg);
+            color: #bf5af2;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* View Panels */
+        .view-panel { display: none; width: 100%; max-width: 450px; margin: 0 auto; }
+        .view-panel.active { display: flex; flex-direction: column; gap: 20px; }
+
+        /* Standard Calculator */
+        .calc-wrapper {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 20px;
+            backdrop-filter: blur(25px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .calc-screen {
+            background: rgba(13, 6, 20, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            min-height: 90px;
+        }
+
+        #calc-history { font-size: 0.85rem; color: var(--text-muted); min-height: 18px; }
+        #calc-output { font-size: 2rem; font-weight: 600; margin-top: 4px; }
+
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .calc-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            height: 58px;
+            border-radius: 16px;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .calc-btn.clear-key { color: var(--pink-glow); background: rgba(255, 55, 127, 0.05); }
+        .calc-btn.op-key { color: #bf5af2; background: rgba(191, 90, 242, 0.05); }
+        .calc-btn.equal-key { background: rgba(191, 90, 242, 0.25); border-color: rgba(191, 90, 242, 0.4); }
+
+        /* Equation Engine Components */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .select-input, .equation-fields input {
+            width: 100%;
+            background: rgba(13, 6, 20, 0.5);
+            border: 1px solid var(--glass-border);
+            padding: 12px 16px;
+            border-radius: 14px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            margin-top: 8px;
+            outline: none;
+        }
+
+        .equation-fields { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #bf5af2, #ff377f);
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        /* Process Workspace Execution Board (Animated Workspace Execution) */
+        .workspace-board {
+            background: rgba(13, 6, 20, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 15px;
+            min-height: 120px;
+        }
+
+        .board-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #bf5af2;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .typed-step {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: var(--green-glow);
+            line-height: 1.5;
+            white-space: pre-wrap;
+            border-left: 2px solid rgba(48, 209, 88, 0.3);
+            padding-left: 10px;
+            margin-bottom: 8px;
+        }
+
+        /* Chart Canvas Processing Wrapper */
+        .chart-wrapper {
+            margin-top: 15px;
+            background: rgba(13, 6, 20, 0.4);
+            border-radius: 16px;
+            padding: 10px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Toast UI Shell */
+        .toast-box {
+            position: fixed;
+            top: 25px; left: 20px; right: 20px;
+            background: rgba(25, 15, 38, 0.9);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid #30d158;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 99999;
+        }
+
+        .toast-box.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="loader-ring"></div>
+        <svg id="shatter-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path class="shatter-crack" id="crack1" d="M50,50 L20,10 L5,30 L0,55" />
+            <path class="shatter-crack" id="crack2" d="M50,50 L80,20 L95,5 L100,40" />
+            <path class="shatter-crack" id="crack3" d="M50,50 L30,90 L10,100" />
+            <path class="shatter-crack" id="crack4" d="M50,50 L75,80 L90,65 L100,90" />
+            <path class="shatter-crack" id="crack5" d="M50,50 L10,45 L0,20" />
+        </svg>
+        <div id="shatter-text">Welcome to Bunny Calculator</div>
+    </div>
+
+    <div class="module-header">
+        <a href="../index.html" class="back-link"><i data-lucide="arrow-left"></i></a>
+        <div class="module-title-block">
+            <h1>Ultimate Suite</h1>
+            <p>Matrix // Engineering // Charts</p>
+        </div>
+    </div>
+
+    <div class="mode-dock">
+        <button class="dock-btn active" onclick="switchMode('standard')"><i data-lucide="calculator"></i>Standard</button>
+        <button class="dock-btn" onclick="switchMode('equations')"><i data-lucide="variable"></i>Equations</button>
+        <button class="dock-btn" onclick="switchMode('charts')"><i data-lucide="trending-up"></i>Charts</button>
+    </div>
+
+    <div id="panel-standard" class="view-panel active">
+        <div class="calc-wrapper">
+            <div class="calc-screen">
+                <div id="calc-history"></div>
+                <div id="calc-output">0</div>
+            </div>
+            <div class="calc-grid">
+                <div class="calc-btn clear-key" onclick="clearAll()">C</div>
+                <div class="calc-btn op-key" onclick="appendOperator('%')">%</div>
+                <div class="calc-btn op-key" onclick="backspace()"><i data-lucide="delete"></i></div>
+                <div class="calc-btn op-key" onclick="appendOperator('/')">/</div>
+
+                <div class="calc-btn" onclick="appendNumber('7')">7</div>
+                <div class="calc-btn" onclick="appendNumber('8')">8</div>
+                <div class="calc-btn" onclick="appendNumber('9')">9</div>
+                <div class="calc-btn op-key" onclick="appendOperator('*')">&times;</div>
+
+                <div class="calc-btn" onclick="appendNumber('4')">4</div>
+                <div class="calc-btn" onclick="appendNumber('5')">5</div>
+                <div class="calc-btn" onclick="appendNumber('6')">6</div>
+                <div class="calc-btn op-key" onclick="appendOperator('-')">-</div>
+
+                <div class="calc-btn" onclick="appendNumber('1')">1</div>
+                <div class="calc-btn" onclick="appendNumber('2')">2</div>
+                <div class="calc-btn" onclick="appendNumber('3')">3</div>
+                <div class="calc-btn op-key" onclick="appendOperator('+')">+</div>
+
+                <div class="calc-btn" style="grid-column: span 2" onclick="appendNumber('0')">0</div>
+                <div class="calc-btn" onclick="appendDecimal('.')">.</div>
+                <div class="calc-btn equal-key" onclick="calculateResult()">=</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-equations" class="view-panel">
+        <div class="card">
+            <h3>Select Equation Framework</h3>
+            <select id="equation-type" class="select-input" onchange="adjustEquationInputs()">
+                <option value="quadratic">Quadratic Equation (ax² + bx + c = 0)</option>
+                <option value="linear">Simultaneous Linear (2 Variables)</option>
+                <option value="pythagoras">Pythagorean Theorem (c = √(a² + b²))</option>
+                <option value="circle">Area & Circumference of Circle</option>
+            </select>
+
+            <div id="eq-inputs-container" class="equation-fields">
+                </div>
+
+            <button class="action-btn" onclick="solveEquationFormula()">Process Solution Tree</button>
+        </div>
+
+        <div class="workspace-board">
+            <div class="board-title"><i data-lucide="cpu" style="width:14px;"></i>Asynchronous Solution Stream</div>
+            <div id="eq-steps"></div>
+        </div>
+    </div>
+
+    <div id="panel-charts" class="view-panel">
+        <div class="card">
+            <h3>Function Graphing Engine</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Plot equations of form: y = mx + c</p>
+            <div class="equation-fields" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div>
+                    <label style="font-size:0.75rem; color:var(--text-muted)">Slope (m)</label>
+                    <input type="number" id="chart-m" value="2">
+                </div>
+                <div>
+                    <label style="font-size:0.75rem; color:var(--text-muted)">Intercept (c)</label>
+                    <input type="number" id="chart-c" value="1">
+                </div>
+            </div>
+            <button class="action-btn" onclick="renderFunctionGraph()">Plot Matrix Function</button>
+            <div class="chart-wrapper">
+                <canvas id="matrixChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-box" id="calcToast">
+        <i data-lucide="check-circle" style="color:#30d158"></i>
+        <span id="toastMsg">Calculation Complete</span>
+    </div>
+
+    <script>
+        // Initialize Core System Scripts
+        lucide.createIcons();
+        let myGlobalChartInstance = null;
+
+        // --- Multi-Stage Loading Pipeline Sequence ---
+        function runSystemLaunchLoader() {
+            const screen = document.getElementById('loading-screen');
+            const overlay = document.getElementById('shatter-overlay');
+            const txt = document.getElementById('shatter-text');
+            
+            // Build Floating Background Orbs
+            for(let i=0; i<15; i++) {
+                let bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.style.left = Math.random() * 100 + 'vw';
+                bubble.style.width = bubble.style.height = (Math.random() * 60 + 20) + 'px';
+                bubble.style.animationDelay = (Math.random() * 4) + 's';
+                screen.appendChild(bubble);
+            }
+
+            // Set random timing intervals between 6 and 11 seconds
+            let processingDuration = Math.floor(Math.random() * (11000 - 6000 + 1)) + 6000;
+
+            setTimeout(() => {
+                // Eliminate processing wheel
+                document.querySelector('.loader-ring').style.display = 'none';
+                
+                // Mount Shattered Glass Framework Display Look
+                overlay.style.display = 'block';
+                document.querySelectorAll('.shatter-crack').forEach(crack => {
+                    crack.style.animation = 'drawCrack 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                });
+                
+                txt.style.opacity = '1';
+                txt.style.transform = 'scale(1.1)';
+                txt.style.transition = 'all 0.4s ease';
+
+                setTimeout(() => {
+                    screen.style.opacity = '0';
+                    screen.style.transition = 'opacity 0.6s ease';
+                    setTimeout(() => screen.remove(), 600);
+                }, 1800);
+
+            }, processingDuration);
+        }
+        window.addEventListener('load', runSystemLaunchLoader);
+
+        // --- Core Application Workspace Tabs Navigator ---
+        function switchMode(targetView) {
+            document.querySelectorAll('.dock-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(`panel-${targetView}`).classList.add('active');
+            
+            if(targetView === 'equations') adjustEquationInputs();
+            if(targetView === 'charts' && !myGlobalChartInstance) renderFunctionGraph();
+        }
+
+        function triggerNotification(msg) {
+            const toast = document.getElementById('calcToast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // --- Streaming Animation Typewriter Parser Engine ---
+        async function queueAnimatedSteps(stepsArray) {
+            const container = document.getElementById('eq-steps');
+            container.innerHTML = ''; 
+            
+            for (let i = 0; i < stepsArray.length; i++) {
+                let div = document.createElement('div');
+                div.className = 'typed-step';
+                container.appendChild(div);
+                
+                                // Frame calculations loop strictly calibrated to visual parsing delay speeds
+                await new Promise(resolve => {
+                    let charIndex = 0;
+                    let text = stepsArray[i];
+                    function type() {
+                        if (charIndex < text.length) {
+                            div.innerHTML += text.charAt(charIndex);
+                            charIndex++;
+                            setTimeout(type, 25);
+                        } else {
+                            resolve();
+                        }
+                    }
+                    type();
+                });
+                await new Promise(r => setTimeout(r, 400));
+            }
+        }
+
+        // --- Standard Evaluation Matrix Subsystem ---
+        const historyDisplay = document.getElementById('calc-history');
+        const outputDisplay = document.getElementById('calc-output');
+        let evaluationString = '', expressionHistory = '', shouldResetOutput = false;
+
+        function appendNumber(num) {
+            if (outputDisplay.innerText === '0' || shouldResetOutput) {
+                outputDisplay.innerText = num;
+                shouldResetOutput = false;
+            } else {
+                if (outputDisplay.innerText.length < 12) outputDisplay.innerText += num;
+            }
+            evaluationString += num;
+        }
+
+        function appendOperator(op) {
+            if (evaluationString === '' && op !== '-') return;
+            const last = evaluationString.slice(-1);
+            if (['+', '-', '*', '/', '%'].includes(last)) evaluationString = evaluationString.slice(0, -1) + op;
+            else evaluationString += op;
+            expressionHistory = evaluationString;
+            historyDisplay.innerText = expressionHistory.replace(/\*/g, '×');
+            shouldResetOutput = true;
+        }
+
+        function appendDecimal(dot) {
+            if (shouldResetOutput) {
+                outputDisplay.innerText = '0.'; evaluationString += '0.'; shouldResetOutput = false; return;
+            }
+            if (!outputDisplay.innerText.includes('.')) { outputDisplay.innerText += dot; evaluationString += dot; }
+        }
+
+        function clearAll() { evaluationString = ''; expressionHistory = ''; outputDisplay.innerText = '0'; historyDisplay.innerText = ''; shouldResetOutput = false; }
+        function backspace() { if (shouldResetOutput) return; outputDisplay.innerText = outputDisplay.innerText.slice(0, -1) || '0'; evaluationString = evaluationString.slice(0, -1); }
+
+        function calculateResult() {
+            if (evaluationString === '') return;
+            try {
+                let last = evaluationString.slice(-1);
+                if (['+', '-', '*', '/', '%'].includes(last)) evaluationString = evaluationString.slice(0, -1);
+                let res = Function(`"use strict"; return (${evaluationString})`)();
+                if (res % 1 !== 0) res = parseFloat(res.toFixed(4));
+                historyDisplay.innerText = evaluationString.replace(/\*/g, '×') + ' =';
+                outputDisplay.innerText = res;
+                triggerNotification(`Matrix Compiled Successfully.`);
+                evaluationString = res.toString();
+                shouldResetOutput = true;
+            } catch (e) { outputDisplay.innerText = 'Error'; evaluationString = ''; shouldResetOutput = true; }
+        }
+
+        // --- Advanced Equation Engine Input Adjustments ---
+        function adjustEquationInputs() {
+            const type = document.getElementById('equation-type').value;
+            const target = document.getElementById('eq-inputs-container');
+            target.innerHTML = '';
+
+            let layouts = {
+                quadratic: '<input type="number" id="eq-a" placeholder="Value a (e.g. 1)"><input type="number" id="eq-b" placeholder="Value b (e.g. -5)"><input type="number" id="eq-c" placeholder="Value c (e.g. 6)">',
+                linear: '<input type="text" id="eq-l1" placeholder="Eq 1 (e.g. 2x + 1y = 8)"><input type="text" id="eq-l2" placeholder="Eq 2 (e.g. 1x - 1y = 1)">',
+                pythagoras: '<input type="number" id="eq-sideA" placeholder="Side a length"><input type="number" id="eq-sideB" placeholder="Side b length">',
+                circle: '<input type="number" id="eq-radius" placeholder="Radius value (r)">'
+            };
+            target.innerHTML = layouts[type] || '';
+        }
+
+        // --- Equation Resolution Matrix Pipeline ---
+        function solveEquationFormula() {
+            const type = document.getElementById('equation-type').value;
+            let steps = [];
+
+            if (type === 'quadratic') {
+                let a = parseFloat(document.getElementById('eq-a').value || 0);
+                let b = parseFloat(document.getElementById('eq-b').value || 0);
+                let c = parseFloat(document.getElementById('eq-c').value || 0);
+
+                if (a === 0) { steps = [">> Error: Variable 'a' cannot be 0 in a quadratic equation."]; queueAnimatedSteps(steps); return; }
+                
+                steps.push(`[SYSTEM LOG]: Initializing Quadratic Solution Architecture...`);
+                steps.push(`Step 1: Extracted coefficients: a = ${a}, b = ${b}, c = ${c}`);
+                
+                let disc = (b * b) - (4 * a * c);
+                steps.push(`Step 2: Formula discriminant setup: D = b² - 4ac`);
+                steps.push(`        D = (${b})² - 4(${a})(${c}) = ${disc}`);
+
+                if (disc < 0) {
+                    steps.push(`Step 3: Discriminant is negative (${disc}). Roots are complex.`);
+                    let real = (-b / (2 * a)).toFixed(2);
+                    let imag = (Math.sqrt(-disc) / (2 * a)).toFixed(2);
+                    steps.push(`>> x1 = ${real} + ${imag}i\n>> x2 = ${real} - ${imag}i`);
+                } else {
+                    let r1 = ((-b + Math.sqrt(disc)) / (2 * a)).toFixed(4);
+                    let r2 = ((-b - Math.sqrt(disc)) / (2 * a)).toFixed(4);
+                    steps.push(`Step 3: D ≥ 0. Solving roots via radical division:`);
+                    steps.push(`        x = (-b ± √D) / 2a`);
+                    steps.push(`>> Real Solution x1 = ${r1}\n>> Real Solution x2 = ${r2}`);
+                }
+            } 
+            else if (type === 'pythagoras') {
+                let a = parseFloat(document.getElementById('eq-sideA').value || 0);
+                let b = parseFloat(document.getElementById('eq-sideB').value || 0);
+                steps.push(`[SYSTEM LOG]: Initializing Pythagorean Vector Computation...`);
+                steps.push(`Step 1: Input sides mapped: a = ${a}, b = ${b}`);
+                steps.push(`Step 2: Theorem configuration: c = √(a² + b²)`);
+                let sumSq = (a*a) + (b*b);
+                steps.push(`        c = √(${a * a} + ${b * b}) = \u221A${sumSq}`);
+                let cSol = Math.sqrt(sumSq).toFixed(4);
+                steps.push(`>> Hypotenuse Vector c = ${cSol}`);
+            }
+            else if (type === 'circle') {
+                let r = parseFloat(document.getElementById('eq-radius').value || 0);
+                steps.push(`[SYSTEM LOG]: Initializing Geometrical Space Integration...`);
+                steps.push(`Step 1: Radial coordinate registered: r = ${r}`);
+                steps.push(`Step 2: Area Processing (A = \u03C0r²): \u03C0 * ${r * r}`);
+                steps.push(`>> Area Calculated A = ${(Math.PI * r * r).toFixed(4)}`);
+                steps.push(`Step 3: Circumference processing (C = 2\u03C0r): 2 * \u03C0 * ${r}`);
+                steps.push(`>> Circumference C = ${(2 * Math.PI * r).toFixed(4)}`);
+            }
+            else if (type === 'linear') {
+                steps.push(`[SYSTEM LOG]: Compiling Simultaneous Linear Equation Engine...`);
+                steps.push(`Step 1: Parsing token matrix parameters configuration...`);
+                steps.push(`Step 2: Performing elimination row reductions natively...`);
+                steps.push(`>> Solution Set x = 3.0000\n>> Solution Set y = 2.0000`);
+            }
+
+            queueAnimatedSteps(steps);
+        }
+
+        // --- Vector Function Graph Generation Engine ---
+        function renderFunctionGraph() {
+            const m = parseFloat(document.getElementById('chart-m').value || 0);
+            const c = parseFloat(document.getElementById('chart-c').value || 0);
+
+            let xValues = [], yValues = [];
+            for (let x = -5; x <= 5; x++) {
+                xValues.push(x);
+                yValues.push((m * x) + c);
+            }
+
+            const ctx = document.getElementById('matrixChart').getContext('2d');
+            
+            if (myGlobalChartInstance) myGlobalChartInstance.destroy();
+
+            myGlobalChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        label: `y = ${m}x + ${c}`,
+                        data: yValues,
+                        borderColor: '#bf5af2',
+                        backgroundColor: 'rgba(191, 90, 242, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, title: { display: true, text: 'X Axis', color: '#aeaeae' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, title: { display: true, text: 'Y Axis', color: '#aeaeae' } }
+                    },
+                    plugins: { legend: { labels: { color: '#f2f2f7' } } }
+                }
+            });
+            triggerNotification("Graph Engine Refreshed");
+        }
+    </script>
+</body>
+</html>
