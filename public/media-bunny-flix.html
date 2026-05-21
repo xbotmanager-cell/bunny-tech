@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BunnyFlix - Premium Cinema Hub</title>
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --netflix-black: #141414;
+            --netflix-dark-grey: #1f1f1f;
+            --netflix-red: #E50914;
+            --netflix-red-hover: #B80710;
+            --glass-card: rgba(30, 30, 30, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-pure: #ffffff;
+            --text-secondary: #aaaaaa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--netflix-black);
+            color: var(--text-pure);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 90px;
+        }
+
+        /* --- Cinema Loader Layer --- */
+        #bunnyflix-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+
+        .cinema-pulse-ring {
+            position: relative;
+            width: 80px; height: 80px;
+            border: 4px solid rgba(229, 9, 20, 0.1);
+            border-top: 4px solid var(--netflix-red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.3);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-brand {
+            margin-top: 20px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: var(--netflix-red);
+            text-transform: uppercase;
+        }
+
+        /* --- Layout Core Shell --- */
+        .bunnyflix-shell {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+        }
+
+        .brand-node {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--netflix-red);
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- Search Bar Container --- */
+        .search-wrapper-node {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .search-wrapper-node i {
+            position: absolute;
+            left: 14px;
+            color: var(--text-secondary);
+        }
+
+        .search-input-field {
+            width: 100%;
+            background: var(--netflix-dark-grey);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 14px 14px 14px 44px;
+            color: var(--text-pure);
+            font-size: 0.9rem;
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input-field:focus {
+            border-color: var(--netflix-red);
+        }
+
+        /* --- App Interface Navigation Tabs Bar --- */
+        .app-navigation-tabs-bar {
+            display: flex;
+            background: var(--netflix-dark-grey);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 4px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .app-navigation-tabs-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab-trigger-node {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            white-space: nowrap;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab-trigger-node.active-tab {
+            background: var(--netflix-red);
+            color: var(--text-pure);
+        }
+
+        /* --- Media Viewport Player Panel --- */
+        .cinema-viewport-player-panel {
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+        }
+
+        .video-player-container-frame {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000000;
+            aspect-ratio: 16/9;
+        }
+
+        .video-js {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .video-js .vjs-big-play-button {
+            background-color: var(--netflix-red) !important;
+            border-color: var(--netflix-red) !important;
+            border-radius: 50% !important;
+            width: 2em !important;
+            height: 2em !important;
+            line-height: 2em !important;
+            margin-top: -1em !important;
+            margin-left: -1em !important;
+        }
+
+        /* Custom Double Tap Skippers */
+        .player-skip-controls-overlay {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 4px;
+        }
+
+        .skip-action-btn {
+            flex: 1;
+            background: var(--netflix-dark-grey);
+            border: 1px solid var(--glass-border);
+            color: var(--text-pure);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .active-video-metadata {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .active-video-title {
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .section-header-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        /* --- Media Video Grid Cards --- */
+        .media-content-display-grid-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .video-card-item-hull {
+            display: flex;
+            gap: 12px;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 10px;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .video-card-item-hull:active {
+            transform: scale(0.98);
+        }
+
+        .card-thumbnail-node {
+            width: 120px;
+            height: 75px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            flex-shrink: 0;
+            border: 1px solid var(--glass-border);
+        }
+
+        .card-thumbnail-node img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-metadata-node {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: hidden;
+        }
+
+        .card-video-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+
+        .card-channel-name {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bunnyflix-loader">
+        <div class="cinema-pulse-ring"></div>
+        <div class="loader-brand">BunnyFlix</div>
+    </div>
+
+    <div class="bunnyflix-shell">
+        
+        <header>
+            <div class="brand-node">BunnyFlix</div>
+        </header>
+
+        <div class="search-wrapper-node" id="searchBarContainerNode">
+            <i data-lucide="search" style="width:18px; height:18px;"></i>
+            <input type="text" class="search-input-field" placeholder="Search movies, songs, videos..." id="appGlobalSearchInputField" />
+        </div>
+
+        <nav class="app-navigation-tabs-bar">
+            <button class="nav-tab-trigger-node active-tab" onclick="switchActiveAppLayoutTab('home', 'Trending Movies')" id="tabLink_home">
+                <i data-lucide="clapperboard" style="width:16px; height:16px;"></i> Home
+            </button>
+            <button class="nav-tab-trigger-node" onclick="switchActiveAppLayoutTab('bongo', 'Bongo Movies')" id="tabLink_bongo">
+                <i data-lucide="film" style="width:16px; height:16px;"></i> Bongo Movies
+            </button>
+            <button class="nav-tab-trigger-node" onclick="switchActiveAppLayoutTab('songs', 'Music Videos')" id="tabLink_songs">
+                <i data-lucide="music-2" style="width:16px; height:16px;"></i> Songs
+            </button>
+        </nav>
+
+        <div class="cinema-viewport-player-panel" id="cinemaViewportPlayerPanelContainer">
+            <div class="video-player-container-frame">
+                <video id="bunnyflix-core-player" class="video-js vjs-default-skin vjs-big-play-button" controls preload="auto" poster=""></video>
+            </div>
+            
+            <div class="player-skip-controls-overlay">
+                <button class="skip-action-btn" onclick="triggerPlayerTimeSkipperRewind(-10)">
+                    <i data-lucide="rotate-ccw" style="width:14px; height:14px;"></i> -10s
+                </button>
+                <button class="skip-action-btn" onclick="triggerPlayerTimeSkipperRewind(10)">
+                    <i data-lucide="rotate-cw" style="width:14px; height:14px;"></i> +10s
+                </button>
+            </div>
+
+            <div class="active-video-metadata">
+                <h3 class="active-video-title" id="activePlayerVideoTitleLabel">Video Stream Title Node</h3>
+            </div>
+
+            <div class="section-header-title">
+                <i data-lucide="layers" style="width:14px; height:14px; color: var(--netflix-red);"></i> More Like This
+            </div>
+            
+            <div class="media-content-display-grid-wrapper" id="relatedMediaContentFeedWrapper">
+                </div>
+        </div>
+
+        <div class="media-content-display-grid-wrapper">
+            <div class="section-header-title" id="primaryGridSectionHeaderTitleLabel">Trending Movies</div>
+            <div class="media-content-display-grid-wrapper" id="primaryAppMediaStreamCatalogGridWrapper">
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Production System Configuration Properties Environment Context Scope
+        const GLOBAL_YOUTUBE_DATA_API_KEY_STRING = "AIzaSyDl2jrRffbN4qyY81iCNDD1zETMqn8hoFA";
+        const YOUTUBE_SEARCH_API_ENDPOINT_URL = "https://www.googleapis.com/youtube/v3/search";
+
+        let activeAppLayoutTabContext = "home";
+        let videoJsPlayerInstanceRef = null;
+
+        // Document Initialization Lifecycle Hook Instance
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initializeVideoJsPlayerEngine();
+            executePrimaryCatalogDataPipelineFetch("Trending Movies");
+
+            // Input element return keyboard binding observer
+            document.getElementById('appGlobalSearchInputField').addEventListener('keypress', (eventArgs) => {
+                if (eventArgs.key === 'Enter') {
+                    const searchStringQueryContext = eventArgs.target.value.trim();
+                    if (searchStringQueryContext) {
+                        document.querySelectorAll('.nav-tab-trigger-node').forEach(node => node.classList.remove('active-tab'));
+                        document.getElementById('primaryGridSectionHeaderTitleLabel').innerText = `Results for: ${searchStringQueryContext}`;
+                        executePrimaryCatalogDataPipelineFetch(searchStringQueryContext);
+                    }
+                }
+            });
+        });
+
+        // Initialize Native Video.js Player Frame Module Engine Structure
+        function initializeVideoJsPlayerEngine() {
+            videoJsPlayerInstanceRef = videojs('bunnyflix-core-player', {
+                controls: true,
+                fluid: true,
+                playbackRates: [0.5, 1, 1.5, 2]
+            });
+        }
+
+        // Toggle App Header Filter Category Selection State View Tab Layout Node Mapping
+        function switchActiveAppLayoutTab(tabIdentityKeyString, apiSearchQueryParameterContext) {
+            document.querySelectorAll('.nav-tab-trigger-node').forEach(node => node.classList.remove('active-tab'));
+            document.getElementById(`tabLink_${tabIdentityKeyString}`).classList.add('active-tab');
+            document.getElementById('appGlobalSearchInputField').value = '';
+            
+            activeAppLayoutTabContext = tabIdentityKeyString;
+            document.getElementById('primaryGridSectionHeaderTitleLabel').innerText = apiSearchQueryParameterContext;
+            
+            executePrimaryCatalogDataPipelineFetch(apiSearchQueryParameterContext);
+        }
+
+        // Display or Remove Dynamic Cinema Loading Overlay Panel Screen Layer
+        function toggleCinemaLoadingOverlayPanelDisplayState(shouldDisplayStateBoolean) {
+            const loaderNodeRef = document.getElementById('bunnyflix-loader');
+            if (shouldDisplayStateBoolean) {
+                loaderNodeRef.style.display = 'flex';
+                loaderNodeRef.style.opacity = '1';
+            } else {
+                loaderNodeRef.style.opacity = '0';
+                setTimeout(() => { loaderNodeRef.style.display = 'none'; }, 400);
+            }
+        }
+
+        // Core YouTube API Request Gateway Telemetry Integration Engine Controller
+        function executePrimaryCatalogDataPipelineFetch(searchQueryValue) {
+            toggleCinemaLoadingOverlayPanelDisplayState(true);
+            
+            const constructedTargetApiEndpointUrl = `${YOUTUBE_SEARCH_API_ENDPOINT_URL}?part=snippet&maxResults=15&q=${encodeURIComponent(searchQueryValue)}&type=video&key=${GLOBAL_YOUTUBE_DATA_API_KEY_STRING}`;
+
+            fetch(constructedTargetApiEndpointUrl)
+                .then(httpResponseStream => httpResponseStream.json())
+                .then(jsonPayloadDataset => {
+                    renderPrimaryCatalogGridCardsFeed(jsonPayloadDataset.items || []);
+                    toggleCinemaLoadingOverlayPanelDisplayState(false);
+                })
+                .catch(errorContextLog => {
+                    console.error("API Gateway Error Exception Log:", errorContextLog);
+                    toggleCinemaLoadingOverlayPanelDisplayState(false);
+                });
+        }
+
+        // Paint Main Catalog Collection Display Layout Grid Panel Cards View
+        function renderPrimaryCatalogGridCardsFeed(videoCollectionItemsDataset) {
+            const gridWrapperRef = document.getElementById('primaryAppMediaStreamCatalogGridWrapper');
+            gridWrapperRef.innerHTML = '';
+
+            if (videoCollectionItemsDataset.length === 0) {
+                gridWrapperRef.innerHTML = `<div style="text-align:center; padding: 40px var(--text-secondary);">No records found matching criterion parameters scope.</div>`;
+                return;
+            }
+
+            videoCollectionItemsDataset.forEach(videoItemNode => {
+                const videoIdCursor = videoItemNode.id.videoId;
+                const titleContextString = videoItemNode.snippet.title;
+                const thumbnailSourceUrl = videoItemNode.snippet.thumbnails.medium.url;
+                const channelTitleContext = videoItemNode.snippet.channelTitle;
+
+                const cardHtmlContainerElement = document.createElement('div');
+                cardHtmlContainerElement.classList.add('video-card-item-hull');
+                cardHtmlContainerElement.onclick = () => mountTargetStreamVideoToCinemaViewport(videoIdCursor, titleContextString);
+
+                cardHtmlContainerElement.innerHTML = `
+                    <div class="card-thumbnail-node">
+                        <img src="${thumbnailSourceUrl}" alt="Stream Poster Canvas">
+                    </div>
+                    <div class="card-metadata-node">
+                        <h4 class="card-video-title">${titleContextString}</h4>
+                        <span class="card-channel-name">${channelTitleContext}</span>
+                    </div>
+                `;
+                gridWrapperRef.appendChild(cardHtmlContainerElement);
+            });
+        }
+
+        // Active Stream Player Video Engine Mounting Pipeline Controller Routine
+        function mountTargetStreamVideoToCinemaViewport(targetVideoIdParameterKey, videoTitleTextLabelContext) {
+            const viewportContainerPanelRef = document.getElementById('cinemaViewportPlayerPanelContainer');
+            viewportContainerPanelRef.style.display = 'flex';
+            
+            document.getElementById('activePlayerVideoTitleLabel').innerText = videoTitleTextLabelContext;
+            
+            // Generate clean CORS proxy embed line mapping streams directly into player instance structure
+            const videojsInjectedStreamSourceUrl = `https://www.youtube.com/watch?v=${targetVideoIdParameterKey}`;
+            
+            videoJsPlayerInstanceRef.src({
+                type: 'video/youtube',
+                src: videojsInjectedStreamSourceUrl
+            });
+
+            // Re-bind poster framework node images pipeline
+            videoJsPlayerInstanceRef.poster(`https://img.youtube.com/vi/${targetVideoIdParameterKey}/hqdefault.jpg`);
+            
+            window.scrollTo({ top: viewportContainerPanelRef.offsetTop - 20, behavior: 'smooth' });
+            videoJsPlayerInstanceRef.play();
+
+            executeRelatedRecommendationDataPipelineFetch(targetVideoIdParameterKey);
+        }
+
+        // Double Tap Skip Control Interceptors Timers Methods 
+        function triggerPlayerTimeSkipperRewind(secondsDeltaValueSign) {
+            if (videoJsPlayerInstanceRef) {
+                const currentElapsedPlaybackSeconds = videoJsPlayerInstanceRef.currentTime();
+                videoJsPlayerInstanceRef.currentTime(currentElapsedPlaybackSeconds + secondsDeltaValueSign);
+            }
+        }
+
+        // Fetch Related Video Profiles Collection Recommendation Array Data Pipeline Logs
+        function executeRelatedRecommendationDataPipelineFetch(associatedTargetVideoIdKey) {
+            const targetRelatedEndpointUrl = `${YOUTUBE_SEARCH_API_ENDPOINT_URL}?part=snippet&maxResults=5&relatedToVideoId=${associatedTargetVideoIdKey}&type=video&key=${GLOBAL_YOUTUBE_DATA_API_KEY_STRING}`;
+
+            fetch(targetRelatedEndpointUrl)
+                .then(httpStream => httpStream.json())
+                .then(payloadData => {
+                    renderRelatedRecommendationFeedCards(payloadData.items || []);
+                })
+                .catch(err => console.error("Error processing recommendation profiles arrays mapping stream:", err));
+        }
+
+        // Paint Related Recommendation Sub-Section View Grid Content Display
+        function renderRelatedRecommendationFeedCards(relatedItemsCollectionDataset) {
+            const relatedFeedWrapperRef = document.getElementById('relatedMediaContentFeedWrapper');
+            relatedFeedWrapperRef.innerHTML = '';
+
+            if (relatedItemsCollectionDataset.length === 0) {
+                relatedFeedWrapperRef.innerHTML = `<div style="font-size:0.75rem; color: var(--text-secondary);">No relevant related video tracks matched index scope parameters.</div>`;
+                return;
+            }
+
+            relatedItemsCollectionDataset.forEach(itemLog => {
+                if (!itemLog.id || !itemLog.id.videoId) return;
+
+                const idRef = itemLog.id.videoId;
+                const titleStr = itemLog.snippet.title;
+                const thumbUrl = itemLog.snippet.thumbnails.medium.url;
+                const channelNameStr = itemLog.snippet.channelTitle;
+
+                const nodeRowCardFrameRef = document.createElement('div');
+                nodeRowCardFrameRef.classList.add('video-card-item-hull');
+                nodeRowCardFrameRef.onclick = () => mountTargetStreamVideoToCinemaViewport(idRef, titleStr);
+
+                nodeRowCardFrameRef.innerHTML = `
+                    <div class="card-thumbnail-node" style="width: 90px; height: 55px;">
+                        <img src="${thumbUrl}" alt="Clip Cover Visual">
+                    </div>
+                    <div class="card-metadata-node">
+                        <h4 class="card-video-title" style="font-size:0.78rem;">${titleStr}</h4>
+                        <span class="card-channel-name" style="font-size:0.68rem;">${channelNameStr}</span>
+                    </div>
+                `;
+                relatedFeedWrapperRef.appendChild(nodeRowCardFrameRef);
+            });
+        }
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-youtube/3.0.1/Youtube.min.js"></script>
+</body>
+</html>
