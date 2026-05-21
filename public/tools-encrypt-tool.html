@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bunny Vault</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    :root {
+        --purple-glow: #bf5af2;
+        --pink-glow: #ff377f;
+        --glass-bg: rgba(22, 11, 36, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --text-main: #f5f5f7;
+        --text-sub: #9e9eb4;
+        --bg-dark: #06020a;
+        --success: #30d158;
+        --danger: #ff453a;
+        --warning: #ffd60a;
+    }
+
+    body {
+        background: var(--bg-dark);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: var(--text-main);
+        overflow: hidden;
+        height: 100vh;
+    }
+
+    /* Loading Screen */
+  .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        transition: opacity 0.5s;
+    }
+
+  .loading-screen.hide {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+  .loader-circle {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(191, 90, 242, 0.2);
+        border-top: 3px solid var(--purple-glow);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        box-shadow: 0 0 20px rgba(191, 90, 242, 0.4);
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+  .loading-dots {
+        display: flex;
+        gap: 8px;
+        margin-top: 24px;
+    }
+
+  .loading-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--purple-glow);
+        border-radius: 50%;
+        animation: blink 1.4s infinite;
+    }
+
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+        0%, 60%, 100% { opacity: 0.3; }
+        30% { opacity: 1; }
+    }
+
+  .loading-text {
+        margin-top: 16px;
+        color: var(--text-sub);
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    /* Main App */
+  .app {
+        display: none;
+        width: 100%;
+        height: 100vh;
+        flex-direction: column;
+    }
+
+  .app.active {
+        display: flex;
+    }
+
+  .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        padding-bottom: 90px;
+    }
+
+  .tab-content {
+        display: none;
+    }
+
+  .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header Logo */
+  .logo-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+  .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 18px;
+        margin: 0 auto 10px;
+        display: block;
+        box-shadow: 0 8px 32px rgba(191, 90, 242, 0.4);
+    }
+
+  .logo-header h1 {
+        font-size: 1.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--purple-glow), var(--pink-glow));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Cards */
+  .card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 16px;
+    }
+
+  .card-title {
+        font-size: 0.75rem;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Buttons */
+  .btn {
+        background: linear-gradient(135deg, var(--purple-glow), var(--pink-glow));
+        border: none;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        box-shadow: 0 6px 20px rgba(191, 90, 242, 0.4);
+    }
+
+  .btn:active {
+        transform: scale(0.97);
+    }
+
+  .btn-secondary {
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: none;
+        border: 1px solid var(--glass-border);
+    }
+
+  .btn-icon {
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        border-radius: 12px;
+    }
+
+    /* Input */
+  .input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 14px;
+        color: var(--text-main);
+        font-size: 1rem;
+        font-family: inherit;
+        margin-bottom: 12px;
+        -webkit-user-select: text;
+        user-select: text;
+    }
+
+  .input:focus {
+        outline: none;
+        border-color: var(--purple-glow);
+        box-shadow: 0 0 0 3px rgba(191, 90, 242, 0.2);
+    }
+
+    textarea.input {
+        min-height: 100px;
+        resize: vertical;
+        font-family: 'Courier New', monospace;
+    }
+
+    /* File Upload */
+  .file-drop {
+        border: 2px dashed var(--glass-border);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+  .file-drop.active {
+        border-color: var(--purple-glow);
+        background: rgba(191, 90, 242, 0.05);
+    }
+
+  .file-preview {
+        margin-top: 12px;
+        padding: 14px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        display: none;
+    }
+
+  .file-preview.show {
+        display: block;
+    }
+
+    /* Output */
+  .output-box {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 16px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        word-break: break-all;
+        min-height: 60px;
+        margin-bottom: 12px;
+        -webkit-user-select: text;
+        user-select: text;
+    }
+
+  .vault-code {
+        font-size: 1.3rem;
+        letter-spacing: 2px;
+        color: var(--success);
+        font-weight: 800;
+        text-align: center;
+        margin: 12px 0;
+    }
+
+    /* History Cards */
+  .history-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 14px;
+    }
+
+  .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+  .history-title {
+        font-size: 1rem;
+        font-weight: 800;
+        margin-bottom: 2px;
+    }
+
+  .history-date {
+        font-size: 0.7rem;
+        color: var(--text-sub);
+    }
+
+  .badge {
+        background: rgba(191, 90, 242, 0.2);
+        color: var(--purple-glow);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.65rem;
+        font-weight: 800;
+    }
+
+  .history-code {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 10px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+  .copy-icon {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+  .copy-icon.copied {
+        color: var(--success);
+    }
+
+  .danger-zone {
+        border-top: 2px dotted rgba(255, 69, 58, 0.3);
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+
+  .danger-content {
+        display: none;
+        background: rgba(255, 69, 58, 0.1);
+        border: 1px solid rgba(255, 69, 58, 0.3);
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 0.8rem;
+    }
+
+  .danger-content.show {
+        display: block;
+    }
+
+    /* Tab Bar */
+  .tab-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        border-top: 1px solid var(--glass-border);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        padding: 8px 0 20px 0;
+        z-index: 50;
+    }
+
+  .tab-btn {
+        background: none;
+        border: none;
+        color: var(--text-sub);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 8px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+  .tab-btn.active {
+        color: var(--purple-glow);
+    }
+
+  .tab-btn i {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Toast */
+  .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100px);
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 14px 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 200;
+        transition: transform 0.3s;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+  .toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+  .search-box {
+        margin-bottom: 16px;
+    }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+    <div class="loader-circle"></div>
+    <div class="loading-dots">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+    </div>
+    <div class="loading-text">ENCRYPTING VAULT...</div>
+</div>
+
+<div class="app" id="app">
+    <div class="content">
+        <div class="logo-header">
+            <img src="https://i.ibb.co/LDMjMYyy/file-00000000855c71f89fb70f5f8bebc2b2.png" alt="Bunny Logo" class="logo">
+            <h1>BUNNY VAULT</h1>
+        </div>
+
+        <!-- TAB 1: ENCRYPT -->
+        <div class="tab-content active" id="encryptTab">
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="file-plus" style="width: 16px; height: 16px;"></i>
+                    PROJECT DETAILS
+                </div>
+                <input type="text" class="input" id="projectTitle" placeholder="Project title - Andika jina la project...">
+                <input type="password" class="input" id="masterPassword" placeholder="Master password - Weka password yako ya siri">
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+                    UPLOAD OR TYPE
+                </div>
+                <div class="file-drop" id="fileDrop">
+                    <i data-lucide="upload-cloud" style="width: 32px; height: 32px; margin: 0 auto 8px; color: var(--text-sub);"></i>
+                    <p style="color: var(--text-sub); font-size: 0.9rem;">Drop file, image, video, audio, PDF</p>
+                    <p style="color: var(--text-sub); font-size: 0.7rem; margin-top: 4px;">Max 10MB - Chochote</p>
+                </div>
+                <input type="file" id="fileInput" accept="*/*">
+                <div class="file-preview" id="filePreview"></div>
+                <textarea class="input" id="textInput" placeholder="Au andika maneno, link, siri yoyote hapa..." style="margin-top: 12px;"></textarea>
+            </div>
+
+            <button class="btn" id="encryptBtn">
+                <i data-lucide="lock" style="width: 18px; height: 18px;"></i>
+                LOCK IT
+            </button>
+
+            <div class="card" id="encryptResult" style="display: none;">
+                <div class="card-title">
+                    <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i>
+                    ENCRYPTED SUCCESSFULLY
+                </div>
+                <p style="text-align: center; color: var(--text-sub); font-size: 0.85rem; margin-bottom: 8px;">Your Vault Code:</p>
+                <div class="vault-code" id="vaultCode">~bunnyXk9#mP2$q</div>
+                <div class="output-box" id="encryptedData" style="font-size: 0.7rem;"></div>
+                <button class="btn btn-secondary" id="copyVaultBtn">
+                    <i data-lucide="copy" style="width: 18px; height: 18px;"></i>
+                    COPY VAULT CODE
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 2: DECRYPT -->
+        <div class="tab-content" id="decryptTab">
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="unlock" style="width: 16px; height: 16px;"></i>
+                    UNLOCK VAULT
+                </div>
+                <input type="text" class="input" id="vaultCodeInput" placeholder="Vault code - Weka code kuanzia ~bunny...">
+                <input type="password" class="input" id="unlockPassword" placeholder="Master password - Weka password ile ile">
+                <button class="btn" id="unlockBtn">
+                    <i data-lucide="key" style="width: 18px; height: 18px;"></i>
+                    UNLOCK
+                </button>
+            </div>
+
+            <div class="card" id="decryptResult" style="display: none;">
+                <div class="card-title">
+                    <i data-lucide="file-check" style="width: 16px; height: 16px;"></i>
+                    DECRYPTED CONTENT
+                </div>
+                <div id="decryptTextOutput" class="output-box" style="display: none;"></div>
+                <div id="decryptFileOutput" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: HISTORY -->
+        <div class="tab-content" id="historyTab">
+            <div class="search-box">
+                <input type="text" class="input" id="historySearch" placeholder="Search by title or date...">
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="encrypt">
+            <i data-lucide="lock"></i>
+            Encrypt
+        </button>
+        <button class="tab-btn" data-tab="decrypt">
+            <i data-lucide="unlock"></i>
+            Decrypt
+        </button>
+        <button class="tab-btn" data-tab="history">
+            <i data-lucide="history"></i>
+            History
+        </button>
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <i data-lucide="check-circle" style="width: 20px; height: 20px; color: var(--success);"></i>
+    <span id="toastText">Success</span>
+</div>
+
+<script>
+lucide.createIcons();
+
+// State
+let history = JSON.parse(localStorage.getItem('bunnyVaultHistory') || '[]');
+let audioCtx;
+let uploadedFile = null;
+let uploadedFileName = '';
+let uploadedFileType = '';
+
+// Loading
+setTimeout(() => {
+    document.getElementById('loadingScreen').classList.add('hide');
+    document.getElementById('app').classList.add('active');
+    playSound(800, 0.1);
+    vibrate(50);
+}, 2500);
+
+// Audio
+function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playSound(freq, duration, type = 'sine') {
+    try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = freq;
+        osc.type = type;
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+}
+
+function vibrate(pattern) {
+    if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+function showToast(text, success = true) {
+    const toast = document.getElementById('toast');
+    const icon = toast.querySelector('i');
+    document.getElementById('toastText').textContent = text;
+    icon.setAttribute('data-lucide', success? 'check-circle' : 'alert-circle');
+    icon.style.color = success? 'var(--success)' : 'var(--danger)';
+    lucide.createIcons();
+    toast.classList.add('show');
+    playSound(success? 600 : 300, 0.1);
+    vibrate(success? 50 : [100, 50, 100]);
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
+        playSound(400, 0.05);
+        vibrate(30);
+    });
+});
+
+// Crypto Functions
+async function deriveKey(password, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+        'raw', enc.encode(password), 'PBKDF2', false, ['deriveBits', 'deriveKey']
+    );
+    return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+    );
+}
+
+async function encryptData(data, password) {
+    const enc = new TextEncoder();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(password, salt);
+    const encrypted = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv: iv },
+        key,
+        typeof data === 'string'? enc.encode(data) : data
+    );
+
+    const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+    combined.set(salt, 0);
+    combined.set(iv, salt.length);
+    combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+
+    return btoa(String.fromCharCode(...combined));
+}
+
+async function decryptData(encryptedData, password) {
+    try {
+        const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+        const salt = combined.slice(0, 16);
+        const iv = combined.slice(16, 28);
+        const data = combined.slice(28);
+
+        const key = await deriveKey(password, salt);
+        const decrypted = await crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            data
+        );
+
+        return decrypted;
+    } catch (e) {
+        throw new Error('Decryption failed');
+    }
+}
+
+// Generate Vault Code: ~bunny + 9 random chars = 15 total
+function generateVaultCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let result = '~bunny';
+    const array = new Uint32Array(9);
+    crypto.getRandomValues(array);
+    for (let i = 0; i < 9; i++) {
+        result += chars[array[i] % chars.length];
+    }
+    return result;
+}
+
+// File Upload
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+const filePreview = document.getElementById('filePreview');
+
+fileDrop.addEventListener('click', () => fileInput.click());
+
+fileDrop.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileDrop.classList.add('active');
+});
+
+fileDrop.addEventListener('dragleave', () => {
+    fileDrop.classList.remove('active');
+});
+
+fileDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileDrop.classList.remove('active');
+    handleFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener('change', (e) => {
+    handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+        showToast('File too large. Max 10MB', false);
+        return;
+    }
+    uploadedFile = file;
+    uploadedFileName = file.name;
+    uploadedFileType = file.type;
+
+    let icon = 'file';
+    if (file.type.startsWith('image/')) icon = 'image';
+    else if (file.type.startsWith('video/')) icon = 'video';
+    else if (file.type.startsWith('audio/')) icon = 'music';
+    else if (file.type.includes('pdf')) icon = 'file-text';
+
+    filePreview.innerHTML = `
+        <i data-lucide="${icon}" style="width: 32px; height: 32px; margin: 0 auto 8px; color: var(--success); display: block;"></i>
+        <p style="color: var(--text-main); font-size: 0.9rem; font-weight: 700; text-align: center;">${file.name}</p>
+        <p style="color: var(--text-sub); font-size: 0.7rem; margin-top: 4px; text-align: center;">${(file.size / 1024).toFixed(1)} KB</p>
+    `;
+    filePreview.classList.add('show');
+    lucide.createIcons();
+    playSound(600, 0.1);
+    vibrate(50);
+}
+
+// Encrypt Button
+document.getElementById('encryptBtn').addEventListener('click', async () => {
+    const title = document.getElementById('projectTitle').value.trim() || 'Untitled Project';
+    const password = document.getElementById('masterPassword').value;
+    const text = document.getElementById('textInput').value;
+
+    if (!password) {
+        showToast('Enter master password', false);
+        return;
+    }
+
+    if (!text &&!uploadedFile) {
+        showToast('Enter text or upload file', false);
+        return;
+    }
+
+    try {
+        let dataToEncrypt;
+        let metadata = {};
+
+        if (uploadedFile) {
+            dataToEncrypt = await uploadedFile.arrayBuffer();
+            metadata = {
+                name: uploadedFileName,
+                type: uploadedFileType,
+                isFile: true,
+                size: uploadedFile.size
+            };
+        } else {
+            dataToEncrypt = text;
+            metadata = { isFile: false };
+        }
+
+        const metaEncrypted = await encryptData(JSON.stringify(metadata), password);
+        const dataEncrypted = await encryptData(dataToEncrypt, password);
+        const vaultCode = generateVaultCode();
+        const fullEncryptedData = metaEncrypted + '::' + dataEncrypted;
+
+        // Save to history
+        const entry = {
+            id: Date.now(),
+            title: title,
+            vaultCode: vaultCode,
+            fullData: fullEncryptedData,
+            password: btoa(password),
+            type: metadata.isFile? uploadedFileType.split('/')[0] : 'text',
+            date: new Date().toLocaleString(),
+            size: metadata.isFile? uploadedFile.size : text.length
+        };
+        history.unshift(entry);
+        localStorage.setItem('bunnyVaultHistory', JSON.stringify(history));
+        renderHistory();
+
+        // Show result
+        document.getElementById('vaultCode').textContent = vaultCode;
+        document.getElementById('encryptedData').textContent = fullEncryptedData;
+        document.getElementById('encryptResult').style.display = 'block';
+
+        showToast('Encrypted successfully!');
+
+        // Reset
+        document.getElementById('projectTitle').value = '';
+        document.getElementById('masterPassword').value = '';
+        document.getElementById('textInput').value = '';
+        uploadedFile = null;
+        uploadedFileName = '';
+        uploadedFileType = '';
+        filePreview.classList.remove('show');
+        filePreview.innerHTML = '';
+    } catch (e) {
+        showToast('Encryption failed', false);
+    }
+});
+
+// Copy Vault Code
+document.getElementById('copyVaultBtn').addEventListener('click', () => {
+    const code = document.getElementById('vaultCode').textContent;
+    navigator.clipboard.writeText(code);
+    showToast('Vault code copied!');
+});
+
+// Decrypt Button
+document.getElementById('unlockBtn').addEventListener('click', async () => {
+    const vaultCode = document.getElementById('vaultCodeInput').value.trim();
+    const password = document.getElementById('unlockPassword').value;
+
+    if (!vaultCode ||!password) {
+        showToast('Enter vault code and password', false);
+        return;
+    }
+
+    if (!vaultCode.startsWith('~bunny') || vaultCode.length!== 15) {
+        showToast('Invalid vault code. Must start with ~bunny and be 15 chars', false);
+        return;
+    }
+
+    // Find in history
+    const entry = history.find(h => h.vaultCode === vaultCode);
+    if (!entry) {
+        showToast('Vault code not found in history', false);
+        return;
+    }
+
+    try {
+        const parts = entry.fullData.split('::');
+        if (parts.length!== 2) {
+            showToast('Invalid encrypted format', false);
+            return;
+        }
+
+        const metaDecrypted = await decryptData(parts[0], password);
+        const meta = JSON.parse(new TextDecoder().decode(metaDecrypted));
+
+        const dataDecrypted = await decryptData(parts[1], password);
+
+        const textOutput = document.getElementById('decryptTextOutput');
+        const fileOutput = document.getElementById('decryptFileOutput');
+        const resultCard = document.getElementById('decryptResult');
+
+        if (meta.isFile) {
+            const blob = new Blob([dataDecrypted], { type: meta.type });
+            const url = URL.createObjectURL(blob);
+            fileOutput.innerHTML = `
+                <a href="${url}" download="${meta.name}" class="btn">
+                    <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+                    Download ${meta.name}
+                </a>
+            `;
+            fileOutput.style.display = 'block';
+            textOutput.style.display = 'none';
+            lucide.createIcons();
+        } else {
+            const text = new TextDecoder().decode(dataDecrypted);
+            textOutput.textContent = text;
+            textOutput.style.display = 'block';
+            fileOutput.style.display = 'none';
+        }
+
+        resultCard.style.display = 'block';
+        showToast('Decrypted successfully!');
+        document.getElementById('vaultCodeInput').value = '';
+        document.getElementById('unlockPassword').value = '';
+    } catch (e) {
+        showToast('Wrong password or corrupted data', false);
+    }
+});
+
+// History
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    const search = document.getElementById('historySearch').value.toLowerCase();
+    const filtered = history.filter(h =>
+        h.title.toLowerCase().includes(search) ||
+        h.date.toLowerCase().includes(search) ||
+        h.vaultCode.toLowerCase().includes(search)
+    );
+
+    if (filtered.length === 0) {
+        list.innerHTML = '<p style="text-align: center; color: var(--text-sub); padding: 20px;">No encryptions yet</p>';
+        return;
+    }
+
+    list.innerHTML = filtered.map(h => {
+        let typeIcon = 'file-text';
+        if (h.type === 'image') typeIcon = 'image';
+        else if (h.type === 'video') typeIcon = 'video';
+        else if (h.type === 'audio') typeIcon = 'music';
+
+        return `
+        <div class="history-card">
+            <div class="history-header">
+                <div>
+                    <div class="history-title">${h.title}</div>
+                    <div class="history-date">${h.date}</div>
+                </div>
+                <span class="badge">${h.type.toUpperCase()}</span>
+            </div>
+            <div class="history-code">
+                <span>${h.vaultCode}</span>
+                <i data-lucide="copy" class="copy-icon" onclick="copyVaultCode('${h.id}', this)" style="width: 16px; height: 16px;"></i>
+            </div>
+            <div class="danger-zone">
+                <button class="btn btn-secondary" style="padding: 10px; font-size: 0.85rem;" onclick="toggleReveal('${h.id}')">
+                    <i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i>
+                    REVEAL DETAILS
+                </button>
+                <div class="danger-content" id="danger-${h.id}">
+                    <p style="margin-bottom: 8px;"><strong>Master Password:</strong> <span id="pwd-${h.id}">••••••••</span>
+                        <i data-lucide="eye" class="copy-icon" onclick="revealPassword('${h.id}')" style="width: 14px; height: 14px; margin-left: 8px;"></i>
+                    </p>
+                    <p><strong>Full Data:</strong> <span style="font-size: 0.7rem; word-break: break-all;">${h.fullData.substring(0, 50)}...</span>
+                        <i data-lucide="copy" class="copy-icon" onclick="copyFullData('${h.id}', this)" style="width: 14px; height: 14px; margin-left: 8px;"></i>
+                    </p>
+                    <button class="btn btn-secondary" style="padding: 8px; font-size: 0.75rem; margin-top: 10px; background: rgba(255,69,58,0.2);" onclick="deleteHistory('${h.id}')">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        DELETE
+                    </button>
+                </div>
+            </div>
+        </div>
+    `}).join('');
+    lucide.createIcons();
+}
+
+window.copyVaultCode = (id, el) => {
+    const item = history.find(h => h.id == id);
+    if (item) {
+        navigator.clipboard.writeText(item.vaultCode);
+        el.setAttribute('data-lucide', 'check');
+        el.classList.add('copied');
+        lucide.createIcons();
+        showToast('Vault code copied!');
+        setTimeout(() => {
+            el.setAttribute('data-lucide', 'copy');
+            el.classList.remove('copied');
+            lucide.createIcons();
+        }, 2000);
+    }
+};
+
+window.toggleReveal = (id) => {
+    const content = document.getElementById('danger-' + id);
+    if (confirm('Reveal sensitive data?')) {
+        content.classList.toggle('show');
+        playSound(400, 0.1);
+        vibrate(50);
+    }
+};
+
+window.revealPassword = (id) => {
+    const item = history.find(h => h.id == id);
+    const span = document.getElementById('pwd-' + id);
+    if (item && span.textContent === '••••••••') {
+        span.textContent = atob(item.password);
+        setTimeout(() => {
+            span.textContent = '••••••••';
+        }, 5000);
+        playSound(500, 0.1);
+        vibrate(50);
+    }
+};
+
+window.copyFullData = (id, el) => {
+    const item = history.find(h => h.id == id);
+    if (item) {
+        navigator.clipboard.writeText(item.fullData);
+        el.setAttribute('data-lucide', 'check');
+        el.classList.add('copied');
+        lucide.createIcons();
+        showToast('Full data copied!');
+        setTimeout(() => {
+            el.setAttribute('data-lucide', 'copy');
+            el.classList.remove('copied');
+            lucide.createIcons();
+        }, 2000);
+    }
+};
+
+window.deleteHistory = (id) => {
+    if (confirm('Delete this encryption? This cannot be undone.')) {
+        history = history.filter(h => h.id!= id);
+        localStorage.setItem('bunnyVaultHistory', JSON.stringify(history));
+        renderHistory();
+        showToast('Deleted successfully');
+    }
+};
+
+document.getElementById('historySearch').addEventListener('input', renderHistory);
+
+// Initialize
+renderHistory();
+</script>
+</body>
+</html>
