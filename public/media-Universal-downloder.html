@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BunnyFlix - Universal Video Downloader</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --netflix-black: #141414;
+            --netflix-dark-grey: #1f1f1f;
+            --netflix-red: #E50914;
+            --netflix-red-hover: #B80710;
+            --glass-card: rgba(30, 30, 30, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-pure: #ffffff;
+            --text-secondary: #aaaaaa;
+            --success-green: #46d369;
+            --warn-orange: #f4b400;
+            --neon-blue: #00dfa2;
+        }
+
+        .light-variant {
+            --netflix-black: #f5f5f7;
+            --netflix-dark-grey: #ffffff;
+            --netflix-red: #E50914;
+            --netflix-red-hover: #B80710;
+            --glass-card: rgba(240, 240, 243, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text-pure: #111111;
+            --text-secondary: #666666;
+            --success-green: #2ecc71;
+            --warn-orange: #e67e22;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--netflix-black);
+            color: var(--text-pure);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.4s ease, color 0.4s ease;
+            padding-bottom: 40px;
+        }
+
+        /* --- BunnyFlix Cinema Pulse Loading Overlay --- */
+        #bunnyflix-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s ease;
+        }
+
+        .cinema-pulse-ring {
+            position: relative;
+            width: 90px; height: 90px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .cinema-pulse-ring::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 4px solid rgba(229, 9, 20, 0.05);
+            border-top: 4px solid var(--netflix-red);
+            border-radius: 50%;
+            animation: cinematicSpin 0.5s linear infinite;
+            box-shadow: 0 0 30px rgba(229, 9, 20, 0.4);
+        }
+
+        @keyframes cinematicSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-brand-inscription {
+            margin-top: 24px;
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: var(--netflix-red);
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
+            animation: textGlowPulse 1s infinite alternate;
+        }
+
+        @keyframes textGlowPulse {
+            0% { opacity: 0.6; transform: scale(0.96); }
+            100% { opacity: 1; transform: scale(1.02); }
+        }
+
+        /* --- Main Adaptive Layout Envelope --- */
+        .bunnyflix-shell {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .netflix-glass-panel {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+
+        /* --- Navigation Bar Top Navigation Elements --- */
+        .cinema-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-identity-node {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .app-identity-node span {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--netflix-red);
+            text-transform: uppercase;
+        }
+
+        .action-icon-hub {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-round-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-pure);
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .nav-round-btn:active { transform: scale(0.92); }
+
+        .notification-indicator-dot {
+            position: absolute;
+            top: 2px; right: 2px;
+            width: 9px; height: 9px;
+            background-color: var(--netflix-red);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--netflix-red);
+        }
+
+        /* --- Section Label Elements --- */
+        .panel-descriptor-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Input URL Engine Aggregator Box --- */
+        .url-input-cluster {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-wrapper-node {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper-node i {
+            position: absolute;
+            left: 14px;
+            color: var(--text-secondary);
+        }
+
+        .unlimited-input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 16px 16px 16px 44px;
+            color: var(--text-pure);
+            font-size: 0.88rem;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .unlimited-input-field:focus {
+            border-color: var(--netflix-red);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.15);
+        }
+
+        .cinema-action-button {
+            background: var(--netflix-red);
+            border: none;
+            color: #ffffff;
+            padding: 16px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(229, 9, 20, 0.3);
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .cinema-action-button:active { transform: scale(0.97); }
+        .cinema-action-button:disabled { background: #333333; color: #666666; cursor: not-allowed; box-shadow: none; }
+
+        /* --- Media Live Validation Profile Card (Resolution Matcher) --- */
+        .media-extractor-preview-panel {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: panelSlideUpIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes panelSlideUpIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .video-thumbnail-frame-hull {
+            position: relative;
+            width: 100%;
+            height: 190px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--glass-border);
+        }
+
+        .video-thumbnail-frame-hull img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        .thumbnail-duration-tag {
+            position: absolute;
+            bottom: 10px; right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .extracted-video-meta-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .extracted-video-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .extracted-video-source-domain {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* --- Quality Selection Matrix System Grid --- */
+        .resolution-matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .resolution-matrix-node-option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .resolution-matrix-node-option:active { transform: scale(0.95); }
+
+        .resolution-matrix-node-option.selected-profile {
+            border-color: var(--netflix-red);
+            background: rgba(229, 9, 20, 0.08);
+        }
+
+        .quality-badge-label { font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 6px;}
+        .quality-file-size-spec { font-size: 0.7rem; color: var(--text-secondary); font-family: monospace;}
+
+        /* --- Progress Ingress Pipe Frame Module --- */
+        .download-progress-box {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 4px;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 14px;
+        }
+
+        .download-progress-meta-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .download-progress-track {
+            width: 100%; height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px; overflow: hidden;
+        }
+
+        .download-progress-bar-fill {
+            width: 0%; height: 100%;
+            background: var(--netflix-red);
+            box-shadow: 0 0 10px var(--netflix-red);
+            transition: width 0.1s linear;
+        }
+
+        .download-speed-metrics {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.68rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        /* --- Persistent Space Separation Section Header --- */
+        .space-separation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 6px;
+            padding: 0 4px;
+        }
+
+        .space-separation-header h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .clear-all-history-trigger-btn {
+            background: transparent;
+            border: none;
+            color: var(--netflix-red);
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* --- Vault History Feed Pipeline List Storage Elements --- */
+        .vault-history-scroll-feed-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .vault-history-scroll-feed-vertical::-webkit-scrollbar { width: 4px; }
+        .vault-history-scroll-feed-vertical::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 2px; }
+
+        .vault-history-card-item-container {
+            display: flex;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 10px;
+            align-items: center;
+            position: relative;
+            animation: cardEntranceFade 0.4s ease forwards;
+        }
+
+        @keyframes cardEntranceFade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vault-card-thumbnail-left-node {
+            width: 100px;
+            height: 65px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            flex-shrink: 0;
+            border: 1px solid var(--glass-border);
+        }
+
+        .vault-card-thumbnail-left-node img { width: 100%; height: 100%; object-fit: cover; }
+
+        .vault-card-metadata-center-node {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .vault-card-video-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .vault-card-source-link {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: monospace;
+        }
+
+        .vault-card-status-badges-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2px;
+        }
+
+        .vault-status-indicator-badge {
+            font-size: 0.58rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .vault-status-indicator-badge.completed { background: rgba(70, 211, 105, 0.12); color: var(--success-green); }
+        .vault-status-indicator-badge.failed { background: rgba(229, 9, 20, 0.12); color: var(--netflix-red); }
+
+        .vault-card-quality-spec-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.04);
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        /* --- Fallback Missing History Context Terminal Frame --- */
+        .vault-empty-fallback-placeholder {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            padding: 40px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vault-empty-fallback-placeholder i { color: rgba(255,255,255,0.05); }
+
+        /* --- Global Custom Status Push Alert Popup Banner Banner --- */
+        .bunnyflix-toast-alert-layer {
+            position: fixed;
+            bottom: 24px; left: 20px; right: 20px;
+            background: rgba(26, 26, 26, 0.98);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--netflix-red);
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text-pure);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            z-index: 999999;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideUpInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUpInToast {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .bunnyflix-toast-alert-layer i { color: var(--netflix-red); }
+        .toast-inner-text-content { font-size: 0.78rem; font-weight: 600; line-height: 1.3; }
+    </style>
+</head>
+<body>
+
+    <div class="bunnyflix-toast-alert-layer" id="bunnyFlixToastNotificationLayerBanner">
+        <i data-lucide="bell"></i>
+        <div class="toast-inner-text-content" id="toastNotificationTextContainer">System environment profile sync initialized.</div>
+    </div>
+
+    <div id="bunnyflix-loader">
+        <div class="cinema-pulse-ring"></div>
+        <div class="loader-brand-inscription">BunnyFlix</div>
+    </div>
+
+    <div class="bunnyflix-shell">
+        
+        <header class="netflix-glass-panel cinema-nav-header">
+            <div class="app-identity-node">
+                <span id="appMainBrandTitleLabel">BunnyFlix</span>
+            </div>
+            <div class="action-icon-hub">
+                <button class="nav-round-btn" onclick="triggerSystemNotificationIndicatorRingAlert()" id="systemBellAlertNotificationNode">
+                    <div class="notification-indicator-dot" id="bellActiveIndicatorBadgeDot"></div>
+                    <i data-lucide="bell" style="width:18px; height:18px;"></i>
+                </button>
+                <button class="nav-round-btn" onclick="toggleBunnyFlixInterfaceThemeVariant()" id="themeVariantToggleActionTriggerBtn">
+                    <i data-lucide="moon" style="width:18px; height:18px;"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="netflix-glass-panel">
+            <div class="panel-descriptor-title"><i data-lucide="link-2"></i> Stream URL Input Ingress</div>
+            
+            <div class="url-input-cluster">
+                <div class="input-wrapper-node">
+                    <i data-lucide="search" style="width:16px; height:16px;"></i>
+                    <input type="text" class="unlimited-input-field" placeholder="Paste video link here (YouTube, TikTok, FB...)" id="videoStreamTargetUrlInput" />
+                </div>
+                
+                <button class="cinema-action-button" id="analyzeStreamUrlActionTriggerBtn" onclick="executeVideoStreamExtractionPipeline()">
+                    <i data-lucide="clapperboard"></i> Extract Media Link
+                </button>
+            </div>
+        </div>
+
+        <div class="netflix-glass-panel media-extractor-preview-panel" id="extractedMediaValidationPreviewPanelContainer">
+            <div class="panel-descriptor-title"><i data-lucide="eye"></i> Extracted Profile Resolution Matcher</div>
+            
+            <div class="video-thumbnail-frame-hull">
+                <img src="" id="extractedVideoLiveThumbnailImageField" alt="Video Thumbnail Canvas">
+                <div class="thumbnail-duration-tag" id="extractedVideoDurationLabelField">00:00</div>
+            </div>
+
+            <div class="extracted-video-meta-summary">
+                <span class="extracted-video-source-domain" id="extractedVideoSourceDomainTypeField">Platform Source</span>
+                <h4 class="extracted-video-title" id="extractedVideoTitleLabelField">Video Title Extraction Loading Sequence Header Text String</h4>
+            </div>
+
+            <div class="panel-descriptor-title" style="margin-bottom: 0; margin-top: 6px;"><i data-lucide="layers"></i> Choose Desired Profile Quality</div>
+            <div class="resolution-matrix-grid" id="resolutionProfilesSelectorMatrixGridWrapper">
+                </div>
+
+            <div class="download-progress-box" id="mediaDownloadProgressPipeTrackingBlock">
+                <div class="download-progress-meta-labels">
+                    <span id="downloadProgressStatusContextString">Downloading Video Buffers...</span>
+                    <span id="downloadProgressPercentageNumericalLabel">0%</span>
+                </div>
+                <div class="download-progress-track">
+                    <div class="download-progress-bar-fill" id="downloadProgressBarLinearProgressFill"></div>
+                </div>
+                <div class="download-speed-metrics">
+                    <span id="downloadSpeedTrackerMetricsLabel">Speed: 0.0 MB/s</span>
+                    <span id="downloadProcessedBytesMetricsLabel">0.0 MB / 0.0 MB</span>
+                </div>
+            </div>
+
+            <button class="cinema-action-button" style="margin-top: 4px;" id="startDownloadActionTriggerBtn" onclick="initiateMediaDownloadStreamSimulationSequence()">
+                <i data-lucide="download-cloud"></i> Start Telemetry Download
+            </button>
+        </div>
+
+        <div class="space-separation-header">
+            <h3><i data-lucide="folder-heart" style="width:16px; height:16px; vertical-align: middle; margin-right: 6px; color: var(--netflix-red);"></i> Vault History Cache</h3>
+            <button class="clear-all-history-trigger-btn" onclick="purgePersistentVaultHistoryStoragePool()">Clear All</button>
+        </div>
+
+        <div class="netflix-glass-panel" style="padding: 14px;">
+            <div class="vault-history-scroll-feed-vertical" id="vaultHistoryPersistentScrollFeedWrapper">
+                <div class="vault-empty-fallback-placeholder" id="vaultHistoryEmptyDatasetFallbackPlaceholderNode">
+                    <i data-lucide="hard-drive" style="width:36px; height:36px;"></i>
+                    <span>No cached records found in local phone storage. Download files to write history parameters logs.</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // System Application Environment Context State Variables
+        let activeInterfaceThemeVariantContext = 'dark';
+        let memoryCacheExtractedVideoObjectDataScope = null;
+        let selectedResolutionProfileIndexDataCursor = 0;
+        let activeDownloadStreamSimulationIntervalTimer = null;
+
+        // Content Initialization Lifecycle Frame Event Hook
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderCachedVaultHistoryRecordsFeedList();
+
+            // Cinema Pulse Loader Diminish Timeout Loop Simulation
+            setTimeout(() => {
+                const loaderScreenElementRef = document.getElementById('bunnyflix-loader');
+                loaderScreenElementRef.style.opacity = '0';
+                loaderScreenElementRef.style.transform = 'scale(1.04)';
+                setTimeout(() => { loaderScreenElementRef.style.display = 'none'; }, 600);
+            }, 2500);
+        });
+
+        // Toggle Application Color Interface Theme Layout System
+        function toggleBunnyFlixInterfaceThemeVariant() {
+            const bodyHTMLElementNodeRef = document.body;
+            const actionButtonIconRef = document.querySelector('#themeVariantToggleActionTriggerBtn i');
+
+            if (activeInterfaceThemeVariantContext === 'dark') {
+                bodyHTMLElementNodeRef.classList.add('light-variant');
+                activeInterfaceThemeVariantContext = 'light';
+                actionButtonIconRef.setAttribute('data-lucide', 'sun');
+            } else {
+                bodyHTMLElementNodeRef.classList.remove('light-variant');
+                activeInterfaceThemeVariantContext = 'dark';
+                actionButtonIconRef.setAttribute('data-lucide', 'moon');
+            }
+            lucide.createIcons();
+        }
+
+        // Trigger Notification Micro Alarm Signal Visual Changes Button Alert
+        function triggerSystemNotificationIndicatorRingAlert() {
+            const bellDotBadgeRef = document.getElementById('bellActiveIndicatorBadgeDot');
+            bellDotBadgeRef.style.display = 'none';
+            displayApplicationStatusToastNotificationAlertMessage("BunnyFlix Engine notification buffer lines synchronized successfully.");
+        }
+
+        // Dispatch Programmatic Global Toast Message Alerts View Box Banner
+        function displayApplicationStatusToastNotificationAlertMessage(messageStringTextContext) {
+            const toastLayerRef = document.getElementById('bunnyFlixToastNotificationLayerBanner');
+            const toastTextContainerRef = document.getElementById('toastNotificationTextContainer');
+
+            toastTextContainerRef.innerText = messageStringTextContext;
+            toastLayerRef.style.display = 'flex';
+
+            setTimeout(() => {
+                toastLayerRef.style.animation = 'none';
+                toastLayerRef.offsetHeight; // Reflow reset hook browser execution anchor
+                toastLayerRef.style.display = 'none';
+            }, 4000);
+        }
+
+        // Mock Resolution Catalog Dictionary Array Dataset Pipeline
+        const universalMockPlatformResolutionProfilesMatrix = {
+            youtube: {
+                domain: "YouTube Video Hub Link",
+                title: "Korean Love Story Drama - Special Romantic Episode Trailer [HD]",
+                thumbnail: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=500&auto=format&fit=crop",
+                duration: "03:45",
+                profiles: [
+                    { quality: "1080p [Full HD]", size: "42.8 MB", rawSizeMb: 42.8 },
+                    { quality: "720p [HD Ready]", size: "24.1 MB", rawSizeMb: 24.1 },
+                    { quality: "480p [Standard]", size: "11.5 MB", rawSizeMb: 11.5 },
+                    { quality: "Audio MP3 [320kbps]", size: "4.8 MB", rawSizeMb: 4.8 }
+                ]
+            },
+            tiktok: {
+                domain: "TikTok Short Video Stream",
+                title: "Trending K-Drama Romantic Dance Transition Scene #QueenOfTears",
+                thumbnail: "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?q=80&w=500&auto=format&fit=crop",
+                duration: "00:58",
+                profiles: [
+                    { quality: "HD No Watermark", size: "8.4 MB", rawSizeMb: 8.4 },
+                    { quality: "Standard Quality", size: "5.2 MB", rawSizeMb: 5.2 },
+                    { quality: "M4A Audio Track", size: "1.1 MB", rawSizeMb: 1.1 }
+                ]
+            },
+            generic: {
+                domain: "Universal Web Domain Resource",
+                title: "Global Extracted Cinematic Media Stream File Resource Link",
+                thumbnail: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=500&auto=format&fit=crop",
+                duration: "12:40",
+                profiles: [
+                    { quality: "High Resolution Source", size: "118.6 MB", rawSizeMb: 118.6 },
+                    { quality: "Medium Compressed", size: "64.2 MB", rawSizeMb: 64.2 },
+                    { quality: "Low Bandwidth 3GP", size: "14.7 MB", rawSizeMb: 14.7 }
+                ]
+            }
+        };
+
+        // Universal Link Parser Resolution Extractor Simulation Engine Pipeline Core Method
+        function executeVideoStreamExtractionPipeline() {
+            const inputUrlStringContext = document.getElementById('videoStreamTargetUrlInput').value.trim();
+            const actionExtractBtnRef = document.getElementById('analyzeStreamUrlActionTriggerBtn');
+            const previewPanelContainerRef = document.getElementById('extractedMediaValidationPreviewPanelContainer');
+
+            if (!inputUrlStringContext) {
+                displayApplicationStatusToastNotificationAlertMessage("ERROR: Please insert a valid streaming URL address line link first.");
+                return;
+            }
+
+            actionExtractBtnRef.disabled = true;
+            actionExtractBtnRef.innerHTML = `<i class="lucide-spinner" style="animation: cinematicSpin 1s linear infinite;"></i> Parsing Link Structure...`;
+            previewPanelContainerRef.style.display = 'none';
+
+            setTimeout(() => {
+                let classificationKeywordMatchKey = 'generic';
+                const lowercaseUrlMatchString = inputUrlStringContext.toLowerCase();
+
+                if (lowercaseUrlMatchString.includes('youtube.com') || lowercaseUrlMatchString.includes('youtu.be')) {
+                    classificationKeywordMatchKey = 'youtube';
+                } else if (lowercaseUrlMatchString.includes('tiktok.com')) {
+                    classificationKeywordMatchKey = 'tiktok';
+                }
+
+                memoryCacheExtractedVideoObjectDataScope = JSON.parse(JSON.stringify(universalMockPlatformResolutionProfilesMatrix[classificationKeywordMatchKey]));
+                memoryCacheExtractedVideoObjectDataScope.sourceUrlStringLink = inputUrlStringContext;
+
+                // Bind and render dataset configurations directly into display elements UI
+                document.getElementById('extractedVideoLiveThumbnailImageField').src = memoryCacheExtractedVideoObjectDataScope.thumbnail;
+                document.getElementById('extractedVideoDurationLabelField').innerText = memoryCacheExtractedVideoObjectDataScope.duration;
+                document.getElementById('extractedVideoSourceDomainTypeField').innerText = memoryCacheExtractedVideoObjectDataScope.domain;
+                document.getElementById('extractedVideoTitleLabelField').innerText = memoryCacheExtractedVideoObjectDataScope.title;
+
+                generateQualitySelectorMatrixGridNodes(memoryCacheExtractedVideoObjectDataScope.profiles);
+
+                actionExtractBtnRef.disabled = false;
+                actionExtractBtnRef.innerHTML = `<i data-lucide="clapperboard"></i> Extract Media Link`;
+                previewPanelContainerRef.style.display = 'flex';
+                
+                document.getElementById('mediaDownloadProgressPipeTrackingBlock').style.display = 'none';
+                document.getElementById('startDownloadActionTriggerBtn').disabled = false;
+                
+                lucide.createIcons();
+                displayApplicationStatusToastNotificationAlertMessage("SUCCESS: Video parameters successfully parsed. Choose resolution quality profile.");
+            }, 1800);
+        }
+
+        // Programmatically Build and Render Quality Selectors Grid Box Layout
+        function generateQualitySelectorMatrixGridNodes(profilesArrayDataset) {
+            const matrixWrapperGridRef = document.getElementById('resolutionProfilesSelectorMatrixGridWrapper');
+            matrixWrapperGridRef.innerHTML = '';
+            selectedResolutionProfileIndexDataCursor = 0;
+
+            profilesArrayDataset.forEach((profileItem, iteratorIndex) => {
+                const nodeButtonElementRef = document.createElement('div');
+                nodeButtonElementRef.classList.add('resolution-matrix-node-option');
+                if (iteratorIndex === 0) nodeButtonElementRef.classList.add('selected-profile');
+                
+                nodeButtonElementRef.setAttribute('id', `resolutionProfileNodeCursorRef_${iteratorIndex}`);
+                nodeButtonElementRef.setAttribute('onclick', `switchActiveSelectedResolutionProfileIndex(${iteratorIndex})`);
+
+                nodeButtonElementRef.innerHTML = `
+                    <span class="quality-badge-label"><i data-lucide="play-circle" style="width:14px; height:14px; color:var(--netflix-red);"></i> ${profileItem.quality}</span>
+                    <span class="quality-file-size-spec">Est. Size: ${profileItem.size}</span>
+                `;
+                matrixWrapperGridRef.appendChild(nodeButtonElementRef);
+            });
+            lucide.createIcons();
+        }
+
+        // Switch Active Selection Profile Resolution Index Mapping
+        function switchActiveSelectedResolutionProfileIndex(targetSelectedCursorIndex) {
+            const containerProfilesCount = memoryCacheExtractedVideoObjectDataScope.profiles.length;
+            
+            for (let i = 0; i < containerProfilesCount; i++) {
+                const targetedNodeRef = document.getElementById(`resolutionProfileNodeCursorRef_${i}`);
+                if (targetedNodeRef) targetedNodeRef.classList.remove('selected-profile');
+            }
+
+            const activeNodeSelectionRef = document.getElementById(`resolutionProfileNodeCursorRef_${targetSelectedCursorIndex}`);
+            if (activeNodeSelectionRef) activeNodeSelectionRef.classList.add('selected-profile');
+            
+            selectedResolutionProfileIndexDataCursor = targetSelectedCursorIndex;
+        }
+
+        // Initiate Media Telemetry Downloader Automation Ingress Loop Sim Pipeline Routine Method
+        function initiateMediaDownloadStreamSimulationSequence() {
+            const startDownloadBtnRef = document.getElementById('startDownloadActionTriggerBtn');
+            const progressTrackingBlockRef = document.getElementById('mediaDownloadProgressPipeTrackingBlock');
+            const progressFillBarLinearRef = document.getElementById('downloadProgressBarLinearProgressFill');
+            const percentageLabelRef = document.getElementById('downloadProgressPercentageNumericalLabel');
+            const speedMetricsLabelRef = document.getElementById('downloadSpeedTrackerMetricsLabel');
+            const bytesMetricsLabelRef = document.getElementById('downloadProcessedBytesMetricsLabel');
+            const progressStatusContextRef = document.getElementById('downloadProgressStatusContextString');
+
+            startDownloadBtnRef.disabled = true;
+            progressTrackingBlockRef.style.display = 'flex';
+            progressFillBarLinearRef.style.width = '0%';
+            percentageLabelRef.innerText = '0%';
+            progressStatusContextRef.innerText = 'Connecting to high-speed buffer server stream lines...';
+
+            let accumulatedLinearProgressPercentCounter = 0;
+            const targetProfileDataScope = memoryCacheExtractedVideoObjectDataScope.profiles[selectedResolutionProfileIndexDataCursor];
+            const targetTotalMaxFileSizeBytesValue = targetProfileDataScope.rawSizeMb;
+
+            activeDownloadStreamSimulationIntervalTimer = setInterval(() => {
+                accumulatedLinearProgressPercentCounter += Math.floor(Math.random() * 6) + 2;
+                if (accumulatedLinearProgressPercentCounter > 100) accumulatedLinearProgressPercentCounter = 100;
+
+                progressFillBarLinearRef.style.width = `${accumulatedLinearProgressPercentCounter}%`;
+                percentageLabelRef.innerText = `${accumulatedLinearProgressPercentCounter}%`;
+
+                // Calculate random variable transfer speeds network indices values tracking
+                const generatedRandomMockSpeedValueMb = (Math.random() * 4 + 2.4).toFixed(1);
+                const currentProcessedBytesAccumulatedValue = ((accumulatedLinearProgressPercentCounter / 100) * targetTotalMaxFileSizeBytesValue).toFixed(1);
+
+                speedMetricsLabelRef.innerText = `Speed: ${generatedRandomMockSpeedValueMb} MB/s`;
+                bytesMetricsLabelRef.innerText = `${currentProcessedBytesAccumulatedValue} MB / ${targetTotalMaxFileSizeBytesValue} MB`;
+
+                if (accumulatedLinearProgressPercentCounter > 15 && accumulatedLinearProgressPercentCounter < 55) {
+                    progressStatusContextRef.innerText = 'Streaming media binary blocks payload packet arrays...';
+                } else if (accumulatedLinearProgressPercentCounter >= 55 && accumulatedLinearProgressPercentCounter < 90) {
+                    progressStatusContextRef.innerText = 'Compiling audio tracks overlay multiplexers frames...';
+                } else if (accumulatedLinearProgressPercentCounter >= 90) {
+                    progressStatusContextRef.innerText = 'Writing finalized MP4 container stream descriptors to storage...';
+                }
+
+                if (accumulatedLinearProgressPercentCounter === 100) {
+                    clearInterval(activeDownloadStreamSimulationIntervalTimer);
+                    progressStatusContextRef.innerText = 'Download transaction sequence finalized.';
+                    
+                    commitFinishedDownloadInstanceRecordToVaultStorage(
+                        memoryCacheExtractedVideoObjectDataScope.title,
+                        memoryCacheExtractedVideoObjectDataScope.sourceUrlStringLink,
+                        memoryCacheExtractedVideoObjectDataScope.thumbnail,
+                        targetProfileDataScope.quality,
+                        'completed'
+                    );
+
+                    displayApplicationStatusToastNotificationAlertMessage("SUCCESS: Video downloaded completely and committed to local phone storage cache.");
+                }
+            }, 1500);
+        }
+
+        // Write Transacted Completed Download Object Dataset Logs into LocalStorage Vault
+        function commitFinishedDownloadInstanceRecordToVaultStorage(title, link, thumb, quality, statusStringValue) {
+            const singleHistoryLogItemSchemaStructureInstance = {
+                id: `bunnyflix_transaction_id_${Date.now()}`,
+                title: title,
+                linkAddress: link,
+                thumbnailUrl: thumb,
+                qualityProfileLabel: quality,
+                transactionStatus: statusStringValue,
+                timestampDateString: new Date().toLocaleDateString()
+            };
+
+            let currentVaultHistoryArrayRawCache = localStorage.getItem('bunnyflix_vault_history_cache_registry');
+            let parsedHistoryArrayContainerList = [];
+
+            if (currentVaultHistoryArrayRawCache) {
+                parsedHistoryArrayContainerList = JSON.parse(currentVaultHistoryArrayRawCache);
+            }
+
+            parsedHistoryArrayContainerList.unshift(singleHistoryLogItemSchemaStructureInstance);
+            localStorage.setItem('bunnyflix_vault_history_cache_registry', JSON.stringify(parsedHistoryArrayContainerList));
+
+            renderCachedVaultHistoryRecordsFeedList();
+        }
+
+        // Pull Dataset Records from LocalStorage Vault and Paint History Feed
+        function renderCachedVaultHistoryRecordsFeedList() {
+            const scrollFeedWrapperVerticalRef = document.getElementById('vaultHistoryPersistentScrollFeedWrapper');
+            const fallbackPlaceholderNodeRef = document.getElementById('vaultHistoryEmptyDatasetFallbackPlaceholderNode');
+
+            let currentVaultHistoryArrayRawCache = localStorage.getItem('bunnyflix_vault_history_cache_registry');
+            
+            if (!currentVaultHistoryArrayRawCache || JSON.parse(currentVaultHistoryArrayRawCache).length === 0) {
+                fallbackPlaceholderNodeRef.style.display = 'flex';
+                // Remove pre-existing item nodes except fallback placeholder to preserve screen asset rendering boundaries
+                const activeCardItemNodesRefs = scrollFeedWrapperVerticalRef.querySelectorAll('.vault-history-card-item-container');
+                activeCardItemNodesRefs.forEach(node => node.remove());
+                return;
+            }
+
+            fallbackPlaceholderNodeRef.style.display = 'none';
+            const parsedHistoryArrayContainerList = JSON.parse(currentVaultHistoryArrayRawCache);
+
+            // Clean previous cards iteration list streams
+            const activeCardItemNodesRefs = scrollFeedWrapperVerticalRef.querySelectorAll('.vault-history-card-item-container');
+            activeCardItemNodesRefs.forEach(node => node.remove());
+
+                        parsedHistoryArrayContainerList.forEach(logItem => {
+                const historyCardFrameNodeRef = document.createElement('div');
+                historyCardFrameNodeRef.classList.add('vault-history-card-item-container');
+
+                historyCardFrameNodeRef.innerHTML = `
+                    <div class="vault-card-thumbnail-left-node">
+                        <img src="${logItem.thumbnailUrl}" alt="History Item Clip">
+                    </div>
+                    <div class="vault-card-metadata-center-node">
+                        <h4 class="vault-card-video-title">${logItem.title}</h4>
+                        <span class="vault-card-source-link">${logItem.linkAddress}</span>
+                        <div class="vault-card-status-badges-footer">
+                            <span class="vault-status-indicator-badge ${logItem.transactionStatus}">${logItem.transactionStatus}</span>
+                            <span class="vault-card-quality-spec-tag">${logItem.qualityProfileLabel}</span>
+                        </div>
+                    </div>
+                `;
+                scrollFeedWrapperVerticalRef.appendChild(historyCardFrameNodeRef);
+            });
+            lucide.createIcons();
+        }
+
+        // Purge Entire LocalStorage Registry Data Scope Matrix Pool Storage Records
+        function purgePersistentVaultHistoryStoragePool() {
+            localStorage.removeItem('bunnyflix_vault_history_cache_registry');
+            renderCachedVaultHistoryRecordsFeedList();
+            displayApplicationStatusToastNotificationAlertMessage("Vault memory directory array clean procedure finished.");
+        }
+    </script>
+</body>
+</html>
+             
