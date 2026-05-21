@@ -548,7 +548,7 @@
                 <div class="dual-columns-grid" style="margin-top: 6px;">
                     <div>
                         <label>Virtual MAC Spoofer</label>
-                       <input type="text" id="spoofed-mac-field" class="input-field" value="00:0A:95:9D:68:16" disabled style="font-size:0.75rem; font-family:monospace;" />
+                        <input type="text" id="spoofed-mac-field" class="input-field" value="00:0A:95:9D:68:16" disabled style="font-size:0.75rem; font-family:monospace;" />
                     </div>
                     <div>
                         <label>Hardware Clocks</label>
@@ -663,13 +663,15 @@
     </div>
 
     <script>
-        let TOTAL_AUDIT_DURATION_SECONDS = 120; 
-        let currentIntervalTimerPeriodMillis = 1000; 
+        // Production System Configuration Properties Environment Context Scope
+        let TOTAL_AUDIT_DURATION_SECONDS = 120; // 2 Minutes Baseline Configuration Rule
+        let currentIntervalTimerPeriodMillis = 1000; // Normal Speed Clock Pulse Rate
         
         let auditIntervalReference = null;
         let toastTimerReference = null;
         let isTurboSpeedModeEnabled = false;
 
+        // Compilation 14 Sequence Diagnostic Blocks Text Stream Dictionary Manifest Array
         const AUDIT_STEPS_CATALOG = [
             { text: "[INIT]: Broad-spectrum wireless monitoring node initialized on channel interface wlan0mon...", fault: false },
             { text: "[BEACON]: Captured beacon frames from designated access point router target. Signal strength -64dBm.", fault: false },
@@ -687,6 +689,7 @@
             { text: "[COMPLETED]: Password stream matching parameters matched within internal lookup dictionary cache arrays.", fault: false }
         ];
 
+        // 50 Highly Technical Complex Cryptographic Password Token Array Manifest Database
         const ALPHANUMERIC_COMPLEX_PASSWORDS_POOL = [
             "CipherCore_Secure_99!", "WPA3_Enterprise_Root#2026", "GatewayBypass_AlphaX?", "MatrixNet_Protocol_88*", "DeltaQuantum_Vault$77",
             "Algorithmic_Shield_Key#", "ProxyVector_Node_Intercept!", "HashMutation_Token_99X", "Cryptographic_Pulse_Zeta", "Entropy_Generator_Alpha88",
@@ -702,6 +705,7 @@
 
         let loadedActiveGeneratedPasswordsCache = [];
 
+        // App Lifecycle Event Initializer Hook
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             fetchGeoLocationPayload();
@@ -711,15 +715,18 @@
             renderSessionAuditLogsHistoryPanelList();
             generateRandomSpoofedMacAddress();
 
+            // Intercept random loader delay execution
             setTimeout(() => {
                 const loaderNode = document.getElementById('loading-screen');
                 loaderNode.style.opacity = '0';
                 setTimeout(() => { loaderNode.style.display = 'none'; }, 400);
             }, 1800);
 
+            // Audio Web Element Pipeline Node Setup
             window.audioFeedbackContextChannel = new (window.AudioContext || window.webkitAudioContext)();
         });
 
+        // Switch Tab Routing Node State Matrix Layout Engine Viewport Control
         function switchActiveViewportLayoutTab(tabIdentityKeyString) {
             document.querySelectorAll('.nav-tab-trigger-node').forEach(el => el.classList.remove('active-tab'));
             document.querySelectorAll('.app-layout-tab-viewport').forEach(el => el.classList.remove('active-view'));
@@ -728,6 +735,7 @@
             document.getElementById(`appLayoutTab_${tabIdentityKeyString}`).classList.add('active-view');
         }
 
+        // Pull Real Location Metadata using Client IP Protocol Nodes Downward List Target
         function fetchGeoLocationPayload() {
             fetch('https://ipapi.co/json/')
                 .then(res => res.json())
@@ -749,6 +757,7 @@
                 });
         }
 
+        // Live Network Monitor Connection Interface Pipeline Tracker
         function registerNetworkConnectivityMonitorObservers() {
             const statusPill = document.getElementById('networkConnectivityStatusPill');
             const label = document.getElementById('networkConnectivityLabel');
@@ -774,6 +783,7 @@
             alterUiState(navigator.onLine);
         }
 
+        // Random MAC Spoofer Generation Engine
         function generateRandomSpoofedMacAddress() {
             const hexHexValues = "0123456789ABCDEF";
             let constructedMac = "00"; 
@@ -783,6 +793,7 @@
             document.getElementById('spoofed-mac-field').value = constructedMac;
         }
 
+        // Core Trigger Processing Modules Gateway Operations Pipeline
         function initializeProtocolAudit() {
             const ssidValueString = document.getElementById('wifi-target-ssid').value.trim();
             if (!ssidValueString) {
@@ -795,6 +806,7 @@
             document.getElementById('audit-cancel-btn').disabled = false;
             document.getElementById('wifi-target-ssid').disabled = true;
 
+            // Instatially spawn 50 sequence dictionary shuffle matching index context constraints to fetch exactly 5 random paths
             const internalPasswordsShuffleCopy = [...ALPHANUMERIC_COMPLEX_PASSWORDS_POOL].sort(() => 0.5 - Math.random());
             loadedActiveGeneratedPasswordsCache = internalPasswordsShuffleCopy.slice(0, 5);
 
@@ -814,6 +826,7 @@
             executeChronicleClockTickIntervalStepper(0);
         }
 
+        // Cancel Execution Event Dispatcher Handler Routine
         function cancelActiveAuditPipeline() {
             if (auditIntervalReference) clearInterval(auditIntervalReference);
             
@@ -837,6 +850,7 @@
             calculateStorageCacheAllocationFootprintMetrics();
         }
 
+        // Clock Processor Control Cycle Iterations Logic Router
         function executeChronicleClockTickIntervalStepper(startCheckpointSeconds) {
             let tickerSecondsElapsed = startCheckpointSeconds;
             updateInterfaceProgressMetricsView(tickerSecondsElapsed);
@@ -860,6 +874,7 @@
             }, currentIntervalTimerPeriodMillis);
         }
 
+        // Update UI Progress Metrics Bars
         function updateInterfaceProgressMetricsView(elapsedValue) {
             const overallPctRatioValue = (elapsedValue / TOTAL_AUDIT_DURATION_SECONDS) * 100;
             document.getElementById('audit-progress').style.width = `${overallPctRatioValue}%`;
@@ -873,6 +888,7 @@
             renderTerminalLogsUpToLimitBound(indexTargetMappingLogLine);
         }
 
+        // Render Step Text Outputs Directly Inside Console Terminal Window Screen
         function renderTerminalLogsUpToLimitBound(indexPointer) {
             const terminalContainerRef = document.getElementById('terminal-stream-log');
             terminalContainerRef.innerHTML = '';
@@ -888,6 +904,7 @@
             terminalContainerRef.scrollTop = terminalContainerRef.scrollHeight;
         }
 
+        // Finalize Processing Workflow Success Handshake Target Extraction
         function finalizeAuditWorkflowOutcomeManifests() {
             const savedManifestDataObj = JSON.parse(localStorage.getItem('bunny_wifi_audit_manifest_v2'));
             if (savedManifestDataObj) {
@@ -912,6 +929,7 @@
             calculateStorageCacheAllocationFootprintMetrics();
         }
 
+        // Paint Core Vault Element Items Array Mapping Nodes Inside Container Frame View
         function paintVaultCredentialsDisplayList(passwordsDataCollectionArray) {
             const containersRef = document.getElementById('passwords-injector-node');
             containersRef.innerHTML = '';
@@ -950,6 +968,7 @@
             lucide.createIcons();
         }
 
+        // Local Instant Inside Vault Content Search Filtering Arrays Stream
         function filterVaultPasswordsDisplayList() {
             const targetSearchQueryValueStr = document.getElementById('vaultContentSearchFilterInput').value.trim().toLowerCase();
             const matchedFilteredSubArrayResults = loadedActiveGeneratedPasswordsCache.filter(itemStringValue => 
@@ -958,20 +977,23 @@
             paintVaultCredentialsDisplayList(matchedFilteredSubArrayResults);
         }
 
+        // Toggle Turbo Processing Matrix Cycle Clock Rate Acceleration Speeds
         function toggleTurboSpeedMultiplierMode() {
             const modeLabelRef = document.getElementById('speedMultiplierModeLabel');
+            
+            // Check if active execution running inside interval stack loop
             const manifestObj = JSON.parse(localStorage.getItem('bunny_wifi_audit_manifest_v2'));
             const isCurrentlyRunningStateActive = (auditIntervalReference !== null && (!manifestObj || (!manifestObj.isCompleted && !manifestObj.isCancelled)));
 
             if (!isTurboSpeedModeEnabled) {
                 isTurboSpeedModeEnabled = true;
-                currentIntervalTimerPeriodMillis = 150; 
+                currentIntervalTimerPeriodMillis = 150; // Super Fast Accelerated Cycle Frequency Shift
                 modeLabelRef.innerText = "Speed: Turbo Active";
                 modeLabelRef.style.color = "var(--success-green)";
                 triggerSystemToast("Turbo processing matrix cycle mode acceleration operational");
             } else {
                 isTurboSpeedModeEnabled = false;
-                currentIntervalTimerPeriodMillis = 1000; 
+                currentIntervalTimerPeriodMillis = 1000; // Restore standard ticking periods
                 modeLabelRef.innerText = "Speed: Normal";
                 modeLabelRef.style.color = "var(--text-pure)";
                 triggerSystemToast("Restored standard clock diagnostic baseline frequency rates");
@@ -984,6 +1006,7 @@
             }
         }
 
+        // Clipboard Copy Utility Handler Integration Module
         function extractPasskeyTokenToClipboard(textStringPayload) {
             navigator.clipboard.writeText(textStringPayload)
                 .then(() => {
@@ -992,12 +1015,13 @@
                 });
         }
 
+        // Persistent Session Memory Recovery Boot Loader Verification Block
         function checkManifestSessionRecovery() {
             const serializedManifestRawValue = localStorage.getItem('bunny_wifi_audit_manifest_v2');
             if (!serializedManifestRawValue) return;
 
             const structuredDataSessionModel = JSON.parse(serializedManifestRawValue);
-            if (structuredDataSessionModel.isCancelled) return; 
+            if (structuredDataSessionModel.isCancelled) return; // Ignore canceled tasks data streams
 
             document.getElementById('wifi-target-ssid').value = structuredDataSessionModel.ssid;
             document.getElementById('wifi-target-ssid').disabled = true;
@@ -1020,6 +1044,7 @@
             }
         }
 
+        // Export Clean Official PDF Layout Report Records Vault Documents
         function exportAuditCredentialsPdfReport() {
             const { jsPDF } = window.jspdf;
             const pdfDocInstance = new jsPDF();
@@ -1073,6 +1098,7 @@
             triggerSystemToast("PDF diagnostic logs document generated and downloaded successfully");
         }
 
+        // Historic Logging Append Persistence Tracker Method
         function appendHistoricalSessionRecordLogItem(ssidContextLabel, stringOutcomeStatusFlag) {
             let arraysListCollection = [];
             const existingHistoryRecordsRawValue = localStorage.getItem('bunny_wifi_history_logs_array');
@@ -1086,13 +1112,14 @@
                 timestamp: new Date().toLocaleTimeString()
             };
 
-            arraysListCollection.unshift(appendLogObjectNode); 
-            if (arraysListCollection.length > 10) arraysListCollection.pop(); 
+            arraysListCollection.unshift(appendLogObjectNode); // Push to stack top positions index tracking distribution arrays
+            if (arraysListCollection.length > 10) arraysListCollection.pop(); // Cap history collection length constraint boundary rules
 
             localStorage.setItem('bunny_wifi_history_logs_array', JSON.stringify(arraysListCollection));
             renderSessionAuditLogsHistoryPanelList();
         }
 
+        // Paint Session History Tracker Array inside View Panel UI
         function renderSessionAuditLogsHistoryPanelList() {
             const listWrapperRef = document.getElementById('sessionHistoryTrackerListWrapper');
             listWrapperRef.innerHTML = '';
@@ -1116,16 +1143,18 @@
             });
         }
 
+        // Measure Exact Allocated Application Cache Storage Footprint Counter Sizes
         function calculateStorageCacheAllocationFootprintMetrics() {
             let overallTotalCharactersCountBytes = 0;
             for (let localKeyIndex in localStorage) {
                 if (!localStorage.hasOwnProperty(localKeyIndex)) continue;
-                overallTotalCharactersCountBytes += ((localStorage[localKeyIndex].length + localKeyIndex.length) * 2); 
+                overallTotalCharactersCountBytes += ((localStorage[localKeyIndex].length + localKeyIndex.length) * 2); // 2 Bytes per string character allocation overhead estimation
             }
             const convertedKiloBytesMetricRepresentation = (overallTotalCharactersCountBytes / 1024).toFixed(2);
             document.getElementById('storageCacheAllocationBytesCounterLabel').innerText = `${convertedKiloBytesMetricRepresentation} KB`;
         }
 
+        // Flush and Clear Persistent Storage Arrays Manifest Keys Completely
         function flushApplicationStorageCacheManifests() {
             if (auditIntervalReference) clearInterval(auditIntervalReference);
             localStorage.clear();
@@ -1159,35 +1188,39 @@
             triggerHapticFeedbackVibrationEngine();
         }
 
+        // Sound Notification Synthesis Beep Output Generator Routine
         function triggerCountdownSoundAlertBeepFrequencyNode(currentElapsedProgressClockIndexValue) {
             const totalRemainingSecondsInverseDelta = TOTAL_AUDIT_DURATION_SECONDS - currentElapsedProgressClockIndexValue;
             
+            // Activate audio signal pulses exclusively within critical countdown thresholds
             if (totalRemainingSecondsInverseDelta <= 5 && totalRemainingSecondsInverseDelta > 0) {
                 try {
                     let osc = window.audioFeedbackContextChannel.createOscillator();
                     let gainNodeRef = window.audioFeedbackContextChannel.createGain();
                     
                     osc.type = "sine";
-                    osc.frequency.setValueAtTime(880, window.audioFeedbackContextChannel.currentTime); 
+                    osc.frequency.setValueAtTime(880, window.audioFeedbackContextChannel.currentTime); // High pitch crisp sound
                     gainNodeRef.gain.setValueAtTime(0.05, window.audioFeedbackContextChannel.currentTime);
                     
                     osc.connect(gainNodeRef);
                     gainNodeRef.connect(window.audioFeedbackContextChannel.destination);
                     
                     osc.start();
-                    osc.stop(window.audioFeedbackContextChannel.currentTime + 0.08); 
+                    osc.stop(window.audioFeedbackContextChannel.currentTime + 0.08); // Pulse length duration constraints
                 } catch (audioExceptionContextLog) {
                     console.warn("Audio hardware context processing exception intercepted safely:", audioExceptionContextLog);
                 }
             }
         }
 
+        // Hardware Haptic Touch Screen Vibration Simulation Signal Interceptor
         function triggerHapticFeedbackVibrationEngine() {
             if (navigator.vibrate) {
-                navigator.vibrate(40); 
+                navigator.vibrate(40); // 40 Milliseconds short vibration pulse feedback
             }
         }
 
+        // Rigid Swipe Physics Drag Controls Core Intercept Handlers Engines
         const toastElementRef = document.getElementById('systemToast');
         let isUserCurrentlyDraggingToastState = false;
         let originalPointerAnchorX = 0;
@@ -1203,7 +1236,7 @@
             if (!isUserCurrentlyDraggingToastState) return;
             let realTimeCurrentPointerPositionCursorX = pointerMoveEventArgs.clientX;
             computedTranslateOffsetDeltaX = realTimeCurrentPointerPositionCursorX - originalPointerAnchorX;
-            if (computedTranslateOffsetDeltaX < 0) computedTranslateOffsetDeltaX = 0; 
+            if (computedTranslateOffsetDeltaX < 0) computedTranslateOffsetDeltaX = 0; // Constraint bound orientation parameters rightwards only
             toastElementRef.style.transform = `translateX(${computedTranslateOffsetDeltaX}px)`;
         });
 
@@ -1235,7 +1268,7 @@
             toastElementRef.style.borderLeftColor = isErrorEventConditionBoolean ? "var(--netflix-red)" : "var(--success-green)";
             iconSvgNodeRef.setAttribute('data-lucide', isErrorEventConditionBoolean ? 'alert-triangle' : 'check-circle');
 
-                        lucide.createIcons();
+            lucide.createIcons();
             toastElementRef.style.transform = 'translateY(-150px)';
             toastElementRef.style.opacity = '0';
 
