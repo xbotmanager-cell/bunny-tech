@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bunny Media - Image Studio</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;}
+    :root {
+        --purple-glow: #bf5af2; --pink-glow: #ff377f; --glass-bg: rgba(22, 11, 36, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.1); --text-main: #f5f5f7; --text-sub: #9e9eb4;
+        --bg-dark: #06020a; --success: #30d158; --danger: #ff453a;
+    }
+    body {background: var(--bg-dark); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-main); height: 100vh; overflow: hidden;}
+   .app {display: flex; width: 100%; height: 100vh; flex-direction: column;}
+   .content {flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px;}
+   .tab-content {display: none;}
+   .tab-content.active {display: block; animation: fadeIn 0.3s;}
+    @keyframes fadeIn {from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); }}
+   .logo-header {text-align: center; margin-bottom: 20px;}
+   .logo {width: 70px; height: 70px; border-radius: 18px; margin: 0 auto 10px; display: block; box-shadow: 0 8px 32px rgba(191, 90, 242, 0.4);}
+   .logo-header h1 {font-size: 1.5rem; font-weight: 900; background: linear-gradient(135deg, var(--purple-glow), var(--pink-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+   .card {background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; margin-bottom: 16px;}
+   .card-title {font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;}
+   .btn {background: linear-gradient(135deg, var(--purple-glow), var(--pink-glow)); border: none; color: white; padding: 16px 24px; border-radius: 14px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 6px 20px rgba(191, 90, 242, 0.4);}
+   .btn:active {transform: scale(0.97);}
+   .btn:disabled {opacity: 0.5; pointer-events: none;}
+   .btn-secondary {background: rgba(255, 255, 255, 0.08); box-shadow: none; border: 1px solid var(--glass-border);}
+   .input {width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 12px; padding: 14px; color: var(--text-main); font-size: 1rem; font-family: inherit; margin-bottom: 12px; -webkit-user-select: text; user-select: text;}
+   .input:focus {outline: none; border-color: var(--purple-glow); box-shadow: 0 0 0 3px rgba(191, 90, 242, 0.2);}
+    textarea.input {min-height: 100px; resize: vertical;}
+    select.input {appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239e9eb4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center;}
+   .file-drop {border: 2px dashed var(--glass-border); border-radius: 12px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s;}
+   .file-drop.active {border-color: var(--purple-glow); background: rgba(191, 90, 242, 0.05);}
+   .image-preview {width: 100%; border-radius: 12px; margin-top: 12px; display: none;}
+   .image-preview.show {display: block;}
+   .result-grid {display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px;}
+   .result-image {width: 100%; border-radius: 12px; border: 1px solid var(--glass-border);}
+   .status-text {text-align: center; color: var(--text-sub); font-size: 0.85rem; margin: 12px 0;}
+   .tab-bar {position: fixed; bottom: 0; left: 0; right: 0; background: var(--glass-bg); backdrop-filter: blur(25px); border-top: 1px solid var(--glass-border); display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px 0 20px 0; z-index: 50;}
+   .tab-btn {background: none; border: none; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px; font-size: 0.7rem; font-weight: 700;}
+   .tab-btn.active {color: var(--purple-glow);}
+   .tab-btn i {width: 24px; height: 24px;}
+   .toast {position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 12px; padding: 14px 22px; display: flex; align-items: center; gap: 10px; z-index: 200; transition: transform 0.3s; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);}
+   .toast.show {transform: translateX(-50%) translateY(0);}
+   .history-grid {display: grid; grid-template-columns: 1fr 1fr; gap: 12px;}
+   .history-item {background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden;}
+   .history-item img {width: 100%; height: 120px; object-fit: cover;}
+   .history-item p {padding: 8px; font-size: 0.7rem; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+    input[type="file"] {display: none;}
+   .loader {width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 1s linear infinite;}
+    @keyframes spin {0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+    <div class="content">
+        <div class="logo-header">
+            <img src="https://i.ibb.co/LDMjMYyy/file-00000000855c71f89fb70f5f8bebc2b2.png" alt="Bunny Logo" class="logo">
+            <h1>BUNNY MEDIA</h1>
+        </div>
+
+        <!-- TAB 1: GENERATE -->
+        <div class="tab-content active" id="generateTab">
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="wand-2" style="width: 16px; height: 16px;"></i>
+                    TEXT TO IMAGE
+                </div>
+                <textarea class="input" id="promptInput" placeholder="Describe your image... e.g. a cyberpunk bunny in Nairobi at night, neon lights, 4k"></textarea>
+                <select class="input" id="styleSelect">
+                    <option value="">No Style</option>
+                    <option value="realistic">Realistic</option>
+                    <option value="anime">Anime</option>
+                    <option value="cartoon">Cartoon</option>
+                    <option value="pixel art">Pixel Art</option>
+                    <option value="oil painting">Oil Painting</option>
+                </select>
+                <select class="input" id="ratioSelect">
+                    <option value="1:1">Square 1:1</option>
+                    <option value="9:16">Story 9:16</option>
+                    <option value="16:9">Landscape 16:9</option>
+                </select>
+                <button class="btn" id="generateBtn">
+                    <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i>
+                    GENERATE
+                </button>
+                <div class="status-text" id="generateStatus"></div>
+                <div class="result-grid" id="generateResult"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: EDIT -->
+        <div class="tab-content" id="editTab">
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="image-up" style="width: 16px; height: 16px;"></i>
+                    IMAGE TO IMAGE
+                </div>
+                <div class="file-drop" id="fileDrop">
+                    <i data-lucide="upload-cloud" style="width: 32px; height: 32px; margin: 0 auto 8px; color: var(--text-sub);"></i>
+                    <p style="color: var(--text-sub); font-size: 0.9rem;">Drop image here or click to upload</p>
+                </div>
+                <input type="file" id="fileInput" accept="image/*">
+                <img class="image-preview" id="uploadPreview">
+                <textarea class="input" id="editPromptInput" placeholder="Describe changes... e.g. change background to beach, add sunglasses" style="margin-top: 12px;"></textarea>
+                <button class="btn" id="editBtn" disabled>
+                    <i data-lucide="paintbrush" style="width: 18px; height: 18px;"></i>
+                    EDIT IMAGE
+                </button>
+                <div class="status-text" id="editStatus"></div>
+                <div class="result-grid" id="editResult"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: HISTORY -->
+        <div class="tab-content" id="historyTab">
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="history" style="width: 16px; height: 16px;"></i>
+                    GENERATION HISTORY
+                </div>
+                <div class="history-grid" id="historyGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="generate">
+            <i data-lucide="sparkles"></i>
+            Generate
+        </button>
+        <button class="tab-btn" data-tab="edit">
+            <i data-lucide="paintbrush"></i>
+            Edit
+        </button>
+        <button class="tab-btn" data-tab="history">
+            <i data-lucide="history"></i>
+            History
+        </button>
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <i data-lucide="check-circle" style="width: 20px; height: 20px; color: var(--success);"></i>
+    <span id="toastText">Success</span>
+</div>
+
+<script>
+lucide.createIcons();
+
+// Global State
+let history = [];
+let uploadedImageBase64 = null;
+
+// Safe LocalStorage Load
+try {
+    const stored = localStorage.getItem('bunnyMediaHistory');
+    if (stored) history = JSON.parse(stored);
+} catch (e) {
+    history = [];
+}
+
+// 15 PUBLIC TEXT-TO-IMAGE APIS - NO KEY REQUIRED
+const TEXT_TO_IMAGE_APIS = [
+    {
+        name: 'Pollinations',
+        buildUrl: (prompt, style, ratio) => `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + (style? ', ' + style + ' style' : ''))}?width=${getWidth(ratio)}&height=${getHeight(ratio)}&nologo=true&seed=${Math.floor(Math.random()*100000)}`
+    },
+    {
+        name: 'Pollinations-Flux',
+        buildUrl: (prompt, style, ratio) => `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + (style? ', ' + style : ''))}?model=flux&width=${getWidth(ratio)}&height=${getHeight(ratio)}&nologo=true`
+    },
+    {
+        name: 'Pollinations-Turbo',
+        buildUrl: (prompt, style, ratio) => `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=turbo&width=${getWidth(ratio)}&height=${getHeight(ratio)}&nologo=true`
+    },
+    {
+        name: 'HuggingFace-SDXL',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt + (style? ', ' + style + ' style' : '')})
+    },
+    {
+        name: 'HuggingFace-Playground',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/playgroundai/playground-v2-1024px-aesthetic`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-Dreamlike',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/dreamlike-art/dreamlike-photoreal-2.0`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-OpenJourney',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/prompthero/openjourney`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-RealisticVision',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/SG161222/Realistic_Vision_V5.1_noVAE`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-AnythingV5',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/stablediffusionapi/anything-v5`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-Deliberate',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/XpucT/Deliberate`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-SD15',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-SD21',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-Counterfeit',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/gsdf/Counterfeit-V3.0`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-AbyssOrangeMix',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/WarriorMama777/OrangeMixs`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    },
+    {
+        name: 'HuggingFace-EpicRealism',
+        buildUrl: (prompt, style, ratio) => `https://api-inference.huggingface.co/models/epinikion/epicrealism_naturalSinRC1VAE`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, style) => JSON.stringify({inputs: prompt})
+    }
+];
+
+// 15 PUBLIC IMAGE-TO-IMAGE APIS - NO KEY REQUIRED
+const IMAGE_TO_IMAGE_APIS = [
+    {
+        name: 'Pollinations-Edit',
+        buildUrl: (prompt, imageBase64) => `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&image=${encodeURIComponent(imageBase64)}&nologo=true`
+    },
+    {
+        name: 'HuggingFace-SDXL-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-ControlNet-Canny',
+        buildUrl: () => `https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-canny`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-ControlNet-Depth',
+        buildUrl: () => `https://api-inference.huggingface.co/models/lllyasviel/sd-controlnet-depth`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-InstructPix2Pix',
+        buildUrl: () => `https://api-inference.huggingface.co/models/timbrooks/instruct-pix2pix`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-SD15-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-SD21-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-Kandinsky-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/kandinsky-community/kandinsky-2-2-decoder`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-DeepFloyd-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/DeepFloyd/IF-I-XL-v1.0`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-RealisticVision-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/SG161222/Realistic_Vision_V5.1_noVAE`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-Dreamlike-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/dreamlike-art/dreamlike-photoreal-2.0`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-OpenJourney-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/prompthero/openjourney`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-AnythingV5-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/stablediffusionapi/anything-v5`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-Deliberate-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/XpucT/Deliberate`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    },
+    {
+        name: 'HuggingFace-Counterfeit-Img2Img',
+        buildUrl: () => `https://api-inference.huggingface.co/models/gsdf/Counterfeit-V3.0`,
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: (prompt, imageBase64) => JSON.stringify({inputs: prompt, parameters: {image: imageBase64}})
+    }
+];
+
+function getWidth(ratio) {
+    if (ratio === '9:16') return 576;
+    if (ratio === '16:9') return 1024;
+    return 768;
+}
+
+function getHeight(ratio) {
+    if (ratio === '9:16') return 1024;
+    if (ratio === '16:9') return 576;
+    return 768;
+}
+
+// Toast Helper
+function showToast(text, success = true) {
+    const toast = document.getElementById('toast');
+    const icon = toast.querySelector('i');
+    document.getElementById('toastText').textContent = text;
+    icon.setAttribute('data-lucide', success? 'check-circle' : 'alert-circle');
+    icon.style.color = success? 'var(--success)' : 'var(--danger)';
+    lucide.createIcons();
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
+    });
+});
+
+// Generate Image with 15 Fallbacks
+document.getElementById('generateBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('generateBtn');
+    const status = document.getElementById('generateStatus');
+    const result = document.getElementById('generateResult');
+    const prompt = document.getElementById('promptInput').value.trim();
+    const style = document.getElementById('styleSelect').value;
+    const ratio = document.getElementById('ratioSelect').value;
+
+    if (!prompt) {
+        showToast('Enter a prompt first', false);
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div> GENERATING...';
+    result.innerHTML = '';
+    status.textContent = 'Trying API 1 of 15...';
+
+    let success = false;
+    for (let i = 0; i < TEXT_TO_IMAGE_APIS.length; i++) {
+        const api = TEXT_TO_IMAGE_APIS[i];
+        status.textContent = `Trying ${api.name} (${i+1}/15)...`;
+
+        try {
+            let imageUrl;
+            if (api.method === 'POST') {
+                const response = await fetch(api.buildUrl(), {
+                    method: 'POST',
+                    headers: api.headers,
+                    body: api.body(prompt, style)
+                });
+                if (!response.ok) throw new Error('API failed');
+                const blob = await response.blob();
+                imageUrl = URL.createObjectURL(blob);
+            } else {
+                imageUrl = api.buildUrl(prompt, style, ratio);
+                await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = imageUrl;
+                });
+            }
+
+            result.innerHTML = `
+                <img src="${imageUrl}" class="result-image" alt="Generated">
+                <button class="btn btn-secondary" onclick="downloadImage('${imageUrl}', 'bunny-${Date.now()}.png')">
+                    <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+                    DOWNLOAD
+                </button>
+            `;
+            lucide.createIcons();
+            status.textContent = `Success with ${api.name}!`;
+            success = true;
+
+            history.unshift({id: Date.now(), prompt: prompt, image: imageUrl, date: new Date().toLocaleString()});
+            if (history.length > 20) history.pop();
+            try {
+                localStorage.setItem('bunnyMediaHistory', JSON.stringify(history));
+            } catch (e) {}
+            renderHistory();
+            break;
+
+        } catch (e) {
+            continue;
+        }
+    }
+
+    if (!success) {
+        status.textContent = 'All 15 APIs failed. Try again later.';
+        showToast('All servers busy', false);
+    } else {
+        showToast('Image generated!');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="sparkles" style="width: 18px; height: 18px;"></i> GENERATE';
+    lucide.createIcons();
+});
+
+// File Upload
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+const uploadPreview = document.getElementById('uploadPreview');
+const editBtn = document.getElementById('editBtn');
+
+fileDrop.addEventListener('click', () => fileInput.click());
+fileDrop.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileDrop.classList.add('active');
+});
+fileDrop.addEventListener('dragleave', () => {
+    fileDrop.classList.remove('active');
+});
+fileDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileDrop.classList.remove('active');
+    handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+    handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+    if (!file ||!file.type.startsWith('image/')) {
+        showToast('Please upload an image', false);
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        uploadedImageBase64 = e.target.result;
+        uploadPreview.src = uploadedImageBase64;
+        uploadPreview.classList.add('show');
+        editBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Edit Image with 15 Fallbacks
+document.getElementById('editBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('editBtn');
+    const status = document.getElementById('editStatus');
+    const result = document.getElementById('editResult');
+    const prompt = document.getElementById('editPromptInput').value.trim();
+
+    if (!prompt ||!uploadedImageBase64) {
+        showToast('Upload image and enter edit prompt', false);
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div> EDITING...';
+    result.innerHTML = '';
+    status.textContent = 'Trying API 1 of 15...';
+
+    let success = false;
+    for (let i = 0; i < IMAGE_TO_IMAGE_APIS.length; i++) {
+        const api = IMAGE_TO_IMAGE_APIS[i];
+        status.textContent = `Trying ${api.name} (${i+1}/15)...`;
+
+        try {
+            let imageUrl;
+            if (api.method === 'POST') {
+                const response = await fetch(api.buildUrl(), {
+                    method: 'POST',
+                    headers: api.headers,
+                    body: api.body(prompt, uploadedImageBase64)
+                });
+                if (!response.ok) throw new Error('API failed');
+                const blob = await response.blob();
+                imageUrl = URL.createObjectURL(blob);
+            } else {
+                imageUrl = api.buildUrl(prompt, uploadedImageBase64);
+                await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = resolve;
+                    img.onerror = reject;
+                    img.src = imageUrl;
+                });
+            }
+
+            result.innerHTML = `
+                <img src="${imageUrl}" class="result-image" alt="Edited">
+                <button class="btn btn-secondary" onclick="downloadImage('${imageUrl}', 'bunny-edit-${Date.now()}.png')">
+                    <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+                    DOWNLOAD
+                </button>
+            `;
+            lucide.createIcons();
+            status.textContent = `Success with ${api.name}!`;
+            success = true;
+
+            history.unshift({id: Date.now(), prompt: prompt, image: imageUrl, date: new Date().toLocaleString()});
+            if (history.length > 20) history.pop();
+            try {
+                localStorage.setItem('bunnyMediaHistory', JSON.stringify(history));
+            } catch (e) {}
+            renderHistory();
+            break;
+
+        } catch (e) {
+            continue;
+        }
+    }
+
+    if (!success) {
+        status.textContent = 'All 15 APIs failed. Try again later.';
+        showToast('All servers busy', false);
+    } else {
+        showToast('Image edited!');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="paintbrush" style="width: 18px; height: 18px;"></i> EDIT IMAGE';
+    lucide.createIcons();
+});
+
+// Download Helper
+window.downloadImage = (url, filename) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+};
+
+// Render History
+function renderHistory() {
+    const grid = document.getElementById('historyGrid');
+    if (history.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: var(--text-sub); grid-column: 1 / -1;">No images yet</p>';
+        return;
+    }
+    grid.innerHTML = history.map(h => `
+        <div class="history-item">
+            <img src="${h.image}" alt="History">
+            <p>${h.prompt}</p>
+        </div>
+    `).join('');
+}
+
+renderHistory();
+</script>
+</body>
+</html>
