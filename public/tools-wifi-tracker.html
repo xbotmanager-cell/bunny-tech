@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The NetSpy Engine - Advanced Subnet Recon</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #040209;
+            --purple-glow: #8e2de2;
+            --pink-glow: #ff2d55;
+            --cyan-glow: #00f2fe;
+            --green-glow: #30d158;
+            --yellow-glow: #ffd60a;
+            --glass-bg: rgba(16, 8, 28, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --text-main: #f5f5f7;
+            --text-muted: #9e9eb0;
+            --panel-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+        }
+
+        .light-theme {
+            --bg-color: #f6f5fa;
+            --purple-glow: #9b51e0;
+            --pink-glow: #e63946;
+            --cyan-glow: #007aff;
+            --green-glow: #2ecc71;
+            --yellow-glow: #f39c12;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(142, 45, 226, 0.12);
+            --text-main: #1c1c1e;
+            --text-muted: #6e6e73;
+            --panel-shadow: 0 16px 36px rgba(142, 45, 226, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.4s ease, color 0.4s ease;
+            padding-bottom: 30px;
+        }
+
+        /* --- Super Fast Circular Loader Layer --- */
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(145deg, #040209, #0f061c);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fast-loader-ring {
+            position: relative;
+            width: 100px; height: 100px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .fast-loader-ring::before {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 5px solid rgba(255, 255, 255, 0.03);
+            border-top: 5px solid var(--cyan-glow);
+            border-bottom: 5px solid var(--pink-glow);
+            border-radius: 50%;
+            animation: superFastSpin 0.4s linear infinite;
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.2);
+        }
+
+        @keyframes superFastSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .blinking-dots-center { display: flex; gap: 6px; z-index: 10; }
+        .core-dot {
+            width: 10px; height: 10px;
+            background-color: var(--purple-glow);
+            border-radius: 50%;
+            animation: fastPulseDot 0.45s infinite alternate;
+        }
+        .core-dot:nth-child(2) { background-color: var(--cyan-glow); animation-delay: 0.15s; }
+        .core-dot:nth-child(3) { background-color: var(--pink-glow); animation-delay: 0.3s; }
+
+        @keyframes fastPulseDot {
+            0% { opacity: 0.2; transform: scale(0.75); }
+            100% { opacity: 1; transform: scale(1.25); }
+        }
+
+        #welcome-title {
+            margin-top: 28px;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--cyan-glow), var(--purple-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        /* --- Ambient Vector Background Space --- */
+        .ambient-glow-space {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1; overflow: hidden; pointer-events: none;
+        }
+
+        .glow-node {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.15;
+            animation: driftingFluidics 25s infinite ease-in-out alternate;
+        }
+
+        @keyframes driftingFluidics {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, -70px) scale(1.25); }
+        }
+
+        /* --- Base Layout Wrapper --- */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 22px;
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            box-shadow: var(--panel-shadow);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-title {
+            font-size: 1.05rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan-glow), var(--purple-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .icon-btn:active { transform: scale(0.9); }
+
+        /* --- Section Header Labels --- */
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            margin-left: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Geolocation & Local Gateway Profile Banner --- */
+        .geo-banner {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: linear-gradient(135deg, rgba(142, 45, 226, 0.12), rgba(0, 242, 254, 0.04));
+        }
+
+        .geo-banner i {
+            color: var(--cyan-glow);
+            animation: pulseFlicker 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseFlicker {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .geo-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .geo-details .geo-ip {
+            font-size: 0.85rem;
+            font-weight: 800;
+            font-family: monospace;
+        }
+
+        .geo-details .geo-loc {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Configuration Target Inputs --- */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--cyan-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: monospace;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--cyan-glow);
+        }
+
+        .select-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* --- Scan Pipeline Buttons --- */
+        .action-trigger-btn {
+            background: linear-gradient(135deg, var(--cyan-glow), var(--purple-glow));
+            border: none;
+            color: #ffffff;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0, 242, 254, 0.2);
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-trigger-btn:active { transform: scale(0.97); }
+        .action-trigger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Linear Ingress Progress Bar Component --- */
+        .progress-block {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .progress-metrics-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            font-weight: 800;
+            font-family: monospace;
+        }
+
+        .progress-track-shell {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan-glow), var(--green-glow));
+            transition: width 0.1s linear;
+        }
+
+        /* --- Analytics Visual Layer --- */
+        .analytics-shell {
+            display: none;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .chart-shell {
+            position: relative;
+            width: 100%; height: 140px;
+        }
+
+        .metrics-summary-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .summary-badge {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-badge span { font-size: 0.68rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;}
+        .summary-badge strong { font-size: 0.95rem; font-family: monospace; }
+
+        /* --- Device Discovery Feed Grid --- */
+        .discovery-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .discovery-grid::-webkit-scrollbar { width: 4px; }
+        .discovery-grid::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 2px; }
+
+        .device-card-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            animation: cardEntranceFade 0.4s ease forwards;
+        }
+
+        @keyframes cardEntranceFade {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .device-meta-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .device-avatar-node {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .device-avatar-node.gateway { color: var(--cyan-glow); background: rgba(0, 242, 254, 0.05); }
+        .device-avatar-node.rogue { color: var(--pink-glow); background: rgba(255, 45, 85, 0.05); }
+        .device-avatar-node.trusted { color: var(--green-glow); background: rgba(48, 209, 88, 0.05); }
+
+        .device-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .device-hostname { font-size: 0.82rem; font-weight: 800; }
+        .device-ip-addr { font-size: 0.72rem; font-family: monospace; color: var(--text-muted); }
+        .device-mac-addr { font-size: 0.65rem; font-family: monospace; color: var(--text-muted); letter-spacing: 0.2px; }
+
+        .status-pill {
+            font-size: 0.62rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pill.gateway { background: rgba(0, 242, 254, 0.12); color: var(--cyan-glow); }
+        .status-pill.rogue { background: rgba(255, 45, 85, 0.12); color: var(--pink-glow); animation: flashAlert 1s infinite alternate; }
+        .status-pill.trusted { background: rgba(48, 209, 88, 0.12); color: var(--green-glow); }
+
+        @keyframes flashAlert {
+            0% { opacity: 0.6; } 100% { opacity: 1; box-shadow: 0 0 8px rgba(255, 45, 85, 0.2); }
+        }
+
+        /* --- Rogue Threat Modal / Banner Popup --- */
+        .alert-popup-banner {
+            position: fixed;
+            top: 24px; left: 20px; right: 20px;
+            background: rgba(15, 4, 12, 0.96);
+            border: 1px solid rgba(255, 45, 85, 0.25);
+            border-left: 4px solid var(--pink-glow);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: var(--text-main);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideDownIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideDownIn {
+            from { transform: translateY(-40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .alert-popup-banner i { color: var(--pink-glow); }
+        .alert-popup-text { font-size: 0.78rem; font-weight: 700; line-height: 1.3; }
+
+        /* --- Export Utility Elements --- */
+        .export-footer-panel {
+            display: none;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        .export-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .export-btn:active { background: rgba(255,255,255,0.03); }
+    </style>
+</head>
+<body>
+
+    <div class="alert-popup-banner" id="threatAlertPopupNode">
+        <i data-lucide="shield-alert"></i>
+        <div class="alert-popup-text" id="threatAlertMessageText">ROGUE DEVICE DISCOVERED: An unidentified terminal bypass detected.</div>
+    </div>
+
+    <div id="loading-screen">
+        <div class="fast-loader-ring">
+            <div class="blinking-dots-center">
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+                <div class="core-dot"></div>
+            </div>
+        </div>
+        <div id="welcome-title">The NetSpy Engine</div>
+    </div>
+
+    <div class="ambient-glow-space">
+        <div class="glow-node" style="width:250px; height:250px; background:rgba(142, 45, 226, 0.15); top:10%; left:-5vw;"></div>
+        <div class="glow-node" style="width:280px; height:280px; background:rgba(0, 242, 254, 0.12); bottom:15%; right:-5vw;"></div>
+    </div>
+
+    <div class="app-container">
+        
+        <header class="glass-panel">
+            <span class="brand-title">THE NETSPY ENGINE</span>
+            <button class="icon-btn" onclick="toggleEcosystemThemeVariant()" id="themeToggleBtn">
+                <i data-lucide="moon"></i>
+            </button>
+        </header>
+
+        <div class="glass-panel geo-banner">
+            <i data-lucide="map-pin"></i>
+            <div class="geo-details">
+                <span class="geo-ip" id="localGatewayIpField">192.168.1.1</span>
+                <span class="geo-loc" id="networkOperatorField">Resolving Infrastructure Coordinates...</span>
+            </div>
+        </div>
+
+        <div class="glass-panel">
+            <div class="section-title"><i data-lucide="sliders"></i>Recon Parameters Mapping</div>
+            
+            <div class="input-group">
+                <label>Target Subnet Scope Boundary</label>
+                <input type="text" class="input-field" value="192.168.1.0 / 24" id="subnetScopeInput" />
+            </div>
+
+            <div class="input-group" style="margin-bottom: 18px;">
+                <label>Scan Strategy Protocol Pipeline</label>
+                <select class="select-field" id="scanStrategySelector">
+                    <option value="fast">Fast Ping Sweep (ICMP Broadcast Mapping)</option>
+                    <option value="deep">Deep Recon Mode (ARP Request + OS Fingerprint)</option>
+                </select>
+            </div>
+
+            <button class="action-trigger-btn" id="executeScanActionTriggerBtn" onclick="initiateSubnetDiscoverySequence()">
+                <i data-lucide="scan-line"></i> Execute Subnet Scanning
+            </button>
+
+            <div class="progress-block" id="scanProgressContainerBlock">
+                <div class="progress-metrics-labels">
+                    <span id="scanProgressStatusLabel">Scanning Subnet Scope Pool...</span>
+                    <span id="scanProgressPercentageLabel">0%</span>
+                </div>
+                <div class="progress-track-shell">
+                    <div class="progress-fill-bar" id="scanProgressBarLinearFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel analytics-shell" id="reconAnalyticsDataPanel">
+            <div class="chart-shell">
+                <canvas id="subnetPieChartDistributionCanvas"></canvas>
+            </div>
+            <div class="metrics-summary-box">
+                <div class="summary-badge">
+                    <span>Total Nodes</span>
+                    <strong id="totalDiscoveredNodesCounterLabel">0</strong>
+                </div>
+                <div class="summary-badge" style="border-left: 2px solid var(--pink-glow);">
+                    <span>Rogue Alerts</span>
+                    <strong id="totalRogueThreatsCounterLabel" style="color: var(--pink-glow);">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title"><i data-lucide="cpu"></i>Discovered Terminal Matrix Streams</div>
+            <div class="glass-panel" style="padding: 16px;">
+                <div class="discovery-grid" id="discoveredDevicesFeedGridWrapper">
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 30px 10px;" id="gridFallbackEmptyMessageNode">
+                        No active scan instance found. Execute Subnet Scan routine to gather live telemetry records.
+                    </div>
+                </div>
+                
+                <div class="export-footer-panel" id="exportUtilityPanelNode">
+                    <button class="export-btn" onclick="exportDiscoveredSubnetDatasetLog()"><i data-lucide="download"></i> Export Intelligence Log</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // System Application State Variables
+        let activeThemeModeVariantContext = 'dark';
+        let referencePieChartInstance = null;
+        let scanPipelineProcessingIntervalTimer = null;
+        let memoryCacheDiscoveredTerminalsListArray = [];
+
+        // App Initialization Sequence Binding Event Handler
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            resolveClientInfrastructureCoordinates();
+            
+            // Fast Loader Timeout Routine Execution Simulation Loop
+            setTimeout(() => {
+                const loaderScreen = document.getElementById('loading-screen');
+                loaderScreen.style.opacity = '0';
+                loaderScreen.style.transform = 'scale(1.05)';
+                setTimeout(() => { loaderScreen.style.display = 'none'; }, 500);
+            }, 2200);
+        });
+
+        // Toggle UI/UX Ecosystem Color Theme Layout Switcher
+        function toggleEcosystemThemeVariant() {
+            const bodyNodeRef = document.body;
+            const themeButtonIconRef = document.querySelector('#themeToggleBtn i');
+
+            if (activeThemeModeVariantContext === 'dark') {
+                bodyNodeRef.classList.add('light-theme');
+                activeThemeModeVariantContext = 'light';
+                themeButtonIconRef.setAttribute('data-lucide', 'sun');
+            } else {
+                bodyNodeRef.classList.remove('light-theme');
+                activeThemeModeVariantContext = 'dark';
+                themeButtonIconRef.setAttribute('data-lucide', 'moon');
+            }
+            lucide.createIcons();
+        }
+
+        // Asynchronous Network Operator Profile Lookup
+        function resolveClientInfrastructureCoordinates() {
+            fetch('https://ipapi.co/json/')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('localGatewayIpField').innerText = data.ip || "192.168.1.34";
+                    document.getElementById('networkOperatorField').innerText = `${data.org || 'Airtel Tanzania'} // ${data.city || 'Dar es Salaam'}, TZ`;
+                    
+                    const calculatedSubnetBaseString = (data.ip) ? data.ip.split('.').slice(0, 3).join('.') + '.0 / 24' : "192.168.1.0 / 24";
+                    document.getElementById('subnetScopeInput').value = calculatedSubnetBaseString;
+                })
+                .catch(() => {
+                    document.getElementById('localGatewayIpField').innerText = "192.168.1.72";
+                    document.getElementById('networkOperatorField').innerText = "Local Wi-Fi Hub Node Gateway Access Point";
+                });
+        }
+
+        // Mock Database Source Registry for Scanner Parsing Logic Loops
+        const mockVulnerabilitiesProfileDirectory = [
+            { name: "Main Gateway Router", vendor: "Huawei Technologies", mac: "00:25:96:FF:12:A1", type: "gateway" },
+            { name: "Lupin Personal Terminal", vendor: "Infinix SMART 20", mac: "CC:94:D2:88:B5:E4", type: "trusted" },
+            { name: "Linux Core Compute Server", vendor: "Intel Architecture", mac: "44:85:00:11:B2:C3", type: "trusted" },
+            { name: "Smart Entertainment Screen", vendor: "Samsung Electronics", mac: "88:C2:B3:94:E1:AA", type: "trusted" },
+            { name: "Unknown Android Host Node", vendor: "Unidentified Terminal", mac: "24:A1:D3:77:8F:90", type: "rogue" },
+            { name: "Unauthorized Desktop Rig", vendor: "Micro-Star International", mac: "7C:A1:B2:C3:D4:E5", type: "rogue" },
+            { name: "Home Storage NAS Cluster", vendor: "Synology Inc.", mac: "00:11:32:A1:B5:C9", type: "trusted" }
+        ];
+
+        // Core Subnet Scanner Automation Trigger Pipeline Loop Sequence
+        function initiateSubnetDiscoverySequence() {
+            const scanBtn = document.getElementById('executeScanActionTriggerBtn');
+            const progressContainer = document.getElementById('scanProgressContainerBlock');
+            const progressBar = document.getElementById('scanProgressBarLinearFill');
+            const progressPercentageLabel = document.getElementById('scanProgressPercentageLabel');
+            const progressStatusLabel = document.getElementById('scanProgressStatusLabel');
+            const gridWrapper = document.getElementById('discoveredDevicesFeedGridWrapper');
+            const emptyFallbackMessage = document.getElementById('gridFallbackEmptyMessageNode');
+            const analyticsPanel = document.getElementById('reconAnalyticsDataPanel');
+            const exportPanel = document.getElementById('exportUtilityPanelNode');
+
+            // Resetting Context Environment Layout Spaces
+            scanBtn.disabled = true;
+            progressContainer.style.display = 'flex';
+            progressBar.style.width = '0%';
+            progressPercentageLabel.innerText = '0%';
+            progressStatusLabel.innerText = 'Initialising ICMP Scan Request Packets Loop...';
+            gridWrapper.innerHTML = '';
+            analyticsPanel.style.display = 'none';
+            exportPanel.style.display = 'none';
+            document.getElementById('threatAlertPopupNode').style.display = 'none';
+            
+            memoryCacheDiscoveredTerminalsListArray = [];
+            let currentLinearProgressStepIndex = 0;
+            let targetDeviceDiscoveryCursorIndex = 0;
+
+            const selectedStrategyContext = document.getElementById('scanStrategySelector').value;
+            const executionVelocityCycleDelay = (selectedStrategyContext === 'fast') ? 120 : 250;
+
+            scanPipelineProcessingIntervalTimer = setInterval(() => {
+                currentLinearProgressStepIndex += Math.floor(Math.random() * 8) + 4;
+                if (currentLinearProgressStepIndex > 100) currentLinearProgressStepIndex = 100;
+
+                progressBar.style.width = `${currentLinearProgressStepIndex}%`;
+                progressPercentageLabel.innerText = `${currentLinearProgressStepIndex}%`;
+
+                // Sub-text status shifting logic
+                if (currentLinearProgressStepIndex > 25 && currentLinearProgressStepIndex < 60) {
+                    progressStatusLabel.innerText = 'Evaluating ARP Broadcast Tables Fingerprints...';
+                } else if (currentLinearProgressStepIndex >= 60 && currentLinearProgressStepIndex < 90) {
+                    progressStatusLabel.innerText = 'Parsing Hardware OUI Vendor Signature Tables...';
+                } else if (currentLinearProgressStepIndex >= 90) {
+                    progressStatusLabel.innerText = 'Finalising Structural Discovery Context Mapping...';
+                }
+
+                // Injecting devices gradually to increase realism factor indices
+                if (currentLinearProgressStepIndex >= (targetDeviceDiscoveryCursorIndex + 1) * 14 && targetDeviceDiscoveryCursorIndex < mockVulnerabilitiesProfileDirectory.length) {
+                    const discoveredSamplePointData = mockVulnerabilitiesProfileDirectory[targetDeviceDiscoveryCursorIndex];
+                    appendTerminalDiscoveryCardItem(discoveredSamplePointData, targetDeviceDiscoveryCursorIndex);
+                    memoryCacheDiscoveredTerminalsListArray.push(discoveredSamplePointData);
+
+                    if (discoveredSamplePointData.type === 'rogue') {
+                        triggerRogueThreatAlertPopupNotification(discoveredSamplePointData);
+                    }
+                    targetDeviceDiscoveryCursorIndex++;
+                }
+
+                if (currentLinearProgressStepIndex === 100) {
+                    clearInterval(scanPipelineProcessingIntervalTimer);
+                    
+                    scanBtn.disabled = false;
+                    progressStatusLabel.innerText = 'Subnet Discovery Run Evaluation Complete.';
+                    exportPanel.style.display = 'flex';
+                    
+                    compileSubnetDiscoveryStructureAnalytics();
+                }
+
+            }, executionVelocityCycleDelay);
+        }
+
+        // Generate and Append DOM Element Items into Discovery Terminal Feed
+        function appendTerminalDiscoveryCardItem(deviceObj, calculatedSubnetIpSuffixOffset) {
+            const gridWrapper = document.getElementById('discoveredDevicesFeedGridWrapper');
+            const targetBaseScopeString = document.getElementById('subnetScopeInput').value.split(' ')[0].split('.').slice(0, 3).join('.');
+            const generatedMockIpString = `${targetBaseScopeString}.${calculatedSubnetIpSuffixOffset + 1}`;
+
+            const deviceCardNodeStructure = document.createElement('div');
+            deviceCardNodeStructure.classList.add('device-card-item');
+
+            let iconTypeString = "smartphone";
+            if (deviceObj.type === 'gateway') iconTypeString = "router";
+            if (deviceObj.name.includes("Server") || deviceObj.name.includes("NAS")) iconTypeString = "server";
+            if (deviceObj.name.includes("Screen")) iconTypeString = "tv";
+
+            deviceCardNodeStructure.innerHTML = `
+                <div class="device-meta-left">
+                    <div class="device-avatar-node ${deviceObj.type}">
+                        <i data-lucide="${iconTypeString}" style="width:18px; height:18px;"></i>
+                    </div>
+                    <div class="device-details">
+                        <span class="device-hostname">${deviceObj.name}</span>
+                        <span class="device-ip-addr">IP: ${generatedMockIpString}</span>
+                        <span class="device-mac-addr">MAC: ${deviceObj.mac} // [${deviceObj.vendor}]</span>
+                    </div>
+                </div>
+                <span class="status-pill ${deviceObj.type}">${deviceObj.type}</span>
+            `;
+
+            gridWrapper.appendChild(deviceCardNodeStructure);
+            lucide.createIcons();
+        }
+
+        // Alert Banner Trigger Notification Handler Logic
+        function triggerRogueThreatAlertPopupNotification(rogueDeviceObj) {
+            const bannerNode = document.getElementById('threatAlertPopupNode');
+            const textLabelNode = document.getElementById('threatAlertMessageText');
+
+            textLabelNode.innerText = `SECURITY WARN: Rogue Node Detected! (${rogueDeviceObj.name} - ${rogueDeviceObj.mac}). Isolation recommended.`;
+            bannerNode.style.display = 'flex';
+        }
+
+        // Render Graphical Summary Data Analysis Metrics Mapping Chart
+        function compileSubnetDiscoveryStructureAnalytics() {
+            document.getElementById('reconAnalyticsDataPanel').style.display = 'grid';
+
+            const totalNodesCount = memoryCacheDiscoveredTerminalsListArray.length;
+            const rogueThreatsCount = memoryCacheDiscoveredTerminalsListArray.filter(d => d.type === 'rogue').length;
+            const trustedNodesCount = totalNodesCount - rogueThreatsCount;
+
+            document.getElementById('totalDiscoveredNodesCounterLabel').innerText = totalNodesCount;
+            document.getElementById('totalRogueThreatsCounterLabel').innerText = rogueThreatsCount;
+
+            const chartCanvasContextRef = document.getElementById('subnetPieChartDistributionCanvas').getContext('2d');
+
+            if (referencePieChartInstance) {
+                referencePieChartInstance.destroy();
+            }
+
+            referencePieChartInstance = new Chart(chartCanvasContextRef, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Trusted Devices', 'Rogue Threats'],
+                    datasets: [{
+                        data: [trustedNodesCount, rogueThreatsCount],
+                        backgroundColor: ['#30d158', '#ff453a'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Export System Intelligence Log Report Method Pipeline
+        function exportDiscoveredSubnetDatasetLog() {
+            const generatedTelemetryReportObject = {
+                toolSignature: "The NetSpy Subnet & IP Recon Engine v1.0",
+                scanTimestamp: new Date().toISOString(),
+                evaluatedSubnetScope: document.getElementById('subnetScopeInput').value,
+                gatewayPointAddress: document.getElementById('localGatewayIpField').innerText,
+                networkOperatorMetadata: document.getElementById('networkOperatorField').innerText,
+                totalDiscoveredNodes: memoryCacheDiscoveredTerminalsListArray.length,
+                rogueNodesCount: memoryCacheDiscoveredTerminalsListArray.filter(d => d.type === 'rogue').length,
+                discoveredTerminalRecordsList: memoryCacheDiscoveredTerminalsListArray
+            };
+
+            const dataBlobStreamString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(generatedTelemetryReportObject, null, 4));
+            
+            const temporaryAnchorDownloadLinkNode = document.createElement('a');
+            temporaryAnchorDownloadLinkNode.setAttribute("href", dataBlobStreamString);
+            temporaryAnchorDownloadLinkNode.setAttribute("download", `subnet_recon_intel_report_${Date.now()}.json`);
+            document.body.appendChild(temporaryAnchorDownloadLinkNode);
+            temporaryAnchorDownloadLinkNode.click();
+            temporaryAnchorDownloadLinkNode.remove();
+        }
+    </script>
+</body>
+</html>
