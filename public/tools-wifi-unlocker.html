@@ -2,40 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bunny Engine - Wi-Fi Protocol Auditor</title>
 
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            --bg-color: #05020a;
-            --purple-glow: rgba(142, 45, 226, 0.25);
-            --pink-glow: rgba(255, 45, 85, 0.25);
-            --cyan-glow: rgba(0, 242, 254, 0.3);
-            --glass-bg: rgba(18, 10, 32, 0.75);
+            --netflix-black: #141414;
+            --netflix-dark-grey: #1f1f1f;
+            --netflix-red: #E50914;
+            --netflix-red-hover: #B80710;
+            --glass-card: rgba(30, 30, 30, 0.85);
             --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #f5f5f7;
-            --text-muted: #9e9eb0;
-            --accent-cyan: #00f2fe;
-            --accent-purple: #8e2de2;
-            --accent-pink: #ff2d55;
-            --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-        }
-
-        .light-theme {
-            --bg-color: #f5f5f7;
-            --purple-glow: rgba(142, 45, 226, 0.1);
-            --pink-glow: rgba(255, 45, 85, 0.1);
-            --cyan-glow: rgba(0, 122, 255, 0.15);
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(0, 0, 0, 0.08);
-            --text-main: #1d1d1f;
-            --text-muted: #86868b;
-            --accent-cyan: #007aff;
-            --accent-purple: #a25ddc;
-            --accent-pink: #ff3b30;
-            --card-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+            --text-pure: #ffffff;
+            --text-secondary: #aaaaaa;
+            --success-green: #30d158;
+            --warning-orange: #ff9f0a;
         }
 
         * {
@@ -47,70 +31,46 @@
         }
 
         body {
-            background: var(--bg-color);
-            color: var(--text-main);
+            background-color: var(--netflix-black);
+            color: var(--text-pure);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 24px 16px 120px 16px;
             overflow-x: hidden;
+            padding-bottom: 90px;
             position: relative;
-            transition: background 0.4s ease, color 0.4s ease;
         }
 
-        /* Ambient Bubble Glow Grid */
-        .ambient-bg-container {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -1; overflow: hidden; pointer-events: none;
-        }
-
-        .ambient-bubble {
-            position: absolute;
-            background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 72%);
-            border-radius: 50%;
-            animation: endlessFloat 16s infinite ease-in-out;
-            opacity: 0.35;
-        }
-
-        @keyframes endlessFloat {
-            0% { transform: translateY(105vh) scale(0.6) translateX(0); opacity: 0; }
-            30% { opacity: 0.5; }
-            70% { opacity: 0.25; }
-            100% { transform: translateY(-20vh) scale(1.4) translateX(60px); opacity: 0; }
-        }
-
-        /* --- Super Fast Circular Loader --- */
+        /* --- Specific Cinema Loader Screen --- */
         #loading-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(145deg, #05020a, #0f061c);
+            background: #000000;
             z-index: 99999;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            transition: opacity 0.4s ease;
         }
 
-        .fast-loader-ring {
+        .cinema-pulse-ring {
             position: relative;
             width: 100px; height: 100px;
             display: flex; align-items: center; justify-content: center;
         }
 
-        .fast-loader-ring::before {
+        .cinema-pulse-ring::before {
             content: '';
             position: absolute;
             width: 100%; height: 100%;
-            border: 5px solid rgba(255, 255, 255, 0.03);
-            border-top: 5px solid var(--accent-cyan);
-            border-bottom: 5px solid var(--accent-pink);
+            border: 5px solid rgba(229, 9, 20, 0.1);
+            border-top: 5px solid var(--netflix-red);
+            border-bottom: 5px solid var(--netflix-red);
             border-radius: 50%;
-            animation: superFastSpin 0.4s linear infinite;
-            box-shadow: 0 0 25px var(--cyan-glow);
+            animation: cinemaSpin 0.6s linear infinite;
+            box-shadow: 0 0 25px rgba(229, 9, 20, 0.4);
         }
 
-        @keyframes superFastSpin {
+        @keyframes cinemaSpin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
@@ -118,12 +78,12 @@
         .blinking-dots-center { display: flex; gap: 6px; z-index: 10; }
         .core-dot {
             width: 10px; height: 10px;
-            background-color: var(--accent-purple);
+            background-color: var(--netflix-red);
             border-radius: 50%;
             animation: fastPulseDot 0.45s infinite alternate;
         }
-        .core-dot:nth-child(2) { background-color: var(--accent-cyan); animation-delay: 0.15s; }
-        .core-dot:nth-child(3) { background-color: var(--accent-pink); animation-delay: 0.3s; }
+        .core-dot:nth-child(2) { animation-delay: 0.15s; }
+        .core-dot:nth-child(3) { animation-delay: 0.3s; }
 
         @keyframes fastPulseDot {
             0% { opacity: 0.2; transform: scale(0.75); }
@@ -136,300 +96,368 @@
             font-weight: 900;
             letter-spacing: 5px;
             text-transform: uppercase;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--netflix-red);
             text-align: center;
         }
 
-        .vortex-gate {
-            position: absolute;
-            width: 0vw; height: 0vh;
-            border-radius: 50%;
-            background: radial-gradient(circle, transparent 20%, #05020a 100%);
-            box-shadow: inset 0 0 150px rgba(0, 242, 254, 0.6);
-            z-index: 20; opacity: 0; pointer-events: none;
+        /* --- App Layout Shell --- */
+        .bunnyflix-shell {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        /* --- Header Element Layout --- */
         .module-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px;
-            background: var(--glass-bg);
+            background: var(--netflix-dark-grey);
             border: 1px solid var(--glass-border);
-            padding: 16px 20px;
-            border-radius: 24px;
-            backdrop-filter: blur(20px);
-            box-shadow: var(--card-shadow);
+            padding: 14px 20px;
+            border-radius: 20px;
         }
 
-        .back-link, .about-toggle {
-            color: var(--text-main);
-            text-decoration: none;
+        .module-title-block h1 {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--netflix-red);
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .module-title-block p {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .network-badge {
             display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+        }
+
+        .network-online { color: var(--success-green); }
+        .network-offline { color: var(--netflix-red); }
+
+        /* --- App Interface Navigation Tabs Bar --- */
+        .app-navigation-tabs-bar {
+            display: flex;
+            background: var(--netflix-dark-grey);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 4px;
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            max-width: 448px;
+            margin: 0 auto;
+            z-index: 999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .nav-tab-trigger-node {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-border);
+            gap: 4px;
+            padding: 8px 0;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 20px;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .module-title-block { text-align: right; }
-        .module-title-block h1 { 
-            font-size: 1.25rem; font-weight: 900; letter-spacing: -0.2px;
-            background: linear-gradient(135deg, var(--text-main), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .nav-tab-trigger-node.active-tab {
+            background: var(--netflix-red);
+            color: var(--text-pure);
         }
-        .module-title-block p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 1.2px; text-transform: uppercase;}
 
-        /* --- Main Content Workstation --- */
-        .forge-container {
-            width: 100%;
-            max-width: 550px;
-            margin: 0 auto;
-            display: flex;
+        /* --- App Layout Viewport Panels --- */
+        .app-layout-tab-viewport {
+            display: none;
             flex-direction: column;
-            gap: 20px;
-            z-index: 2;
+            gap: 18px;
         }
 
-        /* Location Metadata Banner */
-        .geo-banner {
-            background: linear-gradient(135deg, rgba(142, 45, 226, 0.15), rgba(0, 242, 254, 0.05));
+        .app-layout-tab-viewport.active-view {
+            display: flex;
+        }
+
+        /* --- Geo Vertical Downward Layout Matrix --- */
+        .geo-vertical-stack-card {
+            background: var(--glass-card);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            backdrop-filter: blur(15px);
-        }
-        .geo-banner i { color: var(--accent-cyan); animation: pulse 2s infinite; }
-        .geo-details { display: flex; flex-direction: column; gap: 2px; }
-        .geo-details .geo-ip { font-size: 0.85rem; font-weight: 800; color: var(--text-main); }
-        .geo-details .geo-loc { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
-        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-
-        .input-group {
+            padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            padding: 22px;
-            border-radius: 26px;
-            backdrop-filter: blur(20px);
-            box-shadow: var(--card-shadow);
         }
 
-        .input-group label {
-            font-size: 0.78rem; font-weight: 800;
-            color: var(--accent-cyan);
-            text-transform: uppercase; letter-spacing: 1px;
+        .geo-matrix-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .geo-matrix-row:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .geo-matrix-row i {
+            color: var(--netflix-red);
+            width: 18px; height: 18px;
+        }
+
+        .geo-matrix-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .geo-matrix-meta label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .geo-matrix-meta span {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-pure);
+        }
+
+        /* --- Interactive Configurations Framework --- */
+        .input-group-panel {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-group-panel label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--netflix-red);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .input-field {
             width: 100%;
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            padding: 16px;
-            color: var(--text-main);
-            font-size: 0.95rem; font-weight: 600;
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text-pure);
+            font-size: 0.95rem;
+            font-weight: 600;
             outline: none;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .input-field:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 14px var(--cyan-glow);
-        }
-        .input-field:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s;
         }
 
-        .dual-columns {
+        .input-field:focus {
+            border-color: var(--netflix-red);
+            box-shadow: 0 0 10px rgba(229, 9, 20, 0.2);
+        }
+
+        .input-field:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .dual-columns-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
 
-        /* Main Audit Trigger Button */
-        .forge-btn {
+        .action-button-node {
             width: 100%;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            border: none; padding: 18px; border-radius: 18px;
-            color: #ffffff; font-size: 0.95rem; font-weight: 900;
-            letter-spacing: 1px; text-transform: uppercase;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px;
-            box-shadow: 0 12px 35px rgba(0, 242, 254, 0.25);
-            transition: transform 0.2s ease, opacity 0.3s ease;
+            background: var(--netflix-red);
+            border: none; padding: 16px; border-radius: 14px;
+            color: #ffffff; font-size: 0.9rem; font-weight: 800;
+            letter-spacing: 0.5px; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.2s ease;
         }
-        .forge-btn:active { transform: scale(0.97); }
-        .forge-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Asynchronous Stream Workspace Board */
-        .workspace-board {
-            background: #030106;
+        .action-button-node:active { transform: scale(0.98); }
+        .action-button-node:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .cancel-btn-modifier {
+            background: #262626;
             border: 1px solid var(--glass-border);
-            border-radius: 26px; padding: 24px;
-            box-shadow: var(--card-shadow);
-            display: none; /* Controlled via script */
         }
 
-        .board-title {
-            font-size: 0.78rem; font-weight: 800;
-            text-transform: uppercase; color: var(--accent-pink);
-            margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+        .cancel-btn-modifier:hover { background: #333333; }
+
+        /* --- Workspace Console Monitor Terminal --- */
+        .workspace-board {
+            background: #090909;
+            border: 1px solid var(--glass-border);
+            border-radius: 22px; padding: 18px;
+        }
+
+        .board-header-row {
+            font-size: 0.75rem; font-weight: 800;
+            text-transform: uppercase; color: var(--netflix-red);
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .speed-toggle-pill {
+            background: var(--netflix-dark-grey);
+            border: 1px solid var(--glass-border);
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 0.65rem; color: var(--text-pure);
+            cursor: pointer; display: flex; align-items: center; gap: 4px;
         }
 
         .progress-container {
             width: 100%; height: 6px; background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px; overflow: hidden; margin-bottom: 18px;
+            border-radius: 3px; overflow: hidden; margin-bottom: 14px;
         }
         .progress-bar {
             width: 0%; height: 100%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-pink));
-            transition: width 0.4s linear;
+            background: var(--netflix-red);
+            transition: width 0.3s linear;
         }
 
         .stream-terminal {
-            width: 100%; height: 220px;
-            background: rgba(0, 0, 0, 0.6);
+            width: 100%; height: 200px;
+            background: rgba(0, 0, 0, 0.5);
             border: 1px solid var(--glass-border);
-            border-radius: 16px; padding: 14px;
+            border-radius: 12px; padding: 12px;
             overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
             font-family: 'Courier New', Courier, monospace;
         }
 
         .typed-step {
-            font-size: 0.82rem; font-weight: 600; line-height: 1.4;
-            white-space: pre-wrap; padding-left: 8px;
-            border-left: 2px solid var(--accent-cyan); color: var(--text-main);
+            font-size: 0.8rem; font-weight: 600; line-height: 1.4;
+            white-space: pre-wrap; padding-left: 6px;
+            border-left: 2px solid var(--netflix-red); color: var(--text-pure);
         }
         .typed-step.fault-step {
-            border-left-color: var(--accent-pink); color: var(--accent-pink);
+            border-left-color: var(--warning-orange); color: var(--warning-orange);
         }
 
-        /* Result Credentials Box Output */
+        /* --- Credentials Vault Hub Output Layout --- */
         .credentials-matrix-output {
-            margin-top: 18px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(48, 209, 88, 0.2);
-            border-radius: 18px; padding: 18px;
-            display: none; flex-direction: column; gap: 12px;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 18px;
+            display: flex; flex-direction: column; gap: 12px;
         }
+
+        .search-vault-wrapper {
+            position: relative; display: flex; align-items: center;
+        }
+        .search-vault-wrapper i { position: absolute; left: 12px; color: var(--text-secondary); }
+        .search-vault-input {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+            border-radius: 10px; padding: 10px 10px 10px 36px; color: #fff; font-size: 0.82rem; outline: none;
+        }
+
         .matrix-output-header {
             font-size: 0.8rem; font-weight: 900; text-transform: uppercase;
-            color: #30d158; text-align: center; letter-spacing: 0.5px;
+            color: var(--success-green); text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+
         .matrix-passwords-list {
             display: flex; flex-direction: column; gap: 8px;
-            font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;
+            font-family: 'Courier New', Courier, monospace;
         }
+
         .pass-item {
-            background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 10px;
+            background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px;
             border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;
         }
-        .pass-item span { color: #30d158; font-weight: 700; }
+        
+        .pass-left-node { display: flex; flex-direction: column; gap: 2px; }
+        .pass-left-node span { color: var(--success-green); font-weight: 700; font-size: 0.9rem; }
+        .strength-indicator { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .str-ultra { color: var(--success-green); }
+        .str-strong { color: #5ac8fa; }
+        .str-medium { color: var(--warning-orange); }
+
         .pass-copy-btn {
-            background: transparent; border: none; color: var(--accent-cyan); cursor: pointer;
+            background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px;
+        }
+        .pass-copy-btn:active { color: var(--netflix-red); }
+
+        /* --- Settings Cache History Hub Workspace --- */
+        .settings-card-frame {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 16px;
+            display: flex; flex-direction: column; gap: 14px;
         }
 
-        /* --- Compact Sized Multi-Colored Media Nodes --- */
-        .contacts-section-title {
-            font-size: 0.78rem; font-weight: 800; text-transform: uppercase;
-            color: var(--accent-purple); letter-spacing: 1.2px;
-            margin: 24px 0 12px 0; text-align: center;
+        .metrics-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
         }
+        .metrics-row label { color: var(--text-secondary); font-weight: 600; }
+        .metrics-row span { font-weight: 700; color: var(--netflix-red); }
 
-        .contacts-flex-grid {
-            display: flex; justify-content: center; align-items: center;
-            gap: 14px; width: 100%; margin-bottom: 10px; flex-wrap: wrap;
+        .history-log-list {
+            display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;
         }
-
-        .compact-node-card {
-            width: 44px; height: 44px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            text-decoration: none; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        .history-item-node {
+            background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px;
+            font-size: 0.78rem; border: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; color: var(--text-secondary);
         }
-        .compact-node-card:active { transform: scale(0.88); }
-        .compact-node-card i { width: 20px; height: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .history-item-node strong { color: var(--text-pure); }
 
-        /* Standardized Authentic Brand Color Configurations */
-        .brand-whatsapp  { background: #25D366; color: #FFFFFF; }
-        .brand-telegram  { background: #24A1DE; color: #FFFFFF; }
-        .brand-github    { background: #24292E; color: #FFFFFF; }
-        .brand-tiktok    { background: #000000; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.1); }
-        .brand-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #FFFFFF; }
-        .brand-youtube   { background: #FF0000; color: #FFFFFF; }
-        .brand-email     { background: #EA4335; color: #FFFFFF; }
-
-        /* --- Drag/Swipe Capable Custom System Toast Notification Box --- */
+        /* --- Drag/Swipe System Toast Notification Box --- */
         .toast-box {
-            position: fixed; top: 24px; left: 16px; right: 16px;
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-left: 4px solid #30d158; padding: 16px; border-radius: 18px;
-            font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between;
-            transform: translateY(-140px); opacity: 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-            z-index: 999999; backdrop-filter: blur(25px);
-            box-shadow: var(--card-shadow);
-            cursor: grab; touch-action: none;
-            user-select: none;
+            position: fixed; top: 16px; left: 16px; right: 16px;
+            background: var(--netflix-dark-grey); border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--success-green); padding: 14px; border-radius: 14px;
+            font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between;
+            transform: translateY(-150px); opacity: 0; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            z-index: 999999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            cursor: grab; touch-action: none; user-select: none;
         }
-        .toast-box:active { cursor: grabbing; }
         .toast-box.show { transform: translateY(0); opacity: 1; }
-        .toast-left-content { display: flex; align-items: center; gap: 10px; pointer-events: none; }
-        .toast-dismiss-hint { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; pointer-events: none; }
+        .toast-left-content { display: flex; align-items: center; gap: 8px; pointer-events: none; }
+        .toast-dismiss-hint { font-size: 0.6rem; color: var(--text-secondary); text-transform: uppercase; pointer-events: none; }
 
-        /* Floating Theme Switch Engine Node */
-        .floating-theme-hub {
-            position: fixed; bottom: 24px; right: 24px;
-            width: 52px; height: 52px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-            border: none; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: #ffffff; cursor: pointer;
-            box-shadow: 0 8px 25px rgba(142, 45, 226, 0.4);
-            z-index: 999;
-        }
-        .floating-theme-hub:active { transform: scale(0.9); }
-
-        /* About Sheet Drawer Overlay */
-        .about-overlay {
-            position: fixed; bottom: -100%; left: 0; width: 100%; height: 75vh;
-            background: var(--bg-color); border-top: 2px solid var(--glass-border);
-            border-top-left-radius: 32px; border-top-right-radius: 32px;
-            z-index: 1000; padding: 24px;
-            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
-        }
-        .about-overlay.open { bottom: 0; }
-        .about-handle { width: 50px; height: 5px; background: var(--text-muted); border-radius: 3px; margin: -10px auto 24px auto; opacity: 0.3; }
-        .feature-badge-list { display: flex; flex-direction: column; gap: 12px; }
-        .feature-badge-item {
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 14px;
-        }
-        .feature-badge-item i { color: var(--accent-cyan); }
-        .feature-badge-item h4 { font-size: 0.9rem; font-weight: 700; }
-        .feature-badge-item p { font-size: 0.75rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
 
-    <div class="ambient-bg-container" id="ambient-container"></div>
-
     <div id="loading-screen">
-        <div class="fast-loader-ring">
+        <div class="cinema-pulse-ring">
             <div class="blinking-dots-center">
                 <div class="core-dot"></div>
                 <div class="core-dot"></div>
@@ -437,266 +465,211 @@
             </div>
         </div>
         <div id="welcome-title">AirCore Protocol Monitor</div>
-        <div class="vortex-gate" id="vortex-gate"></div>
-    </div>
-
-    <div class="module-header">
-        <a href="index.html" class="back-link"><i data-lucide="arrow-left"></i></a>
-        <div class="module-title-block">
-            <h1>AirCore Decoder</h1>
-            <p>Module // Protocol Auditor</p>
-        </div>
-        <button class="about-toggle" onclick="toggleAboutOverlay()"><i data-lucide="info"></i></button>
-    </div>
-
-    <div class="forge-container">
-
-        <div class="geo-banner">
-            <i data-lucide="map-pin"></i>
-            <div class="geo-details">
-                <span class="geo-ip" id="node-ip-addr">Detecting Client Node...</span>
-                <span class="geo-loc" id="node-geo-loc">Resolving Geo-Matrix Coordinates...</span>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <div class="dual-columns">
-                <div>
-                    <label>Default Local Gateway</label>
-                    <input type="text" class="input-field" value="192.168.1.1" disabled />
-                </div>
-                <div>
-                    <label>Target DNS Matrix</label>
-                    <input type="text" class="input-field" value="8.8.8.8 // 1.1.1.1" disabled />
-                </div>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label for="wifi-target-ssid">Target Access Point Identifier (SSID)</label>
-            <input type="text" id="wifi-target-ssid" class="input-field" placeholder="e.g., Home_Network_Private" />
-        </div>
-
-        <button class="forge-btn" id="audit-trigger-btn" onclick="initializeProtocolAudit()">
-            <i data-lucide="radio"></i> Discover Wi-Fi Password Stream
-        </button>
-
-        <div class="workspace-board" id="audit-workspace">
-            <div class="board-title">
-                <span><i data-lucide="terminal" style="width:12px; display:inline; margin-right:4px;"></i> Audit Stream Pipeline</span>
-                <span id="timer-countdown">05:00 Remaining</span>
-            </div>
-            
-                        <div class="progress-container">
-                <div class="progress-bar" id="audit-progress"></div>
-            </div>
-
-            <div class="stream-terminal" id="terminal-stream-log"></div>
-
-            <div class="credentials-matrix-output" id="credentials-output-block">
-                <div class="matrix-output-header">Brute Force by Bunny Under Lupin Starnley Succeeded!</div>
-                <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-bottom:10px;">Select derived encryption token vector candidate to try:</p>
-                <div class="matrix-passwords-list" id="passwords-injector-node"></div>
-            </div>
-        </div>
-
-        <div class="contacts-section-title">Developer Verification Endpoints</div>
-        <div class="contacts-flex-grid">
-            <a href="https://wa.me/255780470905?text=Hello%20Lupin,%20AirCore%20System%20verified." target="_blank" class="compact-node-card brand-whatsapp">
-                <i data-lucide="message-circle"></i>
-            </a>
-            <a href="https://t.me/+255780470905" target="_blank" class="compact-node-card brand-telegram">
-                <i data-lucide="send"></i>
-            </a>
-            <a href="https://github.com/xbotmanager-cell" target="_blank" class="compact-node-card brand-github">
-                <i data-lucide="github"></i>
-            </a>
-            <a href="https://www.tiktok.com/@mrlupin76_" target="_blank" class="compact-node-card brand-tiktok">
-                <i data-lucide="layers"></i>
-            </a>
-            <a href="https://www.instagram.com/maskedvoice_tz" target="_blank" class="compact-node-card brand-instagram">
-                <i data-lucide="instagram"></i>
-            </a>
-            <a href="https://youtube.com" target="_blank" class="compact-node-card brand-youtube">
-                <i data-lucide="video"></i>
-            </a>
-            <a href="mailto:lupinstarnley009@gmail.com" class="compact-node-card brand-email">
-                <i data-lucide="mail"></i>
-            </a>
-        </div>
-    </div>
-
-    <button class="floating-theme-hub" onclick="toggleInterfaceTheme()"><i data-lucide="sun" id="theme-icon"></i></button>
-
-    <div class="about-overlay" id="about-panel">
-        <div class="about-handle" onclick="toggleAboutOverlay()"></div>
-        <div class="about-content">
-            <h2 style="color:var(--accent-cyan); margin-bottom:14px; font-weight:900;">AirCore Diagnostics Core</h2>
-            <div class="feature-badge-list">
-                <div class="feature-badge-item">
-                    <i data-lucide="shield-alert"></i>
-                    <div>
-                        <h4>Handshake Simulation</h4>
-                        <p>Processes cryptographic standard simulation parameters to analyze structural password entropy thresholds locally.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="toast-box" id="systemToast">
         <div class="toast-left-content">
-            <i data-lucide="check-circle" style="color:#30d158" id="toastIcon"></i>
-            <span id="toastMsg">Notification Channel Synchronized</span>
+            <i id="toastIcon" data-lucide="check-circle" style="width:16px; height:16px;"></i>
+            <span id="toastMsg">Notification Channel Alert</span>
         </div>
-        <span class="toast-dismiss-hint">[Dismiss]</span>
+        <span class="toast-dismiss-hint">Swipe right</span>
+    </div>
+
+    <div class="bunnyflix-shell">
+        
+        <div class="module-header">
+            <div class="module-title-block">
+                <h1>AirCore Decoder</h1>
+                <p>Module // Protocol Auditor</p>
+            </div>
+            <div class="network-badge" id="networkConnectivityStatusPill">
+                <i data-lucide="wifi" class="network-online" style="width:14px; height:14px;"></i>
+                <span id="networkConnectivityLabel" class="network-online">ONLINE</span>
+            </div>
+        </div>
+
+        <div class="app-layout-tab-viewport active-view" id="appLayoutTab_forge">
+            
+            <div class="geo-vertical-stack-card">
+                <div class="geo-matrix-row">
+                    <i data-lucide="fingerprint"></i>
+                    <div class="geo-matrix-meta">
+                        <label>Client Node IP Address</label>
+                        <span id="node-ip-addr">Detecting Client Node...</span>
+                    </div>
+                </div>
+                <div class="geo-matrix-row">
+                    <i data-lucide="cpu"></i>
+                    <div class="geo-matrix-meta">
+                        <label>Internet Service Provider (ISP)</label>
+                        <span id="node-isp-provider">Resolving Provider Matrix...</span>
+                    </div>
+                </div>
+                <div class="geo-matrix-row">
+                    <i data-lucide="globe"></i>
+                    <div class="geo-matrix-meta">
+                        <label>Target Country Location</label>
+                        <span id="node-country-name">Resolving Geographics...</span>
+                    </div>
+                </div>
+                <div class="geo-matrix-row">
+                    <i data-lucide="map"></i>
+                    <div class="geo-matrix-meta">
+                        <label>Region / Province State</label>
+                        <span id="node-region-state">Resolving Region Coordinates...</span>
+                    </div>
+                </div>
+                <div class="geo-matrix-row">
+                    <i data-lucide="navigation"></i>
+                    <div class="geo-matrix-meta">
+                        <label>City / Street Sector Matrix</label>
+                        <span id="node-city-street">Resolving Street Node...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group-panel">
+                <div class="dual-columns-grid">
+                    <div>
+                        <label>Default Local Gateway</label>
+                        <input type="text" class="input-field" value="192.168.1.1" disabled />
+                    </div>
+                    <div>
+                        <label>Target DNS Matrix</label>
+                        <input type="text" class="input-field" value="8.8.8.8 // 1.1.1.1" disabled />
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group-panel">
+                <label for="wifi-target-ssid">Target Access Point Identifier (SSID)</label>
+                <input type="text" id="wifi-target-ssid" class="input-field" placeholder="e.g., Home_Network_Private" />
+                
+                <div class="dual-columns-grid" style="margin-top: 6px;">
+                    <div>
+                        <label>Virtual MAC Spoofer</label>
+                       <input type="text" id="spoofed-mac-field" class="input-field" value="00:0A:95:9D:68:16" disabled style="font-size:0.75rem; font-family:monospace;" />
+                    </div>
+                    <div>
+                        <label>Hardware Clocks</label>
+                        <input type="text" class="input-field" value="MediaTek Helio G81" disabled style="font-size:0.72rem;" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="dual-columns-grid" id="controlButtonsGridWrapper">
+                <button class="action-button-node" id="audit-trigger-btn" onclick="initializeProtocolAudit()">
+                    <i data-lucide="radio"></i> Audit Stream
+                </button>
+                <button class="action-button-node cancel-btn-modifier" id="audit-cancel-btn" onclick="cancelActiveAuditPipeline()" disabled>
+                    <i data-lucide="square"></i> Cancel
+                </button>
+            </div>
+
+        </div>
+
+        <div class="app-layout-tab-viewport" id="appLayoutTab_terminal">
+            <div class="workspace-board" id="audit-workspace">
+                <div class="board-header-row">
+                    <span><i data-lucide="terminal" style="width:12px; display:inline; margin-right:4px;"></i> Stream Pipeline</span>
+                    <div class="speed-toggle-pill" onclick="toggleTurboSpeedMultiplierMode()">
+                        <i data-lucide="zap" style="width:10px; height:10px;"></i>
+                        <span id="speedMultiplierModeLabel">Speed: Normal</span>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="audit-progress"></div>
+                </div>
+
+                <div style="font-size: 0.72rem; color:var(--text-secondary); margin-bottom:8px; font-weight:700; text-align:right;" id="timer-countdown">
+                    02:00 Remaining
+                </div>
+
+                <div class="stream-terminal" id="terminal-stream-log">
+                    <div style="color:var(--text-secondary); font-size:0.8rem; text-align:center; padding-top:80px; font-family:monospace;">
+                        Terminal pipeline uninitialized. Provide SSID parameter context root to ignite core vector tracks.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-layout-tab-viewport" id="appLayoutTab_vault">
+            <div class="credentials-matrix-output">
+                <div class="matrix-output-header" id="vaultStatusHeaderLabel">
+                    <i data-lucide="lock" style="width:16px; height:16px; color:var(--netflix-red);"></i> Vault Content Sealed
+                </div>
+                
+                <div class="search-vault-wrapper">
+                    <i data-lucide="search" style="width:14px; height:14px;"></i>
+                    <input type="text" id="vaultContentSearchFilterInput" class="search-vault-input" placeholder="Search passwords inside cache..." oninput="filterVaultPasswordsDisplayList()" disabled />
+                </div>
+
+                <div class="matrix-passwords-list" id="passwords-injector-node">
+                    <div style="color:var(--text-secondary); font-size:0.78rem; text-align:center; padding:40px 0; font-family:monospace;">
+                        No credentials mapped into volatile local cache. Run auditor pipeline modules completely to retrieve passkeys.
+                    </div>
+                </div>
+
+                <button class="action-button-node cancel-btn-modifier" id="pdfReportExportBtn" onclick="exportAuditCredentialsPdfReport()" disabled style="font-size:0.8rem; padding:12px;">
+                    <i data-lucide="download"></i> Export PDF Audit Report
+                </button>
+            </div>
+        </div>
+
+        <div class="app-layout-tab-viewport" id="appLayoutTab_settings">
+            <div class="settings-card-frame">
+                <div class="board-header-row" style="margin-bottom:6px;">
+                    <span><i data-lucide="settings" style="width:12px; display:inline; margin-right:4px;"></i> Cache Manager Matrix</span>
+                </div>
+
+                <div class="metrics-row">
+                    <label>Volatile Storage Cache Allocated</label>
+                    <span id="storageCacheAllocationBytesCounterLabel">0.00 KB</span>
+                </div>
+
+                <button class="action-button-node" onclick="flushApplicationStorageCacheManifests()" style="background:var(--netflix-red); padding:12px; font-size:0.8rem;">
+                    <i data-lucide="trash-2"></i> Clear All Storage Cache Records
+                </button>
+            </div>
+
+            <div class="settings-card-frame">
+                <div class="board-header-row" style="margin-bottom:8px;">
+                    <span><i data-lucide="history" style="width:12px; display:inline; margin-right:4px;"></i> Session Audit Logs History</span>
+                </div>
+                <div class="history-log-list" id="sessionHistoryTrackerListWrapper">
+                    <div style="font-size:0.72rem; color:var(--text-secondary); text-align:center; padding:10px 0; font-family:monospace;">
+                        History logs cache empty.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="app-navigation-tabs-bar">
+            <button class="nav-tab-trigger-node active-tab" onclick="switchActiveViewportLayoutTab('forge')" id="appTabLink_forge">
+                <i data-lucide="shield-alert" style="width:18px; height:18px;"></i> Forge
+            </button>
+            <button class="nav-tab-trigger-node" onclick="switchActiveViewportLayoutTab('terminal')" id="appTabLink_terminal">
+                <i data-lucide="terminal" style="width:18px; height:18px;"></i> Terminal
+            </button>
+            <button class="nav-tab-trigger-node" onclick="switchActiveViewportLayoutTab('vault')" id="appTabLink_vault">
+                <i data-lucide="key-round" style="width:18px; height:18px;"></i> Vault
+            </button>
+            <button class="nav-tab-trigger-node" onclick="switchActiveViewportLayoutTab('settings')" id="appTabLink_settings">
+                <i data-lucide="sliders" style="width:18px; height:18px;"></i> Settings
+            </button>
+        </nav>
+
     </div>
 
     <script>
-        lucide.createIcons();
-
-        let toastTimerReference = null;
+        let TOTAL_AUDIT_DURATION_SECONDS = 120; 
+        let currentIntervalTimerPeriodMillis = 1000; 
+        
         let auditIntervalReference = null;
-        const TOTAL_AUDIT_DURATION_SECONDS = 300; // 5 Full Minutes Clock Sequence
+        let toastTimerReference = null;
+        let isTurboSpeedModeEnabled = false;
 
-        // Generate Ambient Floating Background Elements
-        function initBackgroundBubbles() {
-            const container = document.getElementById('ambient-container');
-            for(let i=0; i<12; i++) {
-                let element = document.createElement('div');
-                element.className = 'ambient-bubble';
-                element.style.left = Math.random() * 100 + 'vw';
-                element.style.width = element.style.height = (Math.random() * 65 + 25) + 'px';
-                element.style.animationDelay = (Math.random() * 5) + 's';
-                element.style.animationDuration = (Math.random() * 8 + 8) + 's';
-                container.appendChild(element);
-            }
-        }
-        initBackgroundBubbles();
-
-        // Loading Screen Management Engine
-        window.addEventListener('load', () => {
-            const screen = document.getElementById('loading-screen');
-            const vortex = document.getElementById('vortex-gate');
-            let randomLoaderDuration = Math.floor(Math.random() * (2600 - 1500 + 1)) + 1500;
-
-            fetchGeoLocationPayload();
-
-            setTimeout(() => {
-                vortex.style.opacity = '1';
-                vortex.style.width = '240vw'; vortex.style.height = '240vw';
-                vortex.style.transition = 'width 1.2s cubic-bezier(0.16, 1, 0.3, 1), height 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease';
-                setTimeout(() => {
-                    screen.style.opacity = '0';
-                    screen.style.transition = 'opacity 0.4s ease';
-                    setTimeout(() => {
-                        screen.remove();
-                        checkManifestSessionRecovery();
-                    }, 400);
-                }, 800);
-            }, randomLoaderDuration);
-        });
-
-        // Pull Real Location Metadata using Client IP Protocol Nodes
-        function fetchGeoLocationPayload() {
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(data => {
-                    if(data.ip) {
-                        document.getElementById('node-ip-addr').innerText = `Node IP: ${data.ip}`;
-                        document.getElementById('node-geo-loc').innerText = `Loc: ${data.city || 'Unknown'}, ${data.region || 'Unknown Region'}, ${data.country_name || 'Tanzania'}`;
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('node-ip-addr').innerText = "Node IP: 197.250.224.81";
-                    document.getElementById('node-geo-loc').innerText = "Loc: Dar es Salaam, Kinondoni, Tanzania";
-                });
-        }
-
-        // Custom Rigid Draggable Toast Event Physics Engine
-        const toast = document.getElementById('systemToast');
-        let isDraggingToast = false;
-        let toastStartPointerX = 0;
-        let toastCurrentTranslateX = 0;
-
-        toast.addEventListener('pointerdown', (e) => {
-            isDraggingToast = true;
-            toastStartPointerX = e.clientX;
-            toast.style.transition = 'none';
-        });
-
-        document.addEventListener('pointermove', (e) => {
-            if (!isDraggingToast) return;
-            let currentX = e.clientX;
-            toastCurrentTranslateX = currentX - toastStartPointerX;
-            if (toastCurrentTranslateX < 0) toastCurrentTranslateX = 0; // Swipe rightwards constraint preference
-            toast.style.transform = `translateX(${toastCurrentTranslateX}px)`;
-        });
-
-        document.addEventListener('pointerup', () => {
-            if (!isDraggingToast) return;
-            isDraggingToast = false;
-            if (toastCurrentTranslateX > 140) {
-                // Fling/Throw animation away threshold fulfilled
-                toast.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-                toast.style.transform = 'translateX(120%)';
-                toast.style.opacity = '0';
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    if(toastTimerReference) clearTimeout(toastTimerReference);
-                }, 250);
-            } else {
-                // Return to snap baseline position parameters
-                toast.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                toast.style.transform = 'translateX(0)';
-            }
-            toastCurrentTranslateX = 0;
-        });
-
-        toast.addEventListener('click', () => {
-            toast.classList.remove('show');
-            if(toastTimerReference) clearTimeout(toastTimerReference);
-        });
-
-        function triggerSystemToast(message, isError = false) {
-            const msgSpan = document.getElementById('toastMsg');
-            const icon = document.getElementById('toastIcon');
-
-            if(toastTimerReference) clearTimeout(toastTimerReference);
-
-            msgSpan.innerText = message;
-            toast.style.borderLeftColor = isError ? "#ff3b30" : "#30d158";
-            icon.setAttribute('data-lucide', isError ? 'alert-triangle' : 'check-circle');
-            
-            lucide.createIcons();
-            toast.style.transform = 'translateY(-140px)';
-            toast.style.opacity = '0';
-            
-            setTimeout(() => {
-                toast.style.transition = '';
-                toast.classList.add('show');
-                toast.style.transform = '';
-                toast.style.opacity = '';
-            }, 50);
-
-            toastTimerReference = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4500);
-        }
-
-        function toggleInterfaceTheme() {
-            const body = document.body;
-            const icon = document.getElementById('theme-icon');
-            body.classList.toggle('light-theme');
-            icon.setAttribute('data-lucide', body.classList.contains('light-theme') ? 'moon' : 'sun');
-            lucide.createIcons();
-        }
-
-        function toggleAboutOverlay() {
-            document.getElementById('about-panel').classList.toggle('open');
-        }
-
-        // Compilation 14 Sequence Diagnostic Blocks Text Stream Database
         const AUDIT_STEPS_CATALOG = [
             { text: "[INIT]: Broad-spectrum wireless monitoring node initialized on channel interface wlan0mon...", fault: false },
             { text: "[BEACON]: Captured beacon frames from designated access point router target. Signal strength -64dBm.", fault: false },
@@ -714,136 +687,568 @@
             { text: "[COMPLETED]: Password stream matching parameters matched within internal lookup dictionary cache arrays.", fault: false }
         ];
 
-        // Core Trigger Core Engine Logic
+        const ALPHANUMERIC_COMPLEX_PASSWORDS_POOL = [
+            "CipherCore_Secure_99!", "WPA3_Enterprise_Root#2026", "GatewayBypass_AlphaX?", "MatrixNet_Protocol_88*", "DeltaQuantum_Vault$77",
+            "Algorithmic_Shield_Key#", "ProxyVector_Node_Intercept!", "HashMutation_Token_99X", "Cryptographic_Pulse_Zeta", "Entropy_Generator_Alpha88",
+            "NodeMatrix_Decoder_Omega", "KernelOverride_System_2026", "AsmodeusBypass_Gateway!!", "Broadcom_Firmware_Patch7", "AtherosInject_Monitor_Mode",
+            "HandshakeHandshake_Passed*", "PMKID_HexMatrix_Calculation", "SpectralFrequency_Auditor_99", "AirCore_Packet_Interceptor", "Wlan0mon_Interface_Up",
+            "Hexadecimal_Checksum_Verified", "DynamicToken_Rotation_Fault", "BruteForce_Dictionary_Match", "ParallelThread_Processor_66", "DeauthBroadcast_Pulse_Frame",
+            "BeaconInterval_Sync_Locked", "SubnetMask_Routing_Vector", "Localhost_Loopback_Admin9", "RootAccess_Granted_Terminal", "FirmwareSandbox_Isolation_X",
+            "IntrusionDetection_Bypass_88", "WirelessAudit_Session_Active", "SecuredKeyfile_Payload_Stream", "Decrypted_WpaMatrix_Cache", "HardwareHash_Validation_Ok",
+            "VectorClock_Synchronization_!!", "Authentication_Token_Restructured", "NetworkTopology_Scanner_Pulse", "Cryptanalyst_Modulation_Index", "DictionaryAttack_Payload_Load",
+            "CustomSalting_Hash_Matrix", "WpaHandshake_Captured_Local", "PacketCapture_Dumpfile_Logged", "RadioTap_Header_Decoder_Node", "FrameSequence_Acknowledge_True",
+            "IEEE_80211_Protocol_Suite", "WiredEquivalent_Privacy_Legacy", "PreSharedKey_Derivation_Func", "MasterSession_Token_Validation", "BunnyEngine_CoreDecoder_Alpha"
+        ];
+
+        let loadedActiveGeneratedPasswordsCache = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            fetchGeoLocationPayload();
+            registerNetworkConnectivityMonitorObservers();
+            calculateStorageCacheAllocationFootprintMetrics();
+            checkManifestSessionRecovery();
+            renderSessionAuditLogsHistoryPanelList();
+            generateRandomSpoofedMacAddress();
+
+            setTimeout(() => {
+                const loaderNode = document.getElementById('loading-screen');
+                loaderNode.style.opacity = '0';
+                setTimeout(() => { loaderNode.style.display = 'none'; }, 400);
+            }, 1800);
+
+            window.audioFeedbackContextChannel = new (window.AudioContext || window.webkitAudioContext)();
+        });
+
+        function switchActiveViewportLayoutTab(tabIdentityKeyString) {
+            document.querySelectorAll('.nav-tab-trigger-node').forEach(el => el.classList.remove('active-tab'));
+            document.querySelectorAll('.app-layout-tab-viewport').forEach(el => el.classList.remove('active-view'));
+
+            document.getElementById(`appTabLink_${tabIdentityKeyString}`).classList.add('active-tab');
+            document.getElementById(`appLayoutTab_${tabIdentityKeyString}`).classList.add('active-view');
+        }
+
+        function fetchGeoLocationPayload() {
+            fetch('https://ipapi.co/json/')
+                .then(res => res.json())
+                .then(payload => {
+                    if (payload.ip) {
+                        document.getElementById('node-ip-addr').innerText = payload.ip;
+                        document.getElementById('node-isp-provider').innerText = payload.org || "Unknown Service Provider";
+                        document.getElementById('node-country-name').innerText = payload.country_name || "Tanzania";
+                        document.getElementById('node-region-state').innerText = payload.region || "Dar es Salaam";
+                        document.getElementById('node-city-street').innerText = `${payload.city || 'Kinondoni'} Sector Area`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('node-ip-addr').innerText = "197.250.224.81";
+                    document.getElementById('node-isp-provider').innerText = "Vodacom Tanzania PLC";
+                    document.getElementById('node-country-name').innerText = "Tanzania";
+                    document.getElementById('node-region-state').innerText = "Dar es Salaam";
+                    document.getElementById('node-city-street').innerText = "Kinondoni Mkwajuni Matrix";
+                });
+        }
+
+        function registerNetworkConnectivityMonitorObservers() {
+            const statusPill = document.getElementById('networkConnectivityStatusPill');
+            const label = document.getElementById('networkConnectivityLabel');
+            const icon = statusPill.querySelector('i');
+
+            function alterUiState(isOnline) {
+                if (isOnline) {
+                    label.innerText = "ONLINE";
+                    label.className = "network-online";
+                    icon.className = "network-online";
+                    icon.setAttribute('data-lucide', 'wifi');
+                } else {
+                    label.innerText = "OFFLINE";
+                    label.className = "network-offline";
+                    icon.className = "network-offline";
+                    icon.setAttribute('data-lucide', 'wifi-off');
+                }
+                lucide.createIcons();
+            }
+
+            window.addEventListener('online', () => { alterUiState(true); triggerSystemToast("Network connection established successfully"); });
+            window.addEventListener('offline', () => { alterUiState(false); triggerSystemToast("Client node disconnected from remote access network link", true); });
+            alterUiState(navigator.onLine);
+        }
+
+        function generateRandomSpoofedMacAddress() {
+            const hexHexValues = "0123456789ABCDEF";
+            let constructedMac = "00"; 
+            for (let i = 0; i < 5; i++) {
+                constructedMac += ":" + hexHexValues.charAt(Math.floor(Math.random() * 16)) + hexHexValues.charAt(Math.floor(Math.random() * 16));
+            }
+            document.getElementById('spoofed-mac-field').value = constructedMac;
+        }
+
         function initializeProtocolAudit() {
-            const ssid = document.getElementById('wifi-target-ssid').value.trim();
-            if(!ssid) {
-                triggerSystemToast("Operation Denied: SSID Identity Input Required", true);
+            const ssidValueString = document.getElementById('wifi-target-ssid').value.trim();
+            if (!ssidValueString) {
+                triggerSystemToast("Operation Aborted: Valid Target SSID Parameter Matrix Required", true);
+                triggerHapticFeedbackVibrationEngine();
                 return;
             }
 
             document.getElementById('audit-trigger-btn').disabled = true;
+            document.getElementById('audit-cancel-btn').disabled = false;
             document.getElementById('wifi-target-ssid').disabled = true;
-            
-            const sessionState = {
-                ssid: ssid,
+
+            const internalPasswordsShuffleCopy = [...ALPHANUMERIC_COMPLEX_PASSWORDS_POOL].sort(() => 0.5 - Math.random());
+            loadedActiveGeneratedPasswordsCache = internalPasswordsShuffleCopy.slice(0, 5);
+
+            const sessionStateManifestLog = {
+                ssid: ssidValueString,
                 elapsedSeconds: 0,
-                isCompleted: false
+                isCompleted: false,
+                isCancelled: false,
+                turboState: isTurboSpeedModeEnabled,
+                passwords: loadedActiveGeneratedPasswordsCache
             };
-            localStorage.setItem('bunny_wifi_session', JSON.stringify(sessionState));
+
+            localStorage.setItem('bunny_wifi_audit_manifest_v2', JSON.stringify(sessionStateManifestLog));
+            triggerSystemToast(`Igniting diagnostic protocol audit tracking stream for SSID: ${ssidValueString}`);
             
-            startAuditExecutionPipeline(0);
+            switchActiveViewportLayoutTab('terminal');
+            executeChronicleClockTickIntervalStepper(0);
         }
 
-        function startAuditExecutionPipeline(startFromSeconds) {
-            document.getElementById('audit-workspace').style.display = "block";
+        function cancelActiveAuditPipeline() {
+            if (auditIntervalReference) clearInterval(auditIntervalReference);
             
-            let currentSecondsElapsed = startFromSeconds;
-            updateInterfaceProgress(currentSecondsElapsed);
+            const manifest = JSON.parse(localStorage.getItem('bunny_wifi_audit_manifest_v2'));
+            if (manifest) {
+                manifest.isCancelled = true;
+                localStorage.setItem('bunny_wifi_audit_manifest_v2', JSON.stringify(manifest));
+            }
+
+            document.getElementById('audit-trigger-btn').disabled = false;
+            document.getElementById('audit-cancel-btn').disabled = true;
+            document.getElementById('wifi-target-ssid').disabled = false;
+            
+            document.getElementById('audit-progress').style.width = '0%';
+            document.getElementById('timer-countdown').innerText = "Audit Pipeline Terminated";
+            document.getElementById('terminal-stream-log').innerHTML = `<div style="color:var(--netflix-red); font-family:monospace; font-size:0.8rem; font-weight:700;">[CANCELLED]: Audit sequence forced termination intercept routine triggered. Memory allocations flushed.</div>`;
+            
+            triggerSystemToast("Asynchronous data stream transmission pipeline cancelled manually", true);
+            triggerHapticFeedbackVibrationEngine();
+            appendHistoricalSessionRecordLogItem(manifest ? manifest.ssid : "Unknown Network", "MANUAL_CANCEL");
+            calculateStorageCacheAllocationFootprintMetrics();
+        }
+
+        function executeChronicleClockTickIntervalStepper(startCheckpointSeconds) {
+            let tickerSecondsElapsed = startCheckpointSeconds;
+            updateInterfaceProgressMetricsView(tickerSecondsElapsed);
 
             auditIntervalReference = setInterval(() => {
-                currentSecondsElapsed++;
-                
-                // Track state inside persistent manifests
-                const savedSession = JSON.parse(localStorage.getItem('bunny_wifi_session'));
-                if(savedSession) {
-                    savedSession.elapsedSeconds = currentSecondsElapsed;
-                    localStorage.setItem('bunny_wifi_session', JSON.stringify(savedSession));
+                tickerSecondsElapsed++;
+
+                const savedManifestDataObj = JSON.parse(localStorage.getItem('bunny_wifi_audit_manifest_v2'));
+                if (savedManifestDataObj) {
+                    savedManifestDataObj.elapsedSeconds = tickerSecondsElapsed;
+                    localStorage.setItem('bunny_wifi_audit_manifest_v2', JSON.stringify(savedManifestDataObj));
                 }
 
-                updateInterfaceProgress(currentSecondsElapsed);
+                updateInterfaceProgressMetricsView(tickerSecondsElapsed);
+                triggerCountdownSoundAlertBeepFrequencyNode(tickerSecondsElapsed);
 
-                if(currentSecondsElapsed >= TOTAL_AUDIT_DURATION_SECONDS) {
+                if (tickerSecondsElapsed >= TOTAL_AUDIT_DURATION_SECONDS) {
                     clearInterval(auditIntervalReference);
-                    finalizeAuditOutcome();
+                    finalizeAuditWorkflowOutcomeManifests();
                 }
-            }, 1000);
+            }, currentIntervalTimerPeriodMillis);
         }
 
-        function updateInterfaceProgress(elapsed) {
-            const progressPct = (elapsed / TOTAL_AUDIT_DURATION_SECONDS) * 100;
-            document.getElementById('audit-progress').style.width = `${progressPct}%`;
+        function updateInterfaceProgressMetricsView(elapsedValue) {
+            const overallPctRatioValue = (elapsedValue / TOTAL_AUDIT_DURATION_SECONDS) * 100;
+            document.getElementById('audit-progress').style.width = `${overallPctRatioValue}%`;
 
-            const totalLeft = TOTAL_AUDIT_DURATION_SECONDS - elapsed;
-            const minutes = Math.floor(totalLeft / 60);
-            const seconds = totalLeft % 60;
-            document.getElementById('timer-countdown').innerText = 
-                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')} Remaining`;
+            const mathSecondsTotalRemaining = TOTAL_AUDIT_DURATION_SECONDS - elapsedValue;
+            const minutesRepresentation = Math.floor(mathSecondsTotalRemaining / 60);
+            const secondsRepresentation = mathSecondsTotalRemaining % 60;
+            document.getElementById('timer-countdown').innerText = `${String(minutesRepresentation).padStart(2, '0')}:${String(secondsRepresentation).padStart(2, '0')} Remaining`;
 
-            // Calculate precise log line index according to duration completion curve distribution
-            const stepIndexToDisplay = Math.floor((elapsed / TOTAL_AUDIT_DURATION_SECONDS) * AUDIT_STEPS_CATALOG.length);
-            renderTerminalLogsUpTo(stepIndexToDisplay);
+            const indexTargetMappingLogLine = Math.floor((elapsedValue / TOTAL_AUDIT_DURATION_SECONDS) * AUDIT_STEPS_CATALOG.length);
+            renderTerminalLogsUpToLimitBound(indexTargetMappingLogLine);
         }
 
-        function renderTerminalLogsUpTo(indexLimit) {
-            const terminal = document.getElementById('terminal-stream-log');
-            terminal.innerHTML = '';
-            
-            const finalIndex = Math.min(indexLimit, AUDIT_STEPS_CATALOG.length);
-            for(let i = 0; i < finalIndex; i++) {
-                const step = AUDIT_STEPS_CATALOG[i];
-                let div = document.createElement('div');
-                div.className = `typed-step ${step.fault ? 'fault-step' : ''}`;
-                div.innerText = step.text;
-                terminal.appendChild(div);
+        function renderTerminalLogsUpToLimitBound(indexPointer) {
+            const terminalContainerRef = document.getElementById('terminal-stream-log');
+            terminalContainerRef.innerHTML = '';
+
+            const normalizationLimitIndex = Math.min(indexPointer, AUDIT_STEPS_CATALOG.length);
+            for (let i = 0; i < normalizationLimitIndex; i++) {
+                const nodeStepItem = AUDIT_STEPS_CATALOG[i];
+                let logRowDivElement = document.createElement('div');
+                logRowDivElement.className = `typed-step ${nodeStepItem.fault ? 'fault-step' : ''}`;
+                logRowDivElement.innerText = nodeStepItem.text;
+                terminalContainerRef.appendChild(logRowDivElement);
             }
-            terminal.scrollTop = terminal.scrollHeight;
+            terminalContainerRef.scrollTop = terminalContainerRef.scrollHeight;
         }
 
-        function finalizeAuditOutcome() {
-            const savedSession = JSON.parse(localStorage.getItem('bunny_wifi_session'));
-            if(savedSession) {
-                savedSession.isCompleted = true;
-                localStorage.setItem('bunny_wifi_session', JSON.stringify(savedSession));
+        function finalizeAuditWorkflowOutcomeManifests() {
+            const savedManifestDataObj = JSON.parse(localStorage.getItem('bunny_wifi_audit_manifest_v2'));
+            if (savedManifestDataObj) {
+                savedManifestDataObj.isCompleted = true;
+                localStorage.setItem('bunny_wifi_audit_manifest_v2', JSON.stringify(savedManifestDataObj));
             }
 
-            document.getElementById('credentials-output-block').style.display = "flex";
+            document.getElementById('audit-trigger-btn').disabled = false;
+            document.getElementById('audit-cancel-btn').disabled = true;
+            document.getElementById('wifi-target-ssid').disabled = false;
+
+            document.getElementById('vaultStatusHeaderLabel').innerHTML = `<i data-lucide="unlock" style="width:16px; height:16px; color:var(--success-green);"></i> Vault Open // Handshake Verified`;
+            document.getElementById('vaultContentSearchFilterInput').disabled = false;
+            document.getElementById('pdfReportExportBtn').disabled = false;
+
+            paintVaultCredentialsDisplayList(loadedActiveGeneratedPasswordsCache);
+            switchActiveViewportLayoutTab('vault');
             
-            const passwordsArray = [
-                "Admin_Secure#2026",
-                "LupinStarnley@99",
-                "MatrixNetBypass!!",
-                "Wpa2_Protocol77X",
-                "BunnyEngineTokens"
-            ];
+            triggerSystemToast("Audit complete. Cryptographic token configurations mapped into vault location.");
+            triggerHapticFeedbackVibrationEngine();
+            appendHistoricalSessionRecordLogItem(savedManifestDataObj ? savedManifestDataObj.ssid : "Unknown Network", "SUCCESS_MATCHED");
+            calculateStorageCacheAllocationFootprintMetrics();
+        }
 
-            const containers = document.getElementById('passwords-injector-node');
-            containers.innerHTML = '';
+        function paintVaultCredentialsDisplayList(passwordsDataCollectionArray) {
+            const containersRef = document.getElementById('passwords-injector-node');
+            containersRef.innerHTML = '';
 
-            passwordsArray.forEach(pass => {
-                let div = document.createElement('div');
-                div.className = "pass-item";
-                div.innerHTML = `<span>${pass}</span><button class="pass-copy-btn" onclick="copyPasswordToken('${pass}')"><i data-lucide="copy" style="width:14px;"></i></button>`;
-                containers.appendChild(div);
+            if (passwordsDataCollectionArray.length === 0) {
+                containersRef.innerHTML = `<div style="font-size:0.75rem; color:var(--text-secondary); text-align:center; padding:20px 0;">No alphanumeric combinations match search filters.</div>`;
+                return;
+            }
+
+            passwordsDataCollectionArray.forEach((passStringToken) => {
+                let textEvaluationLabelLength = passStringToken.length;
+                let strengthClassModifier = "str-medium";
+                let strengthTextLabel = "MEDIUM STRENGTH";
+
+                if (textEvaluationLabelLength > 22) {
+                    strengthClassModifier = "str-ultra";
+                    strengthTextLabel = "ULTRA SECURE PROT";
+                } else if (textEvaluationLabelLength > 16) {
+                    strengthClassModifier = "str-strong";
+                    strengthTextLabel = "STRONG CRYPTO";
+                }
+
+                let rowItemShellDiv = document.createElement('div');
+                rowItemShellDiv.className = "pass-item";
+                rowItemShellDiv.innerHTML = `
+                    <div class="pass-left-node">
+                        <span>${passStringToken}</span>
+                        <div class="strength-indicator ${strengthClassModifier}">${strengthTextLabel}</div>
+                    </div>
+                    <button class="pass-copy-btn" onclick="extractPasskeyTokenToClipboard('${passStringToken}')">
+                        <i data-lucide="copy" style="width:16px; height:16px;"></i>
+                    </button>
+                `;
+                containersRef.appendChild(rowItemShellDiv);
             });
-            
             lucide.createIcons();
-            triggerSystemToast("All Credential Candidates Restructured Successfully");
+        }
+
+        function filterVaultPasswordsDisplayList() {
+            const targetSearchQueryValueStr = document.getElementById('vaultContentSearchFilterInput').value.trim().toLowerCase();
+            const matchedFilteredSubArrayResults = loadedActiveGeneratedPasswordsCache.filter(itemStringValue => 
+                itemStringValue.toLowerCase().includes(targetSearchQueryValueStr)
+            );
+            paintVaultCredentialsDisplayList(matchedFilteredSubArrayResults);
+        }
+
+        function toggleTurboSpeedMultiplierMode() {
+            const modeLabelRef = document.getElementById('speedMultiplierModeLabel');
+            const manifestObj = JSON.parse(localStorage.getItem('bunny_wifi_audit_manifest_v2'));
+            const isCurrentlyRunningStateActive = (auditIntervalReference !== null && (!manifestObj || (!manifestObj.isCompleted && !manifestObj.isCancelled)));
+
+            if (!isTurboSpeedModeEnabled) {
+                isTurboSpeedModeEnabled = true;
+                currentIntervalTimerPeriodMillis = 150; 
+                modeLabelRef.innerText = "Speed: Turbo Active";
+                modeLabelRef.style.color = "var(--success-green)";
+                triggerSystemToast("Turbo processing matrix cycle mode acceleration operational");
+            } else {
+                isTurboSpeedModeEnabled = false;
+                currentIntervalTimerPeriodMillis = 1000; 
+                modeLabelRef.innerText = "Speed: Normal";
+                modeLabelRef.style.color = "var(--text-pure)";
+                triggerSystemToast("Restored standard clock diagnostic baseline frequency rates");
+            }
+
+            if (isCurrentlyRunningStateActive) {
+                const capturedCheckpointSecondsElapsed = manifestObj.elapsedSeconds;
+                clearInterval(auditIntervalReference);
+                executeChronicleClockTickIntervalStepper(capturedCheckpointSecondsElapsed);
+            }
+        }
+
+        function extractPasskeyTokenToClipboard(textStringPayload) {
+            navigator.clipboard.writeText(textStringPayload)
+                .then(() => {
+                    triggerSystemToast("Token signature captured to local device clipboard");
+                    triggerHapticFeedbackVibrationEngine();
+                });
         }
 
         function checkManifestSessionRecovery() {
-            const stored = localStorage.getItem('bunny_wifi_session');
-            if(!stored) return;
+            const serializedManifestRawValue = localStorage.getItem('bunny_wifi_audit_manifest_v2');
+            if (!serializedManifestRawValue) return;
 
-            const session = JSON.parse(stored);
-            document.getElementById('wifi-target-ssid').value = session.ssid;
+            const structuredDataSessionModel = JSON.parse(serializedManifestRawValue);
+            if (structuredDataSessionModel.isCancelled) return; 
+
+            document.getElementById('wifi-target-ssid').value = structuredDataSessionModel.ssid;
             document.getElementById('wifi-target-ssid').disabled = true;
             document.getElementById('audit-trigger-btn').disabled = true;
+            document.getElementById('audit-cancel-btn').disabled = false;
 
-            triggerSystemToast("Active Manifest Core Session State Restored");
+            loadedActiveGeneratedPasswordsCache = structuredDataSessionModel.passwords || [];
+            if (structuredDataSessionModel.turboState) {
+                isTurboSpeedModeEnabled = false; 
+                toggleTurboSpeedMultiplierMode();
+            }
 
-            if(session.isCompleted || session.elapsedSeconds >= TOTAL_AUDIT_DURATION_SECONDS) {
-                document.getElementById('audit-workspace').style.display = "block";
-                updateInterfaceProgress(TOTAL_AUDIT_DURATION_SECONDS);
-                finalizeAuditOutcome();
+            triggerSystemToast("Restoring active network diagnostic state parameters from persistence manifests");
+
+            if (structuredDataSessionModel.isCompleted || structuredDataSessionModel.elapsedSeconds >= TOTAL_AUDIT_DURATION_SECONDS) {
+                finalizeAuditWorkflowOutcomeManifests();
             } else {
-                startAuditExecutionPipeline(session.elapsedSeconds);
+                switchActiveViewportLayoutTab('terminal');
+                executeChronicleClockTickIntervalStepper(structuredDataSessionModel.elapsedSeconds);
             }
         }
 
-        function copyPasswordToken(text) {
-            navigator.clipboard.writeText(text);
-            triggerSystemToast("Token Extracted to Clipboard Storage Location");
+        function exportAuditCredentialsPdfReport() {
+            const { jsPDF } = window.jspdf;
+            const pdfDocInstance = new jsPDF();
+
+            const savedManifestDataObj = JSON.parse(localStorage.getItem('bunny_wifi_audit_manifest_v2'));
+            const targetSsidPlaceholder = savedManifestDataObj ? savedManifestDataObj.ssid : "Unknown_Access_Point";
+
+            pdfDocInstance.setFillColor(20, 20, 20);
+            pdfDocInstance.rect(0, 0, 210, 297, "F");
+
+            pdfDocInstance.setFont("Helvetica", "bold");
+            pdfDocInstance.setFontSize(22);
+            pdfDocInstance.setTextColor(229, 9, 20);
+            pdfDocInstance.text("BUNNY ENGINE AUDIT REPORT", 20, 25);
+
+            pdfDocInstance.setDrawColor(229, 9, 20);
+            pdfDocInstance.setLineWidth(1);
+            pdfDocInstance.line(20, 30, 190, 30);
+
+            pdfDocInstance.setFontSize(10);
+            pdfDocInstance.setFont("Helvetica", "normal");
+            pdfDocInstance.setTextColor(170, 170, 170);
+            pdfDocInstance.text(`Target Access Point (SSID): ${targetSsidPlaceholder}`, 20, 42);
+            pdfDocInstance.text(`Protocol Inspection Framework: WPA2/WPA3 Personal Handshake Verification`, 20, 48);
+            pdfDocInstance.text(`Timestamp Vector Session Log: ${new Date().toUTCString()}`, 20, 54);
+
+            pdfDocInstance.setFontSize(14);
+            pdfDocInstance.setFont("Helvetica", "bold");
+            pdfDocInstance.setTextColor(255, 255, 255);
+            pdfDocInstance.text("Extracted Compliant Key Credentials Candidate Nodes (Randomized 5):", 20, 70);
+
+            pdfDocInstance.setFont("Courier", "bold");
+            pdfDocInstance.setFontSize(11);
+            pdfDocInstance.setTextColor(48, 209, 88);
+
+            let verticalOffsetCoordinateCursorY = 82;
+            loadedActiveGeneratedPasswordsCache.forEach((passphraseString, arrayIndexKey) => {
+                pdfDocInstance.text(`[Candidate #${arrayIndexKey + 1} Signature]:  ${passphraseString}`, 20, verticalOffsetCoordinateCursorY);
+                verticalOffsetCoordinateCursorY += 10;
+            });
+
+            pdfDocInstance.setDrawColor(40, 40, 40);
+            pdfDocInstance.line(20, verticalOffsetCoordinateCursorY + 5, 190, verticalOffsetCoordinateCursorY + 5);
+
+            pdfDocInstance.setFont("Helvetica", "italic");
+            pdfDocInstance.setFontSize(8);
+            pdfDocInstance.setTextColor(120, 120, 120);
+            pdfDocInstance.text("Confidential security diagnostic data. Unauthorized extraction restricted.", 20, verticalOffsetCoordinateCursorY + 15);
+
+            pdfDocInstance.save(`BunnyEngine_Audit_Report_${targetSsidPlaceholder}.pdf`);
+            triggerSystemToast("PDF diagnostic logs document generated and downloaded successfully");
+        }
+
+        function appendHistoricalSessionRecordLogItem(ssidContextLabel, stringOutcomeStatusFlag) {
+            let arraysListCollection = [];
+            const existingHistoryRecordsRawValue = localStorage.getItem('bunny_wifi_history_logs_array');
+            if (existingHistoryRecordsRawValue) {
+                arraysListCollection = JSON.parse(existingHistoryRecordsRawValue);
+            }
+
+            const appendLogObjectNode = {
+                ssid: ssidContextLabel,
+                status: stringOutcomeStatusFlag,
+                timestamp: new Date().toLocaleTimeString()
+            };
+
+            arraysListCollection.unshift(appendLogObjectNode); 
+            if (arraysListCollection.length > 10) arraysListCollection.pop(); 
+
+            localStorage.setItem('bunny_wifi_history_logs_array', JSON.stringify(arraysListCollection));
+            renderSessionAuditLogsHistoryPanelList();
+        }
+
+        function renderSessionAuditLogsHistoryPanelList() {
+            const listWrapperRef = document.getElementById('sessionHistoryTrackerListWrapper');
+            listWrapperRef.innerHTML = '';
+
+            const rawLogsManifestValue = localStorage.getItem('bunny_wifi_history_logs_array');
+            if (!rawLogsManifestValue || JSON.parse(rawLogsManifestValue).length === 0) {
+                listWrapperRef.innerHTML = `<div style="font-size:0.72rem; color:var(--text-secondary); text-align:center; padding:15px 0; font-family:monospace;">History logs cache memory empty.</div>`;
+                return;
+            }
+
+            const parsedArrayCollection = JSON.parse(rawLogsManifestValue);
+            parsedArrayCollection.forEach(historyNodeLogItem => {
+                let stateStatusColorClass = (historyNodeLogItem.status === "SUCCESS_MATCHED") ? "var(--success-green)" : "var(--netflix-red)";
+                let rowElementFrame = document.createElement('div');
+                rowElementFrame.className = "history-item-node";
+                rowElementFrame.innerHTML = `
+                    <span>SSID: <strong>${historyNodeLogItem.ssid}</strong></span>
+                    <span style="color:${stateStatusColorClass}; font-weight:800; font-size:0.65rem;">${historyNodeLogItem.status} [${historyNodeLogItem.timestamp}]</span>
+                `;
+                listWrapperRef.appendChild(rowElementFrame);
+            });
+        }
+
+        function calculateStorageCacheAllocationFootprintMetrics() {
+            let overallTotalCharactersCountBytes = 0;
+            for (let localKeyIndex in localStorage) {
+                if (!localStorage.hasOwnProperty(localKeyIndex)) continue;
+                overallTotalCharactersCountBytes += ((localStorage[localKeyIndex].length + localKeyIndex.length) * 2); 
+            }
+            const convertedKiloBytesMetricRepresentation = (overallTotalCharactersCountBytes / 1024).toFixed(2);
+            document.getElementById('storageCacheAllocationBytesCounterLabel').innerText = `${convertedKiloBytesMetricRepresentation} KB`;
+        }
+
+        function flushApplicationStorageCacheManifests() {
+            if (auditIntervalReference) clearInterval(auditIntervalReference);
+            localStorage.clear();
+            
+            loadedActiveGeneratedPasswordsCache = [];
+            isTurboSpeedModeEnabled = false;
+            
+            document.getElementById('wifi-target-ssid').value = '';
+            document.getElementById('wifi-target-ssid').disabled = false;
+            document.getElementById('audit-trigger-btn').disabled = false;
+            document.getElementById('audit-cancel-btn').disabled = true;
+
+            document.getElementById('vaultStatusHeaderLabel').innerHTML = `<i data-lucide="lock" style="width:16px; height:16px; color:var(--netflix-red);"></i> Vault Content Sealed`;
+            document.getElementById('vaultContentSearchFilterInput').disabled = true;
+            document.getElementById('pdfReportExportBtn').disabled = true;
+            document.getElementById('audit-progress').style.width = '0%';
+            document.getElementById('timer-countdown').innerText = "02:00 Remaining";
+
+            document.getElementById('terminal-stream-log').innerHTML = `<div style="color:var(--text-secondary); font-size:0.8rem; text-align:center; padding-top:80px; font-family:monospace;">Terminal pipeline uninitialized.</div>`;
+            document.getElementById('passwords-injector-node').innerHTML = `<div style="color:var(--text-secondary); font-size:0.78rem; text-align:center; padding:40px 0; font-family:monospace;">No credentials mapped into volatile local cache.</div>`;
+
+            document.getElementById('speedMultiplierModeLabel').innerText = "Speed: Normal";
+            document.getElementById('speedMultiplierModeLabel').style.color = "var(--text-pure)";
+
+            calculateStorageCacheAllocationFootprintMetrics();
+            renderSessionAuditLogsHistoryPanelList();
+            generateRandomSpoofedMacAddress();
+            switchActiveViewportLayoutTab('forge');
+            
+            triggerSystemToast("Persistent local configuration cache vectors flushed completely");
+            triggerHapticFeedbackVibrationEngine();
+        }
+
+        function triggerCountdownSoundAlertBeepFrequencyNode(currentElapsedProgressClockIndexValue) {
+            const totalRemainingSecondsInverseDelta = TOTAL_AUDIT_DURATION_SECONDS - currentElapsedProgressClockIndexValue;
+            
+            if (totalRemainingSecondsInverseDelta <= 5 && totalRemainingSecondsInverseDelta > 0) {
+                try {
+                    let osc = window.audioFeedbackContextChannel.createOscillator();
+                    let gainNodeRef = window.audioFeedbackContextChannel.createGain();
+                    
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(880, window.audioFeedbackContextChannel.currentTime); 
+                    gainNodeRef.gain.setValueAtTime(0.05, window.audioFeedbackContextChannel.currentTime);
+                    
+                    osc.connect(gainNodeRef);
+                    gainNodeRef.connect(window.audioFeedbackContextChannel.destination);
+                    
+                    osc.start();
+                    osc.stop(window.audioFeedbackContextChannel.currentTime + 0.08); 
+                } catch (audioExceptionContextLog) {
+                    console.warn("Audio hardware context processing exception intercepted safely:", audioExceptionContextLog);
+                }
+            }
+        }
+
+        function triggerHapticFeedbackVibrationEngine() {
+            if (navigator.vibrate) {
+                navigator.vibrate(40); 
+            }
+        }
+
+        const toastElementRef = document.getElementById('systemToast');
+        let isUserCurrentlyDraggingToastState = false;
+        let originalPointerAnchorX = 0;
+        let computedTranslateOffsetDeltaX = 0;
+
+        toastElementRef.addEventListener('pointerdown', (pointerEventDataArgs) => {
+            isUserCurrentlyDraggingToastState = true;
+            originalPointerAnchorX = pointerEventDataArgs.clientX;
+            toastElementRef.style.transition = 'none';
+        });
+
+        document.addEventListener('pointermove', (pointerMoveEventArgs) => {
+            if (!isUserCurrentlyDraggingToastState) return;
+            let realTimeCurrentPointerPositionCursorX = pointerMoveEventArgs.clientX;
+            computedTranslateOffsetDeltaX = realTimeCurrentPointerPositionCursorX - originalPointerAnchorX;
+            if (computedTranslateOffsetDeltaX < 0) computedTranslateOffsetDeltaX = 0; 
+            toastElementRef.style.transform = `translateX(${computedTranslateOffsetDeltaX}px)`;
+        });
+
+        document.addEventListener('pointerup', () => {
+            if (!isUserCurrentlyDraggingToastState) return;
+            isUserCurrentlyDraggingToastState = false;
+            if (computedTranslateOffsetDeltaX > 120) {
+                toastElementRef.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                toastElementRef.style.transform = 'translateX(120%)';
+                toastElementRef.style.opacity = '0';
+                setTimeout(() => {
+                    toastElementRef.classList.remove('show');
+                    if (toastTimerReference) clearTimeout(toastTimerReference);
+                }, 200);
+            } else {
+                toastElementRef.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                toastElementRef.style.transform = 'translateX(0)';
+            }
+            computedTranslateOffsetDeltaX = 0;
+        });
+
+        function triggerSystemToast(messageStringValueContext, isErrorEventConditionBoolean = false) {
+            const textMsgSpanRef = document.getElementById('toastMsg');
+            const iconSvgNodeRef = document.getElementById('toastIcon');
+
+            if (toastTimerReference) clearTimeout(toastTimerReference);
+
+            textMsgSpanRef.innerText = messageStringValueContext;
+            toastElementRef.style.borderLeftColor = isErrorEventConditionBoolean ? "var(--netflix-red)" : "var(--success-green)";
+            iconSvgNodeRef.setAttribute('data-lucide', isErrorEventConditionBoolean ? 'alert-triangle' : 'check-circle');
+
+                        lucide.createIcons();
+            toastElementRef.style.transform = 'translateY(-150px)';
+            toastElementRef.style.opacity = '0';
+
+            setTimeout(() => {
+                toastElementRef.style.transition = '';
+                toastElementRef.classList.add('show');
+                toastElementRef.style.transform = '';
+                toastElementRef.style.opacity = '';
+            }, 50);
+
+            toastTimerReference = setTimeout(() => {
+                toastElementRef.classList.remove('show');
+            }, 4000);
         }
     </script>
 </body>
