@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AgePro Calculator</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    html, body {height: 100%; overflow-x: hidden;}
+    body {
+        background: linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 100%);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #1A1A1A;
+        padding-bottom: 20px;
+    }
+
+   .container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 16px;
+    }
+
+   .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+   .title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #1976D2;
+    }
+
+   .icon-btn {
+        background: #FFFFFF;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+   .icon-btn:active {transform: scale(0.9);}
+
+   .card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+   .card-title {
+        font-size: 0.8rem;
+        color: #5D4037;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+   .input-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+   .input-box {
+        text-align: center;
+    }
+
+   .input-label {
+        font-size: 0.7rem;
+        color: #5D4037;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-align: center;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+    input:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+    }
+
+    input.error {
+        border-color: #F44336;
+        animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+        0%, 100% {transform: translateX(0);}
+        25% {transform: translateX(-5px);}
+        75% {transform: translateX(5px);}
+    }
+
+   .error-text {
+        color: #F44336;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        height: 16px;
+    }
+
+   .age-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        text-align: center;
+    }
+
+   .age-item {
+        background: #F5F5F5;
+        border-radius: 14px;
+        padding: 12px 8px;
+    }
+
+   .age-value {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #0D47A1;
+        line-height: 1;
+    }
+
+   .age-label {
+        font-size: 0.65rem;
+        color: #5D4037;
+        font-weight: 700;
+        margin-top: 4px;
+        text-transform: uppercase;
+    }
+
+   .big-number {
+        font-size: 3rem;
+        font-weight: 900;
+        color: #0D47A1;
+        text-align: center;
+        margin: 8px 0;
+    }
+
+   .countdown {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #1976D2;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+   .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+   .stat-item {
+        background: #F5F5F5;
+        border-radius: 14px;
+        padding: 14px;
+    }
+
+   .stat-value {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #0D47A1;
+        margin-bottom: 2px;
+    }
+
+   .stat-label {
+        font-size: 0.65rem;
+        color: #5D4037;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+   .btn {
+        background: #2196F3;
+        border: none;
+        color: white;
+        padding: 14px;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        width: 100%;
+        box-shadow: 0 4px 0 #1565C0;
+        text-transform: uppercase;
+    }
+
+   .btn:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 #1565C0;
+    }
+
+   .screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #FFFFFF;
+        z-index: 100;
+        display: none;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+   .screen.active {display: flex;}
+
+   .screen-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+   .back-btn {
+        font-size: 1.5rem;
+        margin-right: 12px;
+        cursor: pointer;
+    }
+
+   .screen-content {
+        padding: 20px;
+        line-height: 1.6;
+        color: #1A1A1A;
+    }
+
+   .screen-content h2 {
+        color: #1976D2;
+        margin: 20px 0 8px 0;
+        font-size: 1.2rem;
+    }
+
+   .screen-content p {
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+    }
+
+   .hidden {display: none;}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">AgePro Calculator</div>
+        <div style="display: flex; gap: 8px;">
+            <div class="icon-btn" id="muteBtn">🔊</div>
+            <div class="icon-btn" id="aboutBtn">?</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Enter Your Birth Date</div>
+        <div class="input-group">
+            <div class="input-box">
+                <div class="input-label">Day</div>
+                <input type="number" id="dayInput" placeholder="DD" min="1" max="31">
+            </div>
+            <div class="input-box">
+                <div class="input-label">Month</div>
+                <input type="number" id="monthInput" placeholder="MM" min="1" max="12">
+            </div>
+            <div class="input-box">
+                <div class="input-label">Year</div>
+                <input type="number" id="yearInput" placeholder="YYYY" min="1900" max="2026">
+            </div>
+        </div>
+        <div class="error-text" id="errorText"></div>
+    </div>
+
+    <div id="resultsSection" class="hidden">
+        <div class="card">
+            <div class="card-title">Your Exact Age</div>
+            <div class="age-grid">
+                <div class="age-item">
+                    <div class="age-value" id="years">0</div>
+                    <div class="age-label">Years</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-value" id="months">0</div>
+                    <div class="age-label">Months</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-value" id="days">0</div>
+                    <div class="age-label">Days</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-value" id="hours">0</div>
+                    <div class="age-label">Hours</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-value" id="minutes">0</div>
+                    <div class="age-label">Minutes</div>
+                </div>
+                <div class="age-item">
+                    <div class="age-value" id="seconds">0</div>
+                    <div class="age-label">Seconds</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Total Days Lived</div>
+            <div class="big-number" id="totalDays">0</div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Next Birthday In</div>
+            <div class="countdown" id="birthdayCountdown">0 Days</div>
+            <div style="text-align: center; margin-top: 8px; font-size: 0.9rem; color: #5D4037; font-weight: 600;" id="birthDay"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Life Statistics</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="heartbeats">0</div>
+                    <div class="stat-label">Heartbeats</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="breaths">0</div>
+                    <div class="stat-label">Breaths Taken</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="sleepTime">0</div>
+                    <div class="stat-label">Sleep Time</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="earthOrbits">0</div>
+                    <div class="stat-label">Earth Orbits</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="moonCycles">0</div>
+                    <div class="stat-label">Full Moons</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="zodiac">-</div>
+                    <div class="stat-label">Zodiac Sign</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">Fun Facts</div>
+            <div style="font-size: 0.95rem; font-weight: 600; line-height: 1.5; color: #1A1A1A;">
+                <div id="generation" style="margin-bottom: 8px;">-</div>
+                <div id="famousBirthday" style="margin-bottom: 8px;">-</div>
+                <div id="milestone">-</div>
+            </div>
+        </div>
+
+        <button class="btn" id="shareBtn">Share Results</button>
+    </div>
+</div>
+
+<div class="screen" id="aboutScreen">
+    <div class="screen-header">
+        <div class="back-btn" id="backBtn">←</div>
+        <div style="font-weight: 800; font-size: 1.1rem;">About</div>
+    </div>
+    <div class="screen-content">
+        <h2>AgePro Calculator v1.0©®™</h2>
+        <p>Calculate your exact age and birthday countdown with fun life statistics.</p>
+
+        <h2>Features</h2>
+        <p>- Real-time age in years, months, days, hours, minutes, seconds</p>
+        <p>- Total days lived counter</p>
+        <p>- Birthday countdown timer</p>
+        <p>- Day of week you were born</p>
+        <p>- Life statistics: heartbeats, breaths, sleep time</p>
+        <p>- Zodiac sign and generation info</p>
+        <p>- Famous birthday matches</p>
+        <p>- Share beautiful result cards</p>
+
+        <h2>Privacy</h2>
+        <p>100% offline. No data leaves your device. No signup required.</p>
+
+        <h2>Developer</h2>
+        <p>Muse Spark</p>
+        <p>Contact: agepro@musespark.com</p>
+
+        <p style="margin-top: 30px; font-size: 0.8rem; color: #5D4037;">©2026 All rights reserved®™</p>
+    </div>
+</div>
+
+<script>
+// AUDIO CONTEXT
+let audioCtx;
+let muted = false;
+
+function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playSound(type) {
+    if (!audioCtx || muted) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'tick') {
+        osc.frequency.value = 800;
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+    } else if (type === 'success') {
+        osc.frequency.value = 1000;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+    } else if (type === 'error') {
+        osc.frequency.value = 200;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+    } else if (type === 'click') {
+        osc.frequency.value = 600;
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+}
+
+// DOM ELEMENTS
+const dayInput = document.getElementById('dayInput');
+const monthInput = document.getElementById('monthInput');
+const yearInput = document.getElementById('yearInput');
+const errorText = document.getElementById('errorText');
+const resultsSection = document.getElementById('resultsSection');
+
+// LOAD SAVED DATE
+const savedDate = localStorage.getItem('ageProBirthDate');
+if (savedDate) {
+    const [y, m, d] = savedDate.split('-');
+    dayInput.value = d;
+    monthInput.value = m;
+    yearInput.value = y;
+    calculate();
+}
+
+// INPUT HANDLERS
+[dayInput, monthInput, yearInput].forEach(input => {
+    input.addEventListener('input', () => {
+        initAudio();
+        calculate();
+        if (input.value.length >= input.maxLength && input!== yearInput) {
+            if (input === dayInput) monthInput.focus();
+            if (input === monthInput) yearInput.focus();
+        }
+    });
+});
+
+dayInput.maxLength = 2;
+monthInput.maxLength = 2;
+yearInput.maxLength = 4;
+
+// ZODIAC DATA
+const ZODIACS = [
+    {name: 'Capricorn', start: [12, 22], end: [1, 19], traits: 'Disciplined, Responsible, Ambitious'},
+    {name: 'Aquarius', start: [1, 20], end: [2, 18], traits: 'Independent, Humanitarian, Inventive'},
+    {name: 'Pisces', start: [2, 19], end: [3, 20], traits: 'Compassionate, Artistic, Intuitive'},
+    {name: 'Aries', start: [3, 21], end: [4, 19], traits: 'Courageous, Determined, Confident'},
+    {name: 'Taurus', start: [4, 20], end: [5, 20], traits: 'Reliable, Patient, Practical'},
+    {name: 'Gemini', start: [5, 21], end: [6, 20], traits: 'Adaptable, Outgoing, Curious'},
+    {name: 'Cancer', start: [6, 21], end: [7, 22], traits: 'Loyal, Emotional, Sympathetic'},
+    {name: 'Leo', start: [7, 23], end: [8, 22], traits: 'Confident, Generous, Loyal'},
+    {name: 'Virgo', start: [8, 23], end: [9, 22], traits: 'Analytical, Kind, Hardworking'},
+    {name: 'Libra', start: [9, 23], end: [10, 22], traits: 'Diplomatic, Fair, Social'},
+    {name: 'Scorpio', start: [10, 23], end: [11, 21], traits: 'Passionate, Brave, Resourceful'},
+    {name: 'Sagittarius', start: [11, 22], end: [12, 21], traits: 'Optimistic, Adventurous, Honest'}
+];
+
+const FAMOUS = ['Albert Einstein', 'Barack Obama', 'Taylor Swift', 'Cristiano Ronaldo', 'Bill Gates', 'Elon Musk', 'Oprah Winfrey', 'Lionel Messi', 'Beyoncé', 'Steve Jobs'];
+
+// MAIN CALCULATE FUNCTION
+function calculate() {
+    const day = parseInt(dayInput.value);
+    const month = parseInt(monthInput.value);
+    const year = parseInt(yearInput.value);
+
+    // VALIDATION
+    if (!day ||!month ||!year) {
+        resultsSection.classList.add('hidden');
+        errorText.textContent = '';
+        clearErrors();
+        return;
+    }
+
+    const now = new Date();
+    const birthDate = new Date(year, month - 1, day);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Check if valid date
+    if (birthDate.getDate()!== day || birthDate.getMonth()!== month - 1 || birthDate.getFullYear()!== year) {
+        showError('Invalid date');
+        return;
+    }
+
+    // Check future
+    if (birthDate > today) {
+        showError('Future date not allowed');
+        return;
+    }
+
+    clearErrors();
+    playSound('success');
+    resultsSection.classList.remove('hidden');
+    localStorage.setItem('ageProBirthDate', `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+
+    // CALCULATE AGE
+    let ageYears = today.getFullYear() - year;
+    let ageMonths = today.getMonth() - (month - 1);
+    let ageDays = today.getDate() - day;
+
+    if (ageDays < 0) {
+        ageMonths--;
+        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        ageDays += prevMonth.getDate();
+    }
+    if (ageMonths < 0) {
+        ageYears--;
+        ageMonths += 12;
+    }
+
+    // TOTAL CALCULATIONS
+    const totalDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+    const totalHours = totalDays * 24 + now.getHours();
+    const totalMinutes = totalHours * 60 + now.getMinutes();
+    const totalSeconds = totalMinutes * 60 + now.getSeconds();
+
+    // NEXT BIRTHDAY
+    let nextBirthday = new Date(today.getFullYear(), month - 1, day);
+    if (nextBirthday < today) {
+        nextBirthday.setFullYear(today.getFullYear() + 1);
+    }
+    const daysToBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+    const hoursToBirthday = Math.floor(((nextBirthday - now) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minsToBirthday = Math.floor(((nextBirthday - now) % (1000 * 60 * 60)) / (1000 * 60));
+
+    // STATS
+    const heartbeats = Math.floor(totalSeconds * 1.167);
+    const breaths = Math.floor(totalSeconds * 0.25);
+    const sleepHours = Math.floor(totalDays * 8);
+    const sleepYears = Math.floor(sleepHours / 24 / 365);
+    const sleepMonths = Math.floor((sleepHours / 24 % 365) / 30);
+    const earthOrbits = ageYears;
+    const moonCycles = Math.floor(totalDays / 29.53);
+
+    // ZODIAC
+    const zodiac = getZodiac(month, day);
+    const generation = getGeneration(year);
+    const famousPerson = FAMOUS[Math.floor(Math.random() * FAMOUS.length)];
+
+    // MILESTONE
+    const nextMilestone = Math.ceil(totalDays / 1000) * 1000;
+    const daysToMilestone = nextMilestone - totalDays;
+
+    // UPDATE DOM
+    document.getElementById('years').textContent = ageYears;
+    document.getElementById('months').textContent = ageMonths;
+    document.getElementById('days').textContent = ageDays;
+    document.getElementById('hours').textContent = now.getHours();
+    document.getElementById('minutes').textContent = now.getMinutes();
+    document.getElementById('seconds').textContent = now.getSeconds();
+    document.getElementById('totalDays').textContent = totalDays.toLocaleString();
+    document.getElementById('birthdayCountdown').textContent = `${daysToBirthday} Days, ${hoursToBirthday} Hours, ${minsToBirthday} Min`;
+    document.getElementById('birthDay').textContent = `You were born on ${birthDate.toLocaleDateString('en-US', {weekday: 'long'})}`;
+    document.getElementById('heartbeats').textContent = heartbeats.toLocaleString();
+    document.getElementById('breaths').textContent = breaths.toLocaleString();
+    document.getElementById('sleepTime').textContent = `${sleepYears}Y ${sleepMonths}M`;
+    document.getElementById('earthOrbits').textContent = earthOrbits;
+    document.getElementById('moonCycles').textContent = moonCycles;
+    document.getElementById('zodiac').textContent = zodiac.name + ' ♌';
+    document.getElementById('generation').textContent = `Generation: ${generation}`;
+    document.getElementById('famousBirthday').textContent = `Shares birthday with: ${famousPerson}`;
+    document.getElementById('milestone').textContent = `${nextMilestone.toLocaleString()} days lived in ${daysToMilestone} days`;
+}
+
+// HELPER FUNCTIONS
+function showError(msg) {
+    errorText.textContent = msg;
+    dayInput.classList.add('error');
+    monthInput.classList.add('error');
+    yearInput.classList.add('error');
+    resultsSection.classList.add('hidden');
+    playSound('error');
+}
+
+function clearErrors() {
+    errorText.textContent = '';
+    dayInput.classList.remove('error');
+    monthInput.classList.remove('error');
+    yearInput.classList.remove('error');
+}
+
+function getZodiac(m, d) {
+    for (let z of ZODIACS) {
+        if ((m === z.start[0] && d >= z.start[1]) || (m === z.end[0] && d <= z.end[1])) {
+            return z;
+        }
+    }
+    return ZODIACS[0];
+}
+
+function getGeneration(y) {
+    if (y >= 2013) return 'Gen Alpha';
+    if (y >= 1997) return 'Gen Z';
+    if (y >= 1981) return 'Millennial';
+    if (y >= 1965) return 'Gen X';
+    if (y >= 1946) return 'Baby Boomer';
+    return 'Silent Gen';
+}
+
+// LIVE UPDATE EVERY SECOND
+setInterval(() => {
+    if (!resultsSection.classList.contains('hidden')) {
+        const now = new Date();
+        document.getElementById('seconds').textContent = now.getSeconds();
+        document.getElementById('minutes').textContent = now.getMinutes();
+        document.getElementById('hours').textContent = now.getHours();
+        if (Math.random() < 0.1) playSound('tick');
+    }
+}, 1000);
+
+// BUTTONS
+document.getElementById('muteBtn').addEventListener('click', () => {
+    muted =!muted;
+    document.getElementById('muteBtn').textContent = muted? '🔇' : '🔊';
+    playSound('click');
+});
+
+document.getElementById('aboutBtn').addEventListener('click', () => {
+    document.getElementById('aboutScreen').classList.add('active');
+    playSound('click');
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('aboutScreen').classList.remove('active');
+    playSound('click');
+});
+
+document.getElementById('shareBtn').addEventListener('click', () => {
+    playSound('click');
+    alert('Share feature: Screenshot this page to share your results!');
+});
+
+// INIT
+if (savedDate) calculate();
+</script>
+</body>
+</html>
