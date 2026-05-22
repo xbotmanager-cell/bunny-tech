@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bunny Love - Love Calculator</title>
+
+<!-- Meta Tags For WhatsApp/Facebook/TikTok Preview -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xbotmanager-cell.github.io/bunny-tech/public/tools-love-game.html">
+<meta property="og:title" content="Bunny Love - Check Your Love Match">
+<meta property="og:description" content="Calculate love percentage, get love story, lucky date and more. Created by LUPIN STARNLEY. 100% fun, 0% serious©®™">
+<meta property="og:image" content="https://i.ibb.co/LDMjMYyy/file-00000000855c71f89fb70f5f8bebc2b2.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Bunny Love - Check Your Love Match">
+<meta name="twitter:description" content="Calculate love percentage, get love story, lucky date and more. Created by LUPIN STARNLEY.">
+<meta name="twitter:image" content="https://i.ibb.co/LDMjMYyy/file-00000000855c71f89fb70f5f8bebc2b2.png">
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    :root {
+        --bg-color: #0D0D0D;
+        --card-color: #1A1A1A;
+        --text-color: #FFFFFF;
+        --text-secondary: #B0B0B0;
+        --accent-color: #FF6B9D;
+        --accent-secondary: #FF8E9E;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --shadow-color: rgba(0, 0, 0, 0.3);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --success-color: #4CAF50;
+        --warning-color: #FF9800;
+        --danger-color: #F44336;
+    }
+
+    body.white-mode {
+        --bg-color: #FFFFFF;
+        --card-color: #F5F5F5;
+        --text-color: #1A1A1A;
+        --text-secondary: #5D4037;
+        --accent-color: #E91E63;
+        --accent-secondary: #F06292;
+        --border-color: rgba(0, 0, 0, 0.1);
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --glass-bg: rgba(0, 0, 0, 0.05);
+        --glass-border: rgba(0, 0, 0, 0.1);
+    }
+
+    body.purple-mode {
+        --bg-color: #1A0033;
+        --card-color: rgba(255, 255, 255, 0.1);
+        --text-color: #E0B0FF;
+        --text-secondary: #C084FC;
+        --accent-color: #A855F7;
+        --accent-secondary: #C084FC;
+        --border-color: rgba(168, 85, 247, 0.3);
+        --shadow-color: rgba(168, 85, 247, 0.4);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
+    html, body {
+        height: 100%;
+        overflow-x: hidden;
+    }
+
+    body {
+        background: var(--bg-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        padding-bottom: 20px;
+    }
+
+    body.purple-mode {
+        background: linear-gradient(180deg, #1A0033 0%, #3B0764 100%);
+    }
+
+  .container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 16px;
+    }
+
+  .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+  .title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--accent-color);
+        text-shadow: 0 0 20px var(--accent-color);
+    }
+
+    body.purple-mode.title {
+        text-shadow: 0 0 20px var(--accent-color), 0 0 40px var(--accent-color);
+    }
+
+  .header-icons {
+        display: flex;
+        gap: 8px;
+    }
+
+  .icon-btn {
+        background: var(--card-color);
+        border: 2px solid var(--border-color);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px var(--shadow-color);
+        backdrop-filter: blur(10px);
+        color: var(--text-color);
+    }
+
+    body.purple-mode.icon-btn {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 20px var(--shadow-color);
+    }
+
+  .icon-btn:active {
+        transform: scale(0.9);
+    }
+
+  .icon-btn svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 2.5;
+    }
+
+  .card {
+        background: var(--card-color);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 30px var(--shadow-color);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+    }
+
+    body.purple-mode.card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 30px var(--shadow-color);
+    }
+
+  .card-title {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+  .input-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+  .input-box {
+        position: relative;
+    }
+
+  .input-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 700;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        background: var(--bg-color);
+        color: var(--text-color);
+        outline: none;
+        transition: all 0.2s;
+    }
+
+    input:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+    }
+
+    body.purple-mode input:focus {
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3), 0 0 20px rgba(168, 85, 247, 0.2);
+    }
+
+  .calculate-btn {
+        background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+        border: none;
+        color: white;
+        padding: 16px;
+        border-radius: 16px;
+        font-size: 1.1rem;
+        font-weight: 900;
+        cursor: pointer;
+        width: 100%;
+        box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    body.purple-mode.calculate-btn {
+        box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 30px var(--accent-color);
+    }
+
+  .calculate-btn:active {
+        transform: translateY(3px);
+        box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+    }
+
+  .calculate-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+  .loading {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+  .loading-hearts {
+        font-size: 3rem;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+  .loading-text {
+        margin-top: 12px;
+        font-weight: 700;
+        color: var(--text-secondary);
+    }
+
+  .result-section {
+        text-align: center;
+    }
+
+  .love-percentage {
+        font-size: 5rem;
+        font-weight: 900;
+        color: var(--accent-color);
+        line-height: 1;
+        text-shadow: 0 0 30px var(--accent-color);
+        margin: 16px 0 8px 0;
+    }
+
+    body.purple-mode.love-percentage {
+        text-shadow: 0 0 30px var(--accent-color), 0 0 60px var(--accent-color);
+    }
+
+  .love-status {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-color);
+        margin-bottom: 16px;
+        text-transform: uppercase;
+    }
+
+  .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: var(--border-color);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+  .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--danger-color), var(--warning-color), var(--success-color));
+        border-radius: 10px;
+        transition: width 2s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        box-shadow: 0 0 20px var(--accent-color);
+    }
+
+  .love-story {
+        background: var(--bg-color);
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        padding: 16px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        line-height: 1.6;
+        color: var(--text-color);
+        text-align: left;
+        min-height: 100px;
+        margin-bottom: 16px;
+    }
+
+  .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+  .stat-item {
+        background: var(--bg-color);
+        border: 2px solid var(--border-color);
+        border-radius: 14px;
+        padding: 14px 10px;
+        text-align: center;
+    }
+
+  .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 6px;
+    }
+
+  .stat-value {
+        font-size: 1rem;
+        font-weight: 900;
+        color: var(--accent-color);
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+
+  .stat-label {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+  .share-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+    }
+
+  .share-btn {
+        background: var(--card-color);
+        border: 2px solid var(--border-color);
+        padding: 12px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        cursor: pointer;
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    body.purple-mode.share-btn {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+    }
+
+  .share-btn:active {
+        transform: scale(0.95);
+    }
+
+  .share-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+  .recent-list {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 2;
+    }
+
+  .recent-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+  .recent-item:last-child {
+        border-bottom: none;
+    }
+
+  .screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-color);
+        z-index: 100;
+        display: none;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    body.purple-mode.screen {
+        background: linear-gradient(180deg, #1A0033 0%, #3B0764 100%);
+    }
+
+  .screen.active {
+        display: flex;
+    }
+
+  .screen-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+  .back-btn {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        cursor: pointer;
+        margin-right: 12px;
+        padding: 4px;
+    }
+
+  .back-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+  .screen-content {
+        padding: 20px;
+        line-height: 1.6;
+        color: var(--text-color);
+    }
+
+  .screen-content h2 {
+        color: var(--accent-color);
+        margin: 20px 0 8px 0;
+        font-size: 1.2rem;
+    }
+
+  .screen-content p {
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+  .floating-heart {
+        position: fixed;
+        font-size: 2rem;
+        z-index: 1000;
+        pointer-events: none;
+        animation: floatUp 5s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+        0% {
+            transform: translateY(100vh) scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100px) scale(1.5);
+            opacity: 0;
+        }
+    }
+
+  .hidden {
+        display: none!important;
+    }
+
+  .cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1.2em;
+        background: var(--accent-color);
+        animation: blink 1s infinite;
+        margin-left: 2px;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">Bunny Love</div>
+        <div class="header-icons">
+            <button class="icon-btn" id="themeBtn" title="Change Theme">
+                <i data-lucide="moon"></i>
+            </button>
+            <button class="icon-btn" id="muteBtn" title="Sound">
+                <i data-lucide="volume-2"></i>
+            </button>
+            <button class="icon-btn" id="aboutBtn" title="About">
+                <i data-lucide="info"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="card" id="inputCard">
+        <div class="card-title">
+            <i data-lucide="heart" style="width:16px;height:16px;"></i>
+            Enter Names
+        </div>
+        <div class="input-group">
+            <div class="input-box">
+                <div class="input-label">
+                    <i data-lucide="user" style="width:14px;height:14px;"></i>
+                    Your Name
+                </div>
+                <input type="text" id="name1Input" placeholder="Lupin" maxlength="20">
+            </div>
+            <div class="input-box">
+                <div class="input-label">
+                    <i data-lucide="heart" style="width:14px;height:14px;"></i>
+                    Crush Name
+                </div>
+                <input type="text" id="name2Input" placeholder="Sharon" maxlength="20">
+            </div>
+        </div>
+        <button class="calculate-btn" id="calculateBtn">
+            <i data-lucide="zap"></i>
+            Calculate Love
+        </button>
+    </div>
+
+    <div class="card hidden" id="loadingCard">
+        <div class="loading">
+            <div class="loading-hearts">💖💕💖</div>
+            <div class="loading-text">Calculating love match...</div>
+        </div>
+    </div>
+
+    <div class="card hidden" id="resultCard">
+        <div class="result-section">
+            <div class="love-percentage" id="lovePercentage">0%</div>
+            <div class="love-status" id="loveStatus">CALCULATING</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div class="card-title" style="margin-top:20px;">
+            <i data-lucide="book-open" style="width:16px;height:16px;"></i>
+            Love Story
+        </div>
+        <div class="love-story" id="loveStory"></div>
+
+        <div class="card-title">
+            <i data-lucide="sparkles" style="width:16px;height:16px;"></i>
+            Love Details
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="card-title">
+            <i data-lucide="share-2" style="width:16px;height:16px;"></i>
+            Share Results
+        </div>
+        <div class="share-grid">
+            <button class="share-btn" id="whatsappBtn">
+                <i data-lucide="message-circle"></i>
+                WhatsApp
+            </button>
+            <button class="share-btn" id="copyBtn">
+                <i data-lucide="copy"></i>
+                Copy Link
+            </button>
+            <button class="share-btn" id="downloadBtn">
+                <i data-lucide="download"></i>
+                Download
+            </button>
+        </div>
+    </div>
+
+    <div class="card" id="recentCard">
+        <div class="card-title">
+            <i data-lucide="history" style="width:16px;height:16px;"></i>
+            Recent Couples
+        </div>
+        <div class="recent-list" id="recentList">No couples yet</div>
+    </div>
+
+    <div class="card">
+        <button class="calculate-btn" id="resetBtn">
+            <i data-lucide="rotate-ccw"></i>
+            Try Another Couple
+        </button>
+    </div>
+</div>
+
+<div class="screen" id="aboutScreen">
+    <div class="screen-header">
+        <button class="back-btn" id="backBtn">
+            <i data-lucide="arrow-left"></i>
+        </button>
+        <div style="font-weight: 800; font-size: 1.1rem;">About</div>
+    </div>
+    <div class="screen-content">
+        <h2>Bunny Love v1.0©®™</h2>
+        <p>The ultimate love calculator for fun. Check compatibility, get love story, lucky date and more.</p>
+
+        <h2>Features</h2>
+        <p>- Love percentage 0-100% with smart algorithm</p>
+        <p>- AI-generated love story with typing effect</p>
+        <p>- Zodiac compatibility analysis</p>
+        <p>- Lucky date, place, color predictions</p>
+        <p>- Kids and wedding predictions</p>
+        <p>- 23 fun statistics: kisses, hugs, fights, texts</p>
+        <p>- 3 Themes: Black, White, Purple Glassmorphism</p>
+        <p>- Floating hearts and sound effects</p>
+        <p>- Share link with data or download card</p>
+        <p>- Recent couples history</p>
+        <p>- 100% offline. No data leaves your device</p>
+
+        <h2>Owner</h2>
+        <p>LUPIN STARNLEY</p>
+        <p>Contact: lupinstarnley009@gmail.com</p>
+
+        <p style="margin-top: 30px; font-size: 0.8rem; color: var(--text-secondary);">©2026 All rights reserved®™</p>
+    </div>
+</div>
+
+<script>
+let audioCtx;
+let muted = false;
+let currentTheme = 0;
+let currentResult = null;
+let recentCouples = [];
+
+const themes = [
+    { name: 'black', icon: 'moon' },
+    { name: 'white', icon: 'sun' },
+    { name: 'purple', icon: 'sparkles' }
+];
+
+const loveStatuses = [
+    { min: 0, max: 20, text: 'FRIENDZONE', emoji: '💔' },
+    { min: 21, max: 50, text: 'CRUSH', emoji: '🥰' },
+    { min: 51, max: 80, text: 'TRUE LOVE', emoji: '💕' },
+    { min: 81, max: 100, text: 'SOULMATES', emoji: '😍' }
+];
+
+const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+const places = ['Coco Beach, Dar', 'Kilimanjaro', 'Zanzibar Stone Town', 'Ngorongoro Crater', 'Serengeti', 'Mwanza Rock City', 'Arusha Coffee Shop', 'Dodoma Parliament'];
+const colors = ['Blue', 'Red', 'Pink', 'Purple', 'Green', 'Gold', 'Silver', 'White'];
+
+function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playSound(type) {
+    if (!audioCtx || muted) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'click') {
+        osc.frequency.value = 600;
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'boom') {
+        osc.frequency.value = 100;
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    } else if (type === 'drumroll') {
+        for (let i = 0; i < 10; i++) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.frequency.value = 200 + i * 20;
+            g.gain.setValueAtTime(0.05, audioCtx.currentTime + i * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.1 + 0.05);
+            o.start(audioCtx.currentTime + i * 0.1);
+            o.stop(audioCtx.currentTime + i * 0.1 + 0.05);
+        }
+    } else if (type === 'win') {
+        osc.frequency.value = 523;
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+    } else if (type === 'sad') {
+        osc.frequency.value = 200;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.8);
+    }
+}
+
+function loadSettings() {
+    const saved = localStorage.getItem('bunnyLoveData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        currentTheme = data.theme || 0;
+        muted = data.muted || false;
+        recentCouples = data.recent || [];
+    }
+    applyTheme();
+    updateRecentList();
+    checkURLParams();
+    lucide.createIcons();
+}
+
+function saveSettings() {
+    localStorage.setItem('bunnyLoveData', JSON.stringify({
+        theme: currentTheme,
+        muted: muted,
+        recent: recentCouples
+    }));
+}
+
+function applyTheme() {
+    document.body.className = '';
+    if (currentTheme === 1) document.body.classList.add('white-mode');
+    if (currentTheme === 2) document.body.classList.add('purple-mode');
+
+    const themeIcon = document.querySelector('#themeBtn i');
+    themeIcon.setAttribute('data-lucide', themes[currentTheme].icon);
+    lucide.createIcons();
+
+    const muteIcon = document.querySelector('#muteBtn i');
+    muteIcon.setAttribute('data-lucide', muted? 'volume-x' : 'volume-2');
+    lucide.createIcons();
+}
+
+function checkURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    const name1 = params.get('you');
+    const name2 = params.get('crush');
+    const score = params.get('score');
+
+    if (name1 && name2 && score) {
+        document.getElementById('name1Input').value = decodeURIComponent(name1);
+        document.getElementById('name2Input').value = decodeURIComponent(name2);
+        setTimeout(() => calculateLove(true, parseInt(score)), 500);
+    }
+}
+
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash);
+}
+
+function calculateLoveScore(name1, name2) {
+    const combined = (name1 + name2).toLowerCase().replace(/\s/g, '');
+    const hash = hashCode(combined);
+    let score = hash % 101;
+
+    if (score < 30 && Math.random() > 0.3) score += 20;
+    if (score > 70 && Math.random() > 0.7) score -= 10;
+
+    return Math.min(100, Math.max(0, score));
+}
+
+function getLoveStatus(score) {
+    return loveStatuses.find(s => score >= s.min && score <= s.max);
+}
+
+function getRandomItem(arr, seed) {
+    return arr[seed % arr.length];
+}
+
+function generateLoveStory(name1, name2, score, seed) {
+    const year = 2024 + (seed % 3);
+    const place = getRandomItem(places, seed);
+    const month = ['January', 'February', 'March', 'April', 'May', 'June'][seed % 6];
+    const weddingYear = 2026 + (seed % 5);
+    const fightReason = ['pizza toppings', 'movie choice', 'who drives', 'room temperature'][seed % 4];
+
+    let story = `${name1}, you first encountered ${name2} on ${seed % 28 + 1} ${month} ${year} at ${place}. `;
+    story += `Your eyes locked across the room and time stood still for a moment. `;
+
+    if (score >= 80) {
+        story += `The connection was electric and undeniable from day one. By ${weddingYear} you will exchange vows at ${place} surrounded by ${100 + seed % 200} loved ones. `;
+        story += `Your first disagreement will be about ${fightReason}, yet you will resolve it in ${10 + seed % 20} minutes because your bond transcends conflict. `;
+        story += `Legends will speak of your love as the standard all others aspire to reach.`;
+    } else if (score >= 50) {
+        story += `Your journey began with friendship that blossomed into something deeper. Around ${weddingYear} you might consider forever. `;
+        story += `You will navigate challenges together, including debates over ${fightReason}, emerging stronger each time. `;
+        story += `This love requires patience and understanding, but the reward is worth every effort you invest.`;
+    } else {
+        story += `At present your paths align as companions rather than lovers. The potential exists but circumstances are not yet perfect. `;
+        story += `Perhaps in future seasons your hearts will synchronize. Until then, cherish the friendship you share. `;
+        story += `Remember that the greatest love stories often begin with genuine friendship and mutual respect.`;
+    }
+
+    return story;
+}
+
+function generateStats(name1, name2, score, seed) {
+    const years = 10;
+    const kids = score >= 70? (1 + seed % 3) : (score >= 40? seed % 2 : 0);
+    const weddingYear = 2026 + (seed % 5);
+    const kisses = Math.floor(score * 146 + seed % 1000);
+    const hugs = Math.floor(score * 219 + seed % 1000);
+    const fights = Math.floor((100 - score) / 10 + 1);
+    const texts = Math.floor(score * 1825 + seed % 5000);
+    const dates = Math.floor(score * 5.2 + seed % 50);
+    const heartbeats = Math.floor(score * 2073 + seed % 10000);
+
+    return [
+        { icon: '💍', value: score >= 60? weddingYear : 'Maybe', label: 'Wedding Year' },
+        { icon: '👶', value: kids, label: 'Kids Predicted' },
+        { icon: '😘', value: kisses.toLocaleString(), label: `Kisses in ${years}Y` },
+        { icon: '🤗', value: hugs.toLocaleString(), label: `Hugs in ${years}Y` },
+        { icon: '⚡', value: fights + '/year', label: 'Fights Per Year' },
+        { icon: '📱', value: texts.toLocaleString(), label: `Texts in ${years}Y` },
+        { icon: '🍷', value: dates, label: `Dates in ${years}Y` },
+        { icon: '💓', value: heartbeats.toLocaleString(), label: 'Heartbeats Together' },
+        { icon: '📅', value: `14 Feb ${2026 + seed % 3}`, label: 'Lucky Date' },
+        { icon: '🏖️', value: getRandomItem(places, seed), label: 'Lucky Place' },
+        { icon: '🎨', value: getRandomItem(colors, seed), label: 'Lucky Color' },
+        { icon: '♌', value: `${getRandomItem(zodiacSigns, hashCode(name1))} + ${getRandomItem(zodiacSigns, hashCode(name2))}`, label: 'Zodiac Match' }
+    ];
+}
+
+function typeWriter(element, text, speed = 30) {
+    element.innerHTML = '';
+    let i = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    element.appendChild(cursor);
+
+    function type() {
+        if (i < text.length) {
+            element.insertBefore(document.createTextNode(text.charAt(i)), cursor);
+            i++;
+            setTimeout(type, speed);
+        } else {
+            cursor.remove();
+        }
+    }
+    type();
+}
+
+function createFloatingHearts() {
+    const hearts = ['💖', '💕', '💗', '💓', '💝'];
+    for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = (3 + Math.random() * 2) + 's';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }, i * 100);
+    }
+}
+
+function updateMetaTags(name1, name2, score, status) {
+    const title = `Bunny Love: ${name1} ❤️ ${name2} = ${score}% ${status}`;
+    const description = `${name1} and ${name2} are ${score}% compatible! Their lucky date is 14 Feb 2027. Kids predicted: ${currentResult.stats[1].value}. Tap to check your love match! Created by LUPIN STARNLEY.`;
+
+    document.querySelector('meta[property="og:title"]').setAttribute('content', title);
+    document.querySelector('meta[property="og:description"]').setAttribute('content', description);
+    document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
+    document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
+    document.title = title;
+}
+
+function animateCounter(element, target, duration = 2000) {
+    let start = 0;
+    const increment = target / (duration / 16);
+    const timer = setInterval(() => {
+        start += increment;
+        if (start >= target) {
+            element.textContent = target + '%';
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(start) + '%';
+        }
+    }, 16);
+}
+
+function calculateLove(fromURL = false, urlScore = null) {
+    const name1 = document.getElementById('name1Input').value.trim();
+    const name2 = document.getElementById('name2Input').value.trim();
+
+    if (!name1 ||!name2) {
+        alert('Please enter both names');
+        return;
+    }
+
+    initAudio();
+    if (!fromURL) playSound('drumroll');
+
+    document.getElementById('inputCard').classList.add('hidden');
+    document.getElementById('loadingCard').classList.remove('hidden');
+    document.getElementById('resultCard').classList.add('hidden');
+
+    setTimeout(() => {
+        const score = urlScore!== null? urlScore : calculateLoveScore(name1, name2);
+        const status = getLoveStatus(score);
+        const seed = hashCode(name1 + name2);
+        const story = generateLoveStory(name1, name2, score, seed);
+        const stats = generateStats(name1, name2, score, seed);
+
+        currentResult = { name1, name2, score, status, story, stats, seed };
+
+        document.getElementById('loadingCard').classList.add('hidden');
+        document.getElementById('resultCard').classList.remove('hidden');
+
+        document.getElementById('lovePercentage').textContent = '0%';
+        document.getElementById('loveStatus').textContent = status.text + ' ' + status.emoji;
+        document.getElementById('progressFill').style.width = '0%';
+
+        setTimeout(() => {
+            animateCounter(document.getElementById('lovePercentage'), score);
+            document.getElementById('progressFill').style.width = score + '%';
+        }, 100);
+
+        setTimeout(() => {
+            typeWriter(document.getElementById('loveStory'), story, 20);
+        }, 500);
+
+        const statsGrid = document.getElementById('statsGrid');
+        statsGrid.innerHTML = '';
+        stats.forEach(stat => {
+            const div = document.createElement('div');
+            div.className = 'stat-item';
+            div.innerHTML = `
+                <div class="stat-icon">${stat.icon}</div>
+                <div class="stat-value">${stat.value}</div>
+                <div class="stat-label">${stat.label}</div>
+            `;
+            statsGrid.appendChild(div);
+        });
+
+        if (score >= 80) {
+            createFloatingHearts();
+            playSound('win');
+        } else if (score <= 30) {
+            playSound('sad');
+        } else {
+            playSound('boom');
+        }
+
+        updateMetaTags(name1, name2, score, status.text);
+
+        const exists = recentCouples.find(c => c.name1 === name1 && c.name2 === name2);
+        if (!exists) {
+            recentCouples.unshift({ name1, name2, score });
+            if (recentCouples.length > 5) recentCouples.pop();
+            updateRecentList();
+            saveSettings();
+        }
+
+        updateURL(name1, name2, score);
+    }, 2000);
+}
+
+function updateURL(name1, name2, score) {
+    const url = new URL(window.location);
+    url.searchParams.set('you', encodeURIComponent(name1));
+    url.searchParams.set('crush', encodeURIComponent(name2));
+    url.searchParams.set('score', score);
+    window.history.pushState({}, '', url);
+}
+
+function updateRecentList() {
+    const list = document.getElementById('recentList');
+    if (recentCouples.length === 0) {
+        list.textContent = 'No couples yet';
+        return;
+    }
+
+    list.innerHTML = '';
+    recentCouples.forEach(couple => {
+        const div = document.createElement('div');
+        div.className = 'recent-item';
+        div.innerHTML = `
+            <span>${couple.name1} ❤️ ${couple.name2}</span>
+            <span style="color: var(--accent-color); font-weight: 900;">${couple.score}%</span>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function shareWhatsApp() {
+    if (!currentResult) return;
+    const text = `Check our love match! ${currentResult.name1} ❤️ ${currentResult.name2} = ${currentResult.score}% ${currentResult.status.text}`;
+    const url = window.location.href;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`, '_blank');
+    playSound('click');
+}
+
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard!');
+    playSound('click');
+}
+
+function downloadCard() {
+    alert('Download feature: Take a screenshot to save your results!');
+    playSound('click');
+}
+
+function resetCalculator() {
+    document.getElementById('inputCard').classList.remove('hidden');
+    document.getElementById('resultCard').classList.add('hidden');
+    document.getElementById('name1Input').value = '';
+    document.getElementById('name2Input').value = '';
+    window.history.pushState({}, '', window.location.pathname);
+    document.title = 'Bunny Love - Love Calculator';
+    playSound('click');
+}
+
+document.getElementById('calculateBtn').addEventListener('click', () => calculateLove());
+document.getElementById('themeBtn').addEventListener('click', () => {
+    currentTheme = (currentTheme + 1) % 3;
+    applyTheme();
+    saveSettings();
+    playSound('click');
+});
+
+document.getElementById('muteBtn').addEventListener('click', () => {
+    muted =!muted;
+    applyTheme();
+    saveSettings();
+    playSound('click');
+});
+
+document.getElementById('aboutBtn').addEventListener('click', () => {
+    document.getElementById('aboutScreen').classList.add('active');
+    playSound('click');
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('aboutScreen').classList.remove('active');
+    playSound('click');
+});
+
+document.getElementById('whatsappBtn').addEventListener('click', shareWhatsApp);
+document.getElementById('copyBtn').addEventListener('click', copyLink);
+document.getElementById('downloadBtn').addEventListener('click', downloadCard);
+document.getElementById('resetBtn').addEventListener('click', resetCalculator);
+
+document.getElementById('name1Input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('name2Input').focus();
+});
+
+document.getElementById('name2Input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') calculateLove();
+});
+
+loadSettings();
+</script>
+</body>
+</html>
