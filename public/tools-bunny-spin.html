@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bunny Spin</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    :root {
+        --bg-color: #0D0D0D;
+        --card-color: #1A1A1A;
+        --text-color: #FFFFFF;
+        --text-secondary: #B0B0B0;
+        --accent-color: #FF6B9D;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --shadow-color: rgba(0, 0, 0, 0.3);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body.white-mode {
+        --bg-color: #FFFFFF;
+        --card-color: #F5F5F5;
+        --text-color: #1A1A1A;
+        --text-secondary: #5D4037;
+        --accent-color: #2196F3;
+        --border-color: rgba(0, 0, 0, 0.1);
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --glass-bg: rgba(0, 0, 0, 0.05);
+        --glass-border: rgba(0, 0, 0, 0.1);
+    }
+
+    body.purple-mode {
+        --bg-color: #1A0033;
+        --card-color: rgba(255, 255, 255, 0.1);
+        --text-color: #E0B0FF;
+        --text-secondary: #C084FC;
+        --accent-color: #A855F7;
+        --border-color: rgba(168, 85, 247, 0.3);
+        --shadow-color: rgba(168, 85, 247, 0.4);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
+    html, body {
+        height: 100%;
+        overflow-x: hidden;
+    }
+
+    body {
+        background: var(--bg-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+    }
+
+    body.purple-mode {
+        background: linear-gradient(180deg, #1A0033 0%, #3B0764 100%);
+    }
+
+   .container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 16px;
+    }
+
+   .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+   .title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--accent-color);
+        text-shadow: 0 0 20px var(--accent-color);
+    }
+
+    body.purple-mode.title {
+        text-shadow: 0 0 20px var(--accent-color), 0 0 40px var(--accent-color);
+    }
+
+   .header-icons {
+        display: flex;
+        gap: 8px;
+    }
+
+   .icon-btn {
+        background: var(--card-color);
+        border: 2px solid var(--border-color);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px var(--shadow-color);
+        backdrop-filter: blur(10px);
+        color: var(--text-color);
+    }
+
+    body.purple-mode.icon-btn {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 20px var(--shadow-color);
+    }
+
+   .icon-btn:active {
+        transform: scale(0.9);
+    }
+
+   .card {
+        background: var(--card-color);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 30px var(--shadow-color);
+        border: 1px solid var(--border-color);
+        backdrop-filter: blur(10px);
+    }
+
+    body.purple-mode.card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 0 30px var(--shadow-color);
+    }
+
+   .card-title {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+   .mode-tabs {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+   .mode-tab {
+        background: var(--card-color);
+        border: 2px solid var(--border-color);
+        padding: 10px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+    }
+
+   .mode-tab.active {
+        background: var(--accent-color);
+        color: #FFFFFF;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 20px var(--accent-color);
+    }
+
+    body.purple-mode.mode-tab.active {
+        box-shadow: 0 0 20px var(--accent-color), 0 0 40px var(--accent-color);
+    }
+
+   .input-list {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 12px;
+    }
+
+   .input-item {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+        align-items: center;
+    }
+
+   .input-item input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background: var(--bg-color);
+        color: var(--text-color);
+        outline: none;
+    }
+
+   .input-item input:focus {
+        border-color: var(--accent-color);
+    }
+
+   .delete-btn {
+        background: #F44336;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+   .add-btn {
+        background: var(--accent-color);
+        border: none;
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        width: 100%;
+    }
+
+   .wheel-container {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        margin: 20px auto;
+    }
+
+   .wheel {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        position: relative;
+        transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        box-shadow: 0 0 40px var(--shadow-color);
+        border: 4px solid var(--border-color);
+    }
+
+    body.purple-mode.wheel {
+        box-shadow: 0 0 40px var(--accent-color);
+    }
+
+   .bottle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 60px;
+        height: 60px;
+        margin-left: -30px;
+        margin-top: -30px;
+        font-size: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transform-origin: center center;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+   .pointer {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-top: 25px solid var(--accent-color);
+        filter: drop-shadow(0 2px 4px var(--shadow-color));
+        z-index: 5;
+    }
+
+   .spin-btn {
+        background: var(--accent-color);
+        border: none;
+        color: white;
+        padding: 16px;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 900;
+        cursor: pointer;
+        width: 100%;
+        box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    body.purple-mode.spin-btn {
+        box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 30px var(--accent-color);
+    }
+
+   .spin-btn:active {
+        transform: translateY(3px);
+        box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+    }
+
+   .spin-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+   .winner-display {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--accent-color);
+        margin: 16px 0;
+        min-height: 40px;
+        text-shadow: 0 0 20px var(--accent-color);
+    }
+
+   .settings-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+   .settings-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+   .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 28px;
+        background: var(--border-color);
+        border-radius: 14px;
+        cursor: pointer;
+    }
+
+   .toggle-switch.active {
+        background: var(--accent-color);
+    }
+
+   .toggle-slider {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 22px;
+        height: 22px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.3s;
+    }
+
+   .toggle-switch.active.toggle-slider {
+        left: 25px;
+    }
+
+   .history-list {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.8;
+    }
+
+   .screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-color);
+        z-index: 100;
+        display: none;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    body.purple-mode.screen {
+        background: linear-gradient(180deg, #1A0033 0%, #3B0764 100%);
+    }
+
+   .screen.active {
+        display: flex;
+    }
+
+   .screen-header {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+   .back-btn {
+        font-size: 1.5rem;
+        margin-right: 12px;
+        cursor: pointer;
+        color: var(--text-color);
+    }
+
+   .screen-content {
+        padding: 20px;
+        line-height: 1.6;
+        color: var(--text-color);
+    }
+
+   .screen-content h2 {
+        color: var(--accent-color);
+        margin: 20px 0 8px 0;
+        font-size: 1.2rem;
+    }
+
+   .screen-content p {
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+
+   .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: var(--accent-color);
+        top: -10px;
+        z-index: 1000;
+        animation: confettiFall 3s linear forwards;
+    }
+
+    @keyframes confettiFall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+   .hidden {
+        display: none;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">Bunny Spin</div>
+        <div class="header-icons">
+            <div class="icon-btn" id="themeBtn">🌙</div>
+            <div class="icon-btn" id="muteBtn">🔊</div>
+            <div class="icon-btn" id="aboutBtn">?</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Spin Mode</div>
+        <div class="mode-tabs">
+            <div class="mode-tab active" data-mode="names">Names</div>
+            <div class="mode-tab" data-mode="food">Food</div>
+            <div class="mode-tab" data-mode="money">Money</div>
+            <div class="mode-tab" data-mode="truth">Truth</div>
+        </div>
+
+        <div class="card-title">Items (2-10)</div>
+        <div class="input-list" id="inputList"></div>
+        <button class="add-btn" id="addBtn">+ Add Item</button>
+    </div>
+
+    <div class="card">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas class="wheel" id="wheel" width="280" height="280"></canvas>
+            <div class="bottle" id="bottle">🍾</div>
+        </div>
+        <div class="winner-display" id="winnerDisplay"></div>
+        <button class="spin-btn" id="spinBtn">SPIN</button>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Settings</div>
+        <div class="settings-row">
+            <div class="settings-label">No Repeat</div>
+            <div class="toggle-switch" id="noRepeatToggle">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+        <div class="settings-row">
+            <div class="settings-label">Fast Spin</div>
+            <div class="toggle-switch" id="fastSpinToggle">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Last 5 Winners</div>
+        <div class="history-list" id="historyList">No spins yet</div>
+    </div>
+
+    <div class="card">
+        <button class="spin-btn" id="shareBtn">Share Winner</button>
+    </div>
+</div>
+
+<div class="screen" id="aboutScreen">
+    <div class="screen-header">
+        <div class="back-btn" id="backBtn">←</div>
+        <div style="font-weight: 800; font-size: 1.1rem; color: var(--text-color);">About</div>
+    </div>
+    <div class="screen-content">
+        <h2>Bunny Spin v1.0©®™</h2>
+        <p>The ultimate decision wheel for friends. Spin the bottle to choose names, food, money, truth or dare.</p>
+
+        <h2>Features</h2>
+        <p>- 4 Modes: Names, Food, Money, Truth/Dare</p>
+        <p>- 2-10 custom items with colors</p>
+        <p>- Real bottle physics and sounds</p>
+        <p>- No Repeat mode for fair play</p>
+        <p>- Spin history tracking</p>
+        <p>- 3 Themes: Black, White, Purple Glass</p>
+        <p>- Share winner cards</p>
+        <p>- 100% offline. No data leaves your device</p>
+
+        <h2>Owner</h2>
+        <p>LUPIN STARNLEY</p>
+        <p>Contact: lupinstarnley009@gmail.com</p>
+
+        <p style="margin-top: 30px; font-size: 0.8rem; color: var(--text-secondary);">©2026 All rights reserved®™</p>
+    </div>
+</div>
+
+<script>
+let audioCtx;
+let muted = false;
+let currentMode = 'names';
+let items = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+let noRepeat = false;
+let fastSpin = false;
+let usedItems = [];
+let spinHistory = [];
+let currentTheme = 0;
+let isSpinning = false;
+
+const themes = ['black', 'white', 'purple'];
+const themeIcons = ['🌙', '☀️', '💜'];
+const colors = ['#FF6B9D', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3', '#A8E6CF', '#FFD3B6', '#FFAAA5'];
+
+const modeDefaults = {
+    names: ['Player 1', 'Player 2', 'Player 3', 'Player 4'],
+    food: ['Pizza', 'Burger', 'Chips', 'Soda'],
+    money: ['1000', '2000', '5000', '0'],
+    truth: ['Truth', 'Dare', 'Truth', 'Dare']
+};
+
+function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playSound(type) {
+    if (!audioCtx || muted) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'spin') {
+        osc.frequency.value = 200;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    } else if (type === 'tick') {
+        osc.frequency.value = 800;
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+    } else if (type === 'win') {
+        osc.frequency.value = 1000;
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+    } else if (type === 'click') {
+        osc.frequency.value = 600;
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+}
+
+function loadSettings() {
+    const saved = localStorage.getItem('bunnySpinData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        items = data.items || modeDefaults.names;
+        currentMode = data.mode || 'names';
+        noRepeat = data.noRepeat || false;
+        fastSpin = data.fastSpin || false;
+        currentTheme = data.theme || 0;
+        muted = data.muted || false;
+        spinHistory = data.history || [];
+    }
+    applyTheme();
+    updateModeUI();
+    renderInputs();
+    drawWheel();
+    updateToggles();
+    updateHistory();
+}
+
+function saveSettings() {
+    localStorage.setItem('bunnySpinData', JSON.stringify({
+        items, mode: currentMode, noRepeat, fastSpin, theme: currentTheme, muted, history: spinHistory
+    }));
+}
+
+function applyTheme() {
+    document.body.className = '';
+    if (currentTheme === 1) document.body.classList.add('white-mode');
+    if (currentTheme === 2) document.body.classList.add('purple-mode');
+    document.getElementById('themeBtn').textContent = themeIcons[currentTheme];
+    document.getElementById('muteBtn').textContent = muted? '🔇' : '🔊';
+}
+
+function updateModeUI() {
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.mode === currentMode);
+    });
+}
+
+function renderInputs() {
+    const list = document.getElementById('inputList');
+    list.innerHTML = '';
+    items.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'input-item';
+        div.innerHTML = `
+            <input type="text" value="${item}" data-index="${i}">
+            ${items.length > 2? `<button class="delete-btn" data-index="${i}">×</button>` : ''}
+        `;
+        list.appendChild(div);
+    });
+
+    list.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', (e) => {
+            items[e.target.dataset.index] = e.target.value;
+            drawWheel();
+            saveSettings();
+        });
+    });
+
+    list.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            items.splice(e.target.dataset.index, 1);
+            renderInputs();
+            drawWheel();
+            saveSettings();
+            playSound('click');
+        });
+    });
+}
+
+function drawWheel() {
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    const size = 280;
+    const center = size / 2;
+    const radius = center - 10;
+
+    ctx.clearRect(0, 0, size, size);
+
+    const anglePerItem = (Math.PI * 2) / items.length;
+
+    items.forEach((item, i) => {
+        const startAngle = i * anglePerItem - Math.PI / 2;
+        const endAngle = startAngle + anglePerItem;
+
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--border-color');
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(center, center);
+        ctx.rotate(startAngle + anglePerItem / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 4;
+        const text = item.length > 8? item.substring(0, 8) + '...' : item;
+        ctx.fillText(text, radius - 15, 5);
+        ctx.restore();
+    });
+}
+
+function spin() {
+    if (isSpinning || items.length < 2) return;
+    initAudio();
+    playSound('spin');
+    isSpinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('winnerDisplay').textContent = '';
+
+    let availableItems = noRepeat? items.filter(item =>!usedItems.includes(item)) : [...items];
+    if (availableItems.length === 0) {
+        usedItems = [];
+        availableItems = [...items];
+    }
+
+    const winner = availableItems[Math.floor(Math.random() * availableItems.length)];
+    const winnerIndex = items.indexOf(winner);
+    const anglePerItem = 360 / items.length;
+    const targetAngle = 360 * (fastSpin? 3 : 5) + (360 - (winnerIndex * anglePerItem + anglePerItem / 2));
+
+   const wheel = document.getElementById('wheel');
+    const bottle = document.getElementById('bottle');
+    wheel.style.transform = `rotate(${targetAngle}deg)`;
+    bottle.style.transform = `rotate(${targetAngle}deg)`;
+
+    let ticks = 0;
+    const tickInterval = setInterval(() => {
+        if (ticks++ > 20) clearInterval(tickInterval);
+        playSound('tick');
+    }, 100);
+
+    setTimeout(() => {
+        isSpinning = false;
+        document.getElementById('spinBtn').disabled = false;
+        document.getElementById('winnerDisplay').textContent = `🎉 ${winner} 🎉`;
+        if (noRepeat) usedItems.push(winner);
+        spinHistory.unshift(winner);
+        if (spinHistory.length > 5) spinHistory.pop();
+        updateHistory();
+        saveSettings();
+        playSound('win');
+        createConfetti();
+    }, fastSpin? 2000 : 4000);
+}
+
+function createConfetti() {
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + '%';
+            conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 3000);
+        }, i * 30);
+    }
+}
+
+function updateHistory() {
+    const list = document.getElementById('historyList');
+    list.textContent = spinHistory.length? spinHistory.join(' • ') : 'No spins yet';
+}
+
+function updateToggles() {
+    document.getElementById('noRepeatToggle').classList.toggle('active', noRepeat);
+    document.getElementById('fastSpinToggle').classList.toggle('active', fastSpin);
+}
+
+document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        currentMode = tab.dataset.mode;
+        items = [...modeDefaults[currentMode]];
+        usedItems = [];
+        updateModeUI();
+        renderInputs();
+        drawWheel();
+        saveSettings();
+        playSound('click');
+    });
+});
+
+document.getElementById('addBtn').addEventListener('click', () => {
+    if (items.length < 10) {
+        items.push(`Item ${items.length + 1}`);
+        renderInputs();
+        drawWheel();
+        saveSettings();
+        playSound('click');
+    }
+});
+
+document.getElementById('spinBtn').addEventListener('click', spin);
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+    currentTheme = (currentTheme + 1) % 3;
+    applyTheme();
+    saveSettings();
+    playSound('click');
+});
+
+document.getElementById('muteBtn').addEventListener('click', () => {
+    muted =!muted;
+    applyTheme();
+    saveSettings();
+    playSound('click');
+});
+
+document.getElementById('aboutBtn').addEventListener('click', () => {
+    document.getElementById('aboutScreen').classList.add('active');
+    playSound('click');
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('aboutScreen').classList.remove('active');
+    playSound('click');
+});
+
+document.getElementById('noRepeatToggle').addEventListener('click', () => {
+    noRepeat =!noRepeat;
+    usedItems = [];
+    updateToggles();
+    saveSettings();
+    playSound('click');
+});
+
+document.getElementById('fastSpinToggle').addEventListener('click', () => {
+    fastSpin =!fastSpin;
+    updateToggles();
+    saveSettings();
+    playSound('click');
+});
+
+document.getElementById('shareBtn').addEventListener('click', () => {
+    const winner = document.getElementById('winnerDisplay').textContent;
+    if (winner) {
+        alert(`Share feature: Screenshot this page to share!\n\n${winner}`);
+    } else {
+        alert('Spin first to get a winner!');
+    }
+    playSound('click');
+});
+
+loadSettings();
+</script>
+</body>
+</html>
