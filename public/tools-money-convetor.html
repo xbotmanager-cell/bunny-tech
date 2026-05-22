@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bunny Currency Converter</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    * {margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;}
+    :root {
+        --purple-glow: #bf5af2; --pink-glow: #ff377f; --glass-bg: rgba(22, 11, 36, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.1); --text-main: #f5f5f7; --text-sub: #9e9eb4;
+        --bg-dark: #06020a; --success: #30d158; --danger: #ff453a;
+    }
+    html, body {height: 100%; overflow: hidden;}
+    body {background: var(--bg-dark); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-main);}
+.app {display: flex; width: 100%; height: 100vh; flex-direction: column;}
+.content {flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 90px;} /* SHERIA: SCROLL DOWN VERTICAL MILELE */
+.tab-content {display: none;}
+.tab-content.active {display: block; animation: fadeIn 0.3s;}
+    @keyframes fadeIn {from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); }}
+.logo-header {text-align: center; margin-bottom: 20px;}
+.logo {width: 70px; height: 70px; border-radius: 18px; margin: 0 auto 10px; display: block; box-shadow: 0 8px 32px rgba(191, 90, 242, 0.4);}
+.logo-header h1 {font-size: 1.5rem; font-weight: 900; background: linear-gradient(135deg, var(--purple-glow), var(--pink-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+.card {background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; margin-bottom: 16px;}
+.card-title {font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;}
+.btn {background: linear-gradient(135deg, var(--purple-glow), var(--pink-glow)); border: none; color: white; padding: 16px 24px; border-radius: 14px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 6px 20px rgba(191, 90, 242, 0.4);}
+.btn:active {transform: scale(0.97);}
+.btn:disabled {opacity: 0.5; pointer-events: none;}
+.input {width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 12px; padding: 14px; color: var(--text-main); font-size: 1rem; font-family: inherit; margin-bottom: 12px; -webkit-user-select: text; user-select: text;}
+.input:focus {outline: none; border-color: var(--purple-glow); box-shadow: 0 0 0 3px rgba(191, 90, 242, 0.2);}
+    select.input {appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239e9eb4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center;}
+.result-box {background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 12px; padding: 20px; text-align: center; margin-top: 12px;}
+.result-amount {font-size: 2.2rem; font-weight: 900; color: var(--success); margin: 8px 0; word-break: break-all;}
+.result-rate {font-size: 0.8rem; color: var(--text-sub);}
+.status-text {text-align: center; color: var(--text-sub); font-size: 0.85rem; margin: 12px 0; min-height: 20px;}
+.tab-bar {position: fixed; bottom: 0; left: 0; right: 0; background: var(--glass-bg); backdrop-filter: blur(25px); border-top: 1px solid var(--glass-border); display: grid; grid-template-columns: repeat(2, 1fr); padding: 8px 0 20px 0; z-index: 50;}
+.tab-btn {background: none; border: none; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px; font-size: 0.7rem; font-weight: 700;}
+.tab-btn.active {color: var(--purple-glow);}
+.tab-btn i {width: 24px; height: 24px;}
+.toast {position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 12px; padding: 14px 22px; display: flex; align-items: center; gap: 10px; z-index: 200; transition: transform 0.3s; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);}
+.toast.show {transform: translateX(-50%) translateY(0);}
+.loader {width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 1s linear infinite;}
+    @keyframes spin {0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }}
+.about-text {color: var(--text-sub); font-size: 0.9rem; line-height: 1.6;}
+.about-text h3 {color: var(--text-main); margin: 16px 0 8px 0; font-size: 1rem;}
+.about-text ol {padding-left: 20px;}
+.about-text li {margin-bottom: 8px;}
+.swap-btn {width: 48px; height: 48px; padding: 0; border-radius: 50%; margin: 0 auto 12px; background: rgba(255, 255, 255, 0.08); border: 1px solid var(--glass-border);}
+.last-update {text-align: center; font-size: 0.7rem; color: var(--text-sub); margin-top: 12px;}
+.api-badge {display: inline-block; background: rgba(48, 209, 88, 0.2); color: var(--success); padding: 4px 10px; border-radius: 8px; font-size: 0.65rem; font-weight: 800; margin-top: 8px;}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+    <div class="content">
+        <div class="logo-header">
+            <img src="https://i.ibb.co/LDMjMYyy/file-00000000855c71f89fb70f5f8bebc2b2.png" alt="Bunny Logo" class="logo">
+            <h1>BUNNY CURRENCY</h1>
+        </div>
+
+        <!-- TAB 1: CONVERTER -->
+        <div class="tab-content active" id="converterTab">
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="banknote" style="width: 16px; height: 16px;"></i>
+                    LIVE CURRENCY CONVERTER - WORLDWIDE
+                </div>
+                <input type="number" class="input" id="amountInput" placeholder="Enter amount" value="1" step="0.01">
+
+                <select class="input" id="fromCurrency">
+                    <option value="">Loading currencies...</option>
+                </select>
+
+                <button class="btn swap-btn" id="swapBtn">
+                    <i data-lucide="arrow-down-up" style="width: 20px; height: 20px;"></i>
+                </button>
+
+                <select class="input" id="toCurrency">
+                    <option value="">Loading currencies...</option>
+                </select>
+
+                <button class="btn" id="convertBtn">
+                    <i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i>
+                    CONVERT
+                </button>
+
+                <div class="status-text" id="convertStatus">Connecting to live servers...</div>
+
+                <div class="result-box" id="resultBox" style="display: none;">
+                    <div style="font-size: 0.8rem; color: var(--text-sub);" id="resultFrom"></div>
+                    <div class="result-amount" id="resultAmount">0.00</div>
+                    <div class="result-rate" id="resultRate">1 USD = 0.00 TZS</div>
+                    <div class="api-badge" id="apiBadge">LIVE</div>
+                </div>
+
+                <div class="last-update" id="lastUpdate"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ABOUT -->
+        <div class="tab-content" id="aboutTab">
+            <div class="card">
+                <div class="card-title">
+                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+                    HOW TO USE BUNNY CURRENCY
+                </div>
+                <div class="about-text">
+                    <h3>Converting Money</h3>
+                    <ol>
+                        <li>Enter the amount you want to convert in the first box</li>
+                        <li>Select the currency you are converting FROM in the first dropdown</li>
+                        <li>Select the currency you are converting TO in the second dropdown</li>
+                        <li>Tap the CONVERT button</li>
+                        <li>Wait for the loading indicator to finish</li>
+                        <li>Your converted amount appears with live exchange rates</li>
+                    </ol>
+
+                    <h3>Swap Currencies Quickly</h3>
+                    <ol>
+                        <li>Tap the circular arrow button between the dropdowns</li>
+                        <li>This instantly swaps FROM and TO currencies</li>
+                        <li>Tap CONVERT again to see the reverse conversion</li>
+                    </ol>
+
+                    <h3>Live Data System</h3>
+                    <ol>
+                        <li>Exchange rates update automatically from 15 worldwide sources</li>
+                        <li>If one server fails, the app tries the next one automatically</li>
+                        <li>Last update time is shown at the bottom for transparency</li>
+                        <li>Supports 160+ world currencies including TZS, USD, EUR, GBP, KES, UGX, ZAR, NGN</li>
+                        <li>Works on all devices - scroll down to access all features</li>
+                    </ol>
+
+                    <h3>Important Information</h3>
+                    <ol>
+                        <li>Rates are for reference only - banks may use different rates</li>
+                        <li>All processing happens in your browser for complete privacy</li>
+                        <li>No personal data, accounts, or API keys are required</li>
+                        <li>The app works worldwide with no restrictions</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="converter">
+            <i data-lucide="banknote"></i>
+            Converter
+        </button>
+        <button class="tab-btn" data-tab="about">
+            <i data-lucide="info"></i>
+            About
+        </button>
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <i data-lucide="check-circle" style="width: 20px; height: 20px; color: var(--success);"></i>
+    <span id="toastText">Success</span>
+</div>
+
+<script>
+lucide.createIcons();
+
+// Global State
+let currencyData = {};
+let currencyList = [];
+let lastUpdateTime = null;
+let currentApiIndex = 0;
+
+// 15 PUBLIC CURRENCY APIS - LIVE DATA WORLDWIDE - NO KEY REQUIRED
+const CURRENCY_APIS = [
+    'https://api.exchangerate-api.com/v4/latest/USD',
+    'https://open.er-api.com/v6/latest/USD',
+    'https://api.fxratesapi.com/latest?base=USD',
+    'https://api.vatcomply.com/rates?base=USD',
+    'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+    'https://latest.currency-api.pages.dev/v1/currencies/usd.json',
+    'https://api.exchangerate.host/latest?base=USD',
+    'https://api.frankfurter.app/latest?from=USD',
+    'https://api.exchangeratesapi.io/v1/latest?base=USD',
+    'https://api.currencyapi.com/v3/latest',
+    'https://api.apilayer.com/exchangerates_data/latest?base=USD',
+    'https://api.fastforex.io/fetch-all?from=USD',
+    'https://api.currencyfreaks.com/v2.0/rates/latest?base=USD',
+    'https://api.freecurrencyapi.com/v1/latest?base_currency=USD',
+    'https://v6.exchangerate-api.com/v6/latest/USD'
+];
+
+// All world currencies with names
+const CURRENCY_NAMES = {
+    USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', JPY: 'Japanese Yen', CNY: 'Chinese Yuan',
+    TZS: 'Tanzanian Shilling', KES: 'Kenyan Shilling', UGX: 'Ugandan Shilling', RWF: 'Rwandan Franc',
+    ZAR: 'South African Rand', NGN: 'Nigerian Naira', GHS: 'Ghanaian Cedi', EGP: 'Egyptian Pound',
+    MAD: 'Moroccan Dirham', XOF: 'West African CFA', XAF: 'Central African CFA', ETB: 'Ethiopian Birr',
+    CAD: 'Canadian Dollar', AUD: 'Australian Dollar', NZD: 'New Zealand Dollar', CHF: 'Swiss Franc',
+    INR: 'Indian Rupee', BRL: 'Brazilian Real', RUB: 'Russian Ruble', KRW: 'South Korean Won',
+    MXN: 'Mexican Peso', SGD: 'Singapore Dollar', HKD: 'Hong Kong Dollar', SEK: 'Swedish Krona',
+    NOK: 'Norwegian Krone', DKK: 'Danish Krone', PLN: 'Polish Zloty', THB: 'Thai Baht',
+    IDR: 'Indonesian Rupiah', MYR: 'Malaysian Ringgit', PHP: 'Philippine Peso', VND: 'Vietnamese Dong',
+    AED: 'UAE Dirham', SAR: 'Saudi Riyal', QAR: 'Qatari Riyal', KWD: 'Kuwaiti Dinar',
+    BHD: 'Bahraini Dinar', OMR: 'Omani Rial', JOD: 'Jordanian Dinar', ILS: 'Israeli Shekel',
+    TRY: 'Turkish Lira', PKR: 'Pakistani Rupee', BDT: 'Bangladeshi Taka', LKR: 'Sri Lankan Rupee',
+    NPR: 'Nepalese Rupee', AFN: 'Afghan Afghani', IRR: 'Iranian Rial', IQD: 'Iraqi Dinar',
+    ARS: 'Argentine Peso', CLP: 'Chilean Peso', COP: 'Colombian Peso', PEN: 'Peruvian Sol',
+    UYU: 'Uruguayan Peso', VES: 'Venezuelan Bolívar', BOB: 'Bolivian Boliviano', PYG: 'Paraguayan Guarani'
+};
+
+// Toast Helper
+function showToast(text, success = true) {
+    const toast = document.getElementById('toast');
+    const icon = toast.querySelector('i');
+    document.getElementById('toastText').textContent = text;
+    icon.setAttribute('data-lucide', success? 'check-circle' : 'alert-circle');
+    icon.style.color = success? 'var(--success)' : 'var(--danger)';
+    lucide.createIcons();
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab + 'Tab').classList.add('active');
+    });
+});
+
+// Load Currency Data with 15 Fallbacks - LIVE WORLDWIDE
+async function loadCurrencyData() {
+    const status = document.getElementById('convertStatus');
+    const btn = document.getElementById('convertBtn');
+    btn.disabled = true;
+    status.textContent = 'Connecting to live currency servers worldwide...';
+
+    for (let i = 0; i < CURRENCY_APIS.length; i++) {
+        try {
+            status.textContent = `Loading live rates from source ${i+1}/15...`;
+            const response = await fetch(CURRENCY_APIS[i]);
+            if (!response.ok) throw new Error('API failed');
+
+            const data = await response.json();
+
+            // Normalize different API formats
+            if (data.rates) {
+                currencyData = data.rates;
+            } else if (data.conversion_rates) {
+                currencyData = data.conversion_rates;
+            } else if (data.usd) {
+                currencyData = data.usd;
+                currencyData.USD = 1;
+            } else if (data.data) {
+                currencyData = data.data;
+            } else {
+                currencyData = data;
+            }
+
+            // Ensure USD exists as base
+            if (!currencyData.USD) currencyData.USD = 1;
+
+            currencyList = Object.keys(currencyData).sort();
+            populateCurrencyDropdowns();
+            lastUpdateTime = new Date();
+            updateLastUpdateText();
+            currentApiIndex = i;
+            status.textContent = `Live rates loaded successfully!`;
+            showToast(`Live rates active from server ${i+1}`);
+            btn.disabled = false;
+
+            // Auto-refresh every 5 minutes
+            setTimeout(loadCurrencyData, 300000);
+            return;
+        } catch (e) {
+            continue;
+        }
+    }
+
+    status.textContent = 'Failed to load live rates. Check internet connection.';
+    showToast('All servers busy. Try again.', false);
+    btn.disabled = false;
+}
+
+function populateCurrencyDropdowns() {
+    const fromSelect = document.getElementById('fromCurrency');
+    const toSelect = document.getElementById('toCurrency');
+
+    const options = currencyList.map(code => {
+        const name = CURRENCY_NAMES[code] || code;
+        return `<option value="${code}">${code} - ${name}</option>`;
+    }).join('');
+
+    fromSelect.innerHTML = options;
+    toSelect.innerHTML = options;
+
+    // Set smart defaults
+    fromSelect.value = 'USD';
+    toSelect.value = currencyList.includes('TZS')? 'TZS' : 'EUR';
+}
+
+function updateLastUpdateText() {
+    if (lastUpdateTime) {
+        document.getElementById('lastUpdate').textContent =
+            `Last updated: ${lastUpdateTime.toLocaleTimeString()} | Source ${currentApiIndex + 1}/15`;
+    }
+}
+
+// Swap Button
+document.getElementById('swapBtn').addEventListener('click', () => {
+    const fromSelect = document.getElementById('fromCurrency');
+    const toSelect = document.getElementById('toCurrency');
+    const temp = fromSelect.value;
+    fromSelect.value = toSelect.value;
+    toSelect.value = temp;
+    showToast('Currencies swapped');
+    // Auto convert after swap
+    document.getElementById('convertBtn').click();
+});
+
+// Convert Button
+document.getElementById('convertBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('convertBtn');
+    const status = document.getElementById('convertStatus');
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    const from = document.getElementById('fromCurrency').value;
+    const to = document.getElementById('toCurrency').value;
+
+    if (isNaN(amount) || amount <= 0) {
+        showToast('Enter a valid amount', false);
+        return;
+    }
+
+    if (!from ||!to) {
+        showToast('Select both currencies', false);
+        return;
+    }
+
+    if (Object.keys(currencyData).length === 0) {
+        showToast('Loading rates, please wait...', false);
+        await loadCurrencyData();
+        if (Object.keys(currencyData).length === 0) return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="loader"></div> CONVERTING...';
+    status.textContent = 'Calculating with live worldwide rates...';
+
+    try {
+        // Convert via USD base for accuracy
+        const fromRate = currencyData[from] || 1;
+        const toRate = currencyData[to] || 1;
+        const usdAmount = amount / fromRate;
+        const result = usdAmount * toRate;
+        const rate = toRate / fromRate;
+
+        document.getElementById('resultFrom').textContent = `${amount.toLocaleString()} ${from} =`;
+        document.getElementById('resultAmount').textContent = `${result.toLocaleString(undefined, {maximumFractionDigits: 2})} ${to}`;
+        document.getElementById('resultRate').textContent = `1 ${from} = ${rate.toFixed(6)} ${to}`;
+        document.getElementById('apiBadge').textContent = `LIVE SOURCE ${currentApiIndex + 1}/15`;
+        document.getElementById('resultBox').style.display = 'block';
+
+        status.textContent = 'Conversion successful!';
+        showToast('Converted with live rates!');
+    } catch (e) {
+        status.textContent = 'Conversion failed';
+        showToast('Conversion error', false);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="refresh-cw" style="width: 18px; height: 18px;"></i> CONVERT';
+    lucide.createIcons();
+});
+
+// Initialize on load
+loadCurrencyData();
+
+// Auto-convert when amount changes
+document.getElementById('amountInput').addEventListener('input', () => {
+    if (document.getElementById('resultBox').style.display!== 'none') {
+        document.getElementById('convertBtn').click();
+    }
+});
+</script>
+</body>
+</html>
