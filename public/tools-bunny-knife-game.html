@@ -28,7 +28,7 @@
         background: radial-gradient(circle at 50% 30%, #0d0618 0%, #06020a 100%);
     }
 
-  .ui {
+ .ui {
         position: fixed;
         top: 0;
         left: 0;
@@ -42,7 +42,7 @@
         gap: 8px;
     }
 
-  .score-box {
+ .score-box {
         background: rgba(22, 11, 36, 0.75);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -51,7 +51,7 @@
         min-width: 80px;
     }
 
-  .score-label {
+ .score-label {
         font-size: 0.6rem;
         color: #9e9eb4;
         text-transform: uppercase;
@@ -59,14 +59,14 @@
         font-weight: 700;
     }
 
-  .score-value {
+ .score-value {
         font-size: 1.2rem;
         font-weight: 800;
         color: #bf5af2;
         text-shadow: 0 0 12px rgba(191, 90, 242, 0.5);
     }
 
-  .level-badge {
+ .level-badge {
         background: linear-gradient(135deg, #bf5af2, #ff377f);
         padding: 6px 12px;
         border-radius: 12px;
@@ -76,7 +76,7 @@
         box-shadow: 0 4px 16px rgba(191, 90, 242, 0.4);
     }
 
-  .btn {
+ .btn {
         pointer-events: auto;
         background: rgba(22, 11, 36, 0.75);
         backdrop-filter: blur(20px);
@@ -92,9 +92,9 @@
         font-size: 1.2rem;
     }
 
-  .btn:active {transform: scale(0.9);}
+ .btn:active {transform: scale(0.9);}
 
-  .knife-counter {
+ .knife-counter {
         position: fixed;
         bottom: 30px;
         left: 50%;
@@ -105,7 +105,7 @@
         pointer-events: none;
     }
 
-  .knife-icon {
+ .knife-icon {
         width: 8px;
         height: 24px;
         background: linear-gradient(180deg, #bf5af2, #ff377f);
@@ -113,12 +113,12 @@
         box-shadow: 0 0 8px rgba(191, 90, 242, 0.6);
     }
 
-  .knife-icon.used {
+ .knife-icon.used {
         opacity: 0.2;
         box-shadow: none;
     }
 
-  .screen {
+ .screen {
         position: fixed;
         top: 0;
         left: 0;
@@ -132,11 +132,11 @@
         color: #f5f5f7;
     }
 
-  .screen.active {display: flex;}
+ .screen.active {display: flex;}
 
-  .screen-content {
+ .screen-content {
         flex: 1;
-        overflow-y: auto; /* SHERIA: SCROLL DOWN VERTICAL MILELE */
+        overflow-y: auto;
         padding: 20px;
         display: flex;
         flex-direction: column;
@@ -145,7 +145,7 @@
         text-align: center;
     }
 
-  .screen h1 {
+ .screen h1 {
         font-size: 2.5rem;
         font-weight: 900;
         background: linear-gradient(135deg, #bf5af2, #ff377f);
@@ -154,14 +154,14 @@
         margin-bottom: 8px;
     }
 
-  .screen p {
+ .screen p {
         color: #9e9eb4;
         margin-bottom: 24px;
         font-size: 0.9rem;
         line-height: 1.6;
     }
 
-  .play-btn {
+ .play-btn {
         background: linear-gradient(135deg, #bf5af2, #ff377f);
         border: none;
         color: white;
@@ -174,14 +174,14 @@
         margin: 8px;
     }
 
-  .play-btn:active {transform: scale(0.95);}
-  .play-btn-secondary {
+ .play-btn:active {transform: scale(0.95);}
+ .play-btn-secondary {
         background: rgba(255, 255, 255, 0.08);
         box-shadow: none;
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-  .final-score {
+ .final-score {
         font-size: 3rem;
         font-weight: 900;
         color: #ffd60a;
@@ -189,7 +189,7 @@
         margin: 16px 0;
     }
 
-  .stats-grid {
+ .stats-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
@@ -198,28 +198,28 @@
         margin: 20px 0;
     }
 
-  .stat-box {
+ .stat-box {
         background: rgba(22, 11, 36, 0.75);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         padding: 12px;
     }
 
-  .stat-label {
+ .stat-label {
         font-size: 0.65rem;
         color: #9e9eb4;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
 
-  .stat-value {
+ .stat-value {
         font-size: 1.3rem;
         font-weight: 800;
         color: #30d158;
         margin-top: 4px;
     }
 
-  .about-text {
+ .about-text {
         text-align: left;
         color: #9e9eb4;
         font-size: 0.85rem;
@@ -227,21 +227,21 @@
         max-width: 400px;
     }
 
-  .about-text h3 {
+ .about-text h3 {
         color: #f5f5f7;
         margin: 20px 0 8px 0;
         font-size: 1rem;
     }
 
-  .about-text ol {
+ .about-text ol {
         padding-left: 20px;
     }
 
-  .about-text li {
+ .about-text li {
         margin-bottom: 8px;
     }
 
-  .combo-text {
+ .combo-text {
         position: fixed;
         top: 50%;
         left: 50%;
@@ -255,11 +255,11 @@
         transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-  .combo-text.show {
+ .combo-text.show {
         transform: translate(-50%, -50%) scale(1);
     }
 
-  .shop-grid {
+ .shop-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
@@ -268,7 +268,7 @@
         margin: 20px 0;
     }
 
-  .skin-card {
+ .skin-card {
         background: rgba(22, 11, 36, 0.75);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 14px;
@@ -277,23 +277,23 @@
         transition: all 0.2s;
     }
 
-  .skin-card:active {transform: scale(0.95);}
-  .skin-card.selected {border-color: #bf5af2; box-shadow: 0 0 20px rgba(191, 90, 242, 0.4);}
+ .skin-card:active {transform: scale(0.95);}
+ .skin-card.selected {border-color: #bf5af2; box-shadow: 0 0 20px rgba(191, 90, 242, 0.4);}
 
-  .skin-preview {
+ .skin-preview {
         width: 40px;
         height: 40px;
         margin: 0 auto 8px;
         border-radius: 8px;
     }
 
-  .skin-name {
+ .skin-name {
         font-size: 0.8rem;
         font-weight: 700;
         margin-bottom: 4px;
     }
 
-  .skin-price {
+ .skin-price {
         font-size: 0.7rem;
         color: #ffd60a;
         font-weight: 800;
@@ -591,12 +591,15 @@ function updateKnifeCounter() {
 
 function throwKnife() {
     if (!gameRunning || gamePaused) return;
-    if (knives.length === 0 || knives[0].thrown) return;
+
+    // FIXED: Find first unthrown knife instead of checking knives[0]
+    const knifeIndex = knives.findIndex(k =>!k.thrown);
+    if (knifeIndex === -1) return;
 
     initAudio();
     playSound('throw');
 
-    knives[0].thrown = true;
+    knives[knifeIndex].thrown = true;
     throwCount++;
 
     const now = Date.now();
@@ -697,6 +700,7 @@ function update() {
                 // Check collision with other knives
                 if (checkCollision(knife)) {
                     gameOver();
+                    return;
                 }
 
                 // Check if hit apple
@@ -728,8 +732,8 @@ function update() {
         if (p.life <= 0) particles.splice(i, 1);
     });
 
-    // Check level complete
-    if (knives.every(k => k.thrown) && thrownKnives.every(k => k.stuck)) {
+    // Check level complete - FIXED: Check if all knives are thrown and stuck
+    if (knives.length > 0 && knives.every(k => k.thrown) && thrownKnives.every(k => k.stuck)) {
         score += 100;
         level++;
         document.getElementById('levelDisplay').textContent = level;
@@ -950,8 +954,8 @@ document.getElementById('backBtn').addEventListener('click', () => {
 
 document.getElementById('pauseBtn').addEventListener('click', () => {
     if (!gameRunning) return;
-    gamePaused = !gamePaused;
-    document.getElementById('pauseBtn').textContent = gamePaused ? '▶' : 'II';
+    gamePaused =!gamePaused;
+    document.getElementById('pauseBtn').textContent = gamePaused? '▶' : 'II';
 });
 
 // Shop
@@ -964,11 +968,11 @@ function renderShop() {
         const selected = selectedSkin === i;
 
         const card = document.createElement('div');
-        card.className = 'skin-card' + (selected ? ' selected' : '');
+        card.className = 'skin-card' + (selected? ' selected' : '');
         card.innerHTML = `
             <div class="skin-preview" style="background: ${skin.color}"></div>
             <div class="skin-name">${skin.name}</div>
-            <div class="skin-price">${unlocked ? (selected ? 'EQUIPPED' : 'SELECT') : skin.price + ' 💰'}</div>
+            <div class="skin-price">${unlocked? (selected? 'EQUIPPED' : 'SELECT') : skin.price + ' 💰'}</div>
         `;
 
         card.onclick = () => {
