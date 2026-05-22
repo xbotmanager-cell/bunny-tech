@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Knife Hit Bunny</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    html, body {height: 100%; overflow: hidden;}
+    body {
+        background: #06020a;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        touch-action: none;
+        color: #f5f5f7;
+    }
+
+    #gameCanvas {
+        display: block;
+        background: radial-gradient(circle at 50% 30%, #0d0618 0%, #06020a 100%);
+    }
+
+  .ui {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        z-index: 10;
+        pointer-events: none;
+        gap: 8px;
+    }
+
+  .score-box {
+        background: rgba(22, 11, 36, 0.75);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 8px 14px;
+        min-width: 80px;
+    }
+
+  .score-label {
+        font-size: 0.6rem;
+        color: #9e9eb4;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+    }
+
+  .score-value {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #bf5af2;
+        text-shadow: 0 0 12px rgba(191, 90, 242, 0.5);
+    }
+
+  .level-badge {
+        background: linear-gradient(135deg, #bf5af2, #ff377f);
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-align: center;
+        box-shadow: 0 4px 16px rgba(191, 90, 242, 0.4);
+    }
+
+  .btn {
+        pointer-events: auto;
+        background: rgba(22, 11, 36, 0.75);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #f5f5f7;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+
+  .btn:active {transform: scale(0.9);}
+
+  .knife-counter {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+  .knife-icon {
+        width: 8px;
+        height: 24px;
+        background: linear-gradient(180deg, #bf5af2, #ff377f);
+        border-radius: 4px;
+        box-shadow: 0 0 8px rgba(191, 90, 242, 0.6);
+    }
+
+  .knife-icon.used {
+        opacity: 0.2;
+        box-shadow: none;
+    }
+
+  .screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(6, 2, 10, 0.95);
+        backdrop-filter: blur(20px);
+        display: none;
+        flex-direction: column;
+        z-index: 20;
+        color: #f5f5f7;
+    }
+
+  .screen.active {display: flex;}
+
+  .screen-content {
+        flex: 1;
+        overflow-y: auto; /* SHERIA: SCROLL DOWN VERTICAL MILELE */
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+  .screen h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #bf5af2, #ff377f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+    }
+
+  .screen p {
+        color: #9e9eb4;
+        margin-bottom: 24px;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+  .play-btn {
+        background: linear-gradient(135deg, #bf5af2, #ff377f);
+        border: none;
+        color: white;
+        padding: 14px 32px;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(191, 90, 242, 0.4);
+        margin: 8px;
+    }
+
+  .play-btn:active {transform: scale(0.95);}
+  .play-btn-secondary {
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+  .final-score {
+        font-size: 3rem;
+        font-weight: 900;
+        color: #ffd60a;
+        text-shadow: 0 0 20px rgba(255, 214, 10, 0.5);
+        margin: 16px 0;
+    }
+
+  .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        width: 100%;
+        max-width: 300px;
+        margin: 20px 0;
+    }
+
+  .stat-box {
+        background: rgba(22, 11, 36, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+  .stat-label {
+        font-size: 0.65rem;
+        color: #9e9eb4;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+  .stat-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #30d158;
+        margin-top: 4px;
+    }
+
+  .about-text {
+        text-align: left;
+        color: #9e9eb4;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        max-width: 400px;
+    }
+
+  .about-text h3 {
+        color: #f5f5f7;
+        margin: 20px 0 8px 0;
+        font-size: 1rem;
+    }
+
+  .about-text ol {
+        padding-left: 20px;
+    }
+
+  .about-text li {
+        margin-bottom: 8px;
+    }
+
+  .combo-text {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #ffd60a;
+        text-shadow: 0 0 30px rgba(255, 214, 10, 0.8);
+        z-index: 15;
+        pointer-events: none;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+  .combo-text.show {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+  .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        width: 100%;
+        max-width: 350px;
+        margin: 20px 0;
+    }
+
+  .skin-card {
+        background: rgba(22, 11, 36, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+  .skin-card:active {transform: scale(0.95);}
+  .skin-card.selected {border-color: #bf5af2; box-shadow: 0 0 20px rgba(191, 90, 242, 0.4);}
+
+  .skin-preview {
+        width: 40px;
+        height: 40px;
+        margin: 0 auto 8px;
+        border-radius: 8px;
+    }
+
+  .skin-name {
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+  .skin-price {
+        font-size: 0.7rem;
+        color: #ffd60a;
+        font-weight: 800;
+    }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<div class="ui">
+    <div class="score-box">
+        <div class="score-label">Level</div>
+        <div class="score-value" id="levelDisplay">1</div>
+    </div>
+    <div class="score-box">
+        <div class="level-badge" id="coinDisplay">💰 0</div>
+        <div class="score-label" style="margin-top: 4px;">Best</div>
+        <div class="score-value" id="highScore">0</div>
+    </div>
+    <div class="btn" id="pauseBtn">II</div>
+</div>
+
+<div class="knife-counter" id="knifeCounter"></div>
+<div class="combo-text" id="comboText">PERFECT!</div>
+
+<div class="screen active" id="startScreen">
+    <div class="screen-content">
+        <h1>KNIFE HIT</h1>
+        <p>Tap to throw knives. Don't hit other knives.<br>How far can you go?</p>
+        <button class="play-btn" id="startBtn">PLAY</button>
+        <button class="play-btn play-btn-secondary" id="shopBtn">SKINS</button>
+        <button class="play-btn play-btn-secondary" id="aboutBtn">HOW TO PLAY</button>
+    </div>
+</div>
+
+<div class="screen" id="gameOverScreen">
+    <div class="screen-content">
+        <h1>GAME OVER</h1>
+        <div class="final-score" id="finalScore">0</div>
+        <p id="newBest" style="color: #30d158; display: none; font-weight: 800;">NEW BEST!</p>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="statLevel">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Apples</div>
+                <div class="stat-value" id="statApples">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Perfect</div>
+                <div class="stat-value" id="statPerfect">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Coins</div>
+                <div class="stat-value" id="statCoins">0</div>
+            </div>
+        </div>
+
+        <button class="play-btn" id="restartBtn">PLAY AGAIN</button>
+        <button class="play-btn play-btn-secondary" id="menuBtn">MAIN MENU</button>
+    </div>
+</div>
+
+<div class="screen" id="shopScreen">
+    <div class="screen-content">
+        <h1>KNIFE SKINS</h1>
+        <p>Unlock new knives with coins</p>
+        <div class="shop-grid" id="shopGrid"></div>
+        <button class="play-btn" id="backShopBtn">BACK TO MENU</button>
+    </div>
+</div>
+
+<div class="screen" id="aboutScreen">
+    <div class="screen-content">
+        <h1>HOW TO PLAY</h1>
+        <div class="about-text">
+            <h3>Basic Controls</h3>
+            <ol>
+                <li>Tap anywhere on the screen to throw a knife</li>
+                <li>Knives stick to the spinning log</li>
+                <li>Don't hit other knives or you lose</li>
+                <li>Throw all knives to complete the level</li>
+            </ol>
+
+            <h3>Scoring System</h3>
+            <ol>
+                <li>Each knife: +10 points</li>
+                <li>Hit an apple: +50 coins</li>
+                <li>Throw 3 knives quickly: PERFECT bonus +30</li>
+                <li>Complete level: +100 bonus</li>
+            </ol>
+
+            <h3>Level Progression</h3>
+            <ol>
+                <li>Each level adds more knives to throw</li>
+                <li>Log spins faster and changes direction</li>
+                <li>Every 5th level is a Boss Level with apples</li>
+                <li>Levels are infinite - how far can you go?</li>
+            </ol>
+
+            <h3>Boss Levels</h3>
+            <ol>
+                <li>Appear every 5 levels (5, 10, 15...)</li>
+                <li>Log has apples attached to it</li>
+                <li>Hit apples to collect coins</li>
+                <li>Missing an apple is okay, hitting a knife is not</li>
+            </ol>
+
+            <h3>Tips</h3>
+            <ol>
+                <li>Watch the log rotation pattern before throwing</li>
+                <li>Time your throws when there's a clear gap</li>
+                <li>Don't rush - one bad throw ends the game</li>
+                <li>Save coins to unlock cool knife skins</li>
+            </ol>
+        </div>
+        <button class="play-btn" id="backBtn">BACK TO MENU</button>
+    </div>
+</div>
+
+<script>
+// Audio Context for sounds
+let audioCtx;
+function initAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playSound(type) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'throw') {
+        osc.frequency.value = 800;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'hit') {
+        osc.frequency.value = 200;
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+    } else if (type === 'apple') {
+        osc.frequency.value = 1000;
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+    } else if (type === 'gameover') {
+        osc.frequency.value = 150;
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+    } else if (type === 'perfect') {
+        osc.frequency.value = 1200;
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+}
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Game state
+let gameRunning = false;
+let gamePaused = false;
+let level = 1;
+let score = 0;
+let highScore = parseInt(localStorage.getItem('knifeHighScore') || '0');
+let coins = parseInt(localStorage.getItem('knifeCoins') || '0');
+let applesThisGame = 0;
+let perfectCount = 0;
+let lastThrowTime = 0;
+let throwCount = 0;
+let selectedSkin = parseInt(localStorage.getItem('knifeSkin') || '0');
+
+document.getElementById('highScore').textContent = highScore;
+document.getElementById('coinDisplay').textContent = `💰 ${coins}`;
+
+// Skins
+const SKINS = [
+    {name: 'Classic', color: '#bf5af2', price: 0},
+    {name: 'Golden', color: '#ffd60a', price: 100},
+    {name: 'Fire', color: '#ff453a', price: 200},
+    {name: 'Ice', color: '#64d2ff', price: 200},
+    {name: 'Emerald', color: '#30d158', price: 300},
+    {name: 'Shadow', color: '#1a1a1a', price: 500}
+];
+
+let unlockedSkins = JSON.parse(localStorage.getItem('knifeUnlockedSkins') || '[0]');
+
+// Log
+const log = {
+    x: 0,
+    y: 0,
+    radius: 80,
+    rotation: 0,
+    speed: 2,
+    dir: 1,
+    changeTime: 0
+};
+
+// Knives
+let knives = [];
+let thrownKnives = [];
+let apples = [];
+let particles = [];
+
+// 15 Log rotation patterns for variety
+const ROTATION_PATTERNS = [
+    {speed: 2, change: 0}, {speed: 3, change: 60}, {speed: 2.5, change: 90},
+    {speed: 4, change: 45}, {speed: 1.5, change: 120}, {speed: 3.5, change: 30},
+    {speed: 2, change: 180}, {speed: 4.5, change: 60}, {speed: 2.5, change: 90},
+    {speed: 3, change: 120}, {speed: 5, change: 40}, {speed: 2, change: 150},
+    {speed: 3.5, change: 75}, {speed: 4, change: 100}, {speed: 2.5, change: 50}
+];
+
+function resetGame() {
+    level = 1;
+    score = 0;
+    applesThisGame = 0;
+    perfectCount = 0;
+    throwCount = 0;
+    knives = [];
+    thrownKnives = [];
+    apples = [];
+    particles = [];
+    gameRunning = true;
+    gamePaused = false;
+    log.rotation = 0;
+    log.speed = 2;
+    log.dir = 1;
+    document.getElementById('levelDisplay').textContent = level;
+    generateLevel();
+}
+
+function generateLevel() {
+    knives = [];
+    thrownKnives = [];
+    apples = [];
+
+    const knifeCount = 4 + level;
+    for (let i = 0; i < knifeCount; i++) {
+        knives.push({thrown: false});
+    }
+
+    // Boss level every 5 levels
+    if (level % 5 === 0) {
+        const appleCount = 3 + Math.floor(level / 10);
+        for (let i = 0; i < appleCount; i++) {
+            const angle = (Math.PI * 2 / appleCount) * i;
+            apples.push({
+                angle: angle,
+                hit: false,
+                x: 0,
+                y: 0
+            });
+        }
+    }
+
+    // Set rotation pattern
+    const pattern = ROTATION_PATTERNS[(level - 1) % ROTATION_PATTERNS.length];
+    log.speed = pattern.speed + level * 0.1;
+    log.changeTime = pattern.change;
+
+    updateKnifeCounter();
+}
+
+function updateKnifeCounter() {
+    const counter = document.getElementById('knifeCounter');
+    counter.innerHTML = '';
+    knives.forEach((knife, i) => {
+        const div = document.createElement('div');
+        div.className = 'knife-icon' + (knife.thrown? ' used' : '');
+        counter.appendChild(div);
+    });
+}
+
+function throwKnife() {
+    if (!gameRunning || gamePaused) return;
+    if (knives.length === 0 || knives[0].thrown) return;
+
+    initAudio();
+    playSound('throw');
+
+    knives[0].thrown = true;
+    throwCount++;
+
+    const now = Date.now();
+    if (now - lastThrowTime < 300) {
+        if (throwCount >= 3) {
+            perfectCount++;
+            score += 30;
+            showCombo('PERFECT!');
+            playSound('perfect');
+            throwCount = 0;
+        }
+    } else {
+        throwCount = 1;
+    }
+    lastThrowTime = now;
+
+    thrownKnives.push({
+        x: W / 2,
+        y: H - 100,
+        vy: -25,
+        rotation: 0,
+        stuck: false,
+        angle: 0
+    });
+
+    updateKnifeCounter();
+}
+
+function showCombo(text) {
+    const comboEl = document.getElementById('comboText');
+    comboEl.textContent = text;
+    comboEl.classList.add('show');
+    setTimeout(() => comboEl.classList.remove('show'), 500);
+}
+
+function createParticles(x, y, color, count) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10 - 2,
+            life: 30,
+            color: color,
+            size: 2 + Math.random() * 4
+        });
+    }
+}
+
+function checkCollision(knife) {
+    // Check collision with other knives
+    for (let other of thrownKnives) {
+        if (other === knife ||!other.stuck) continue;
+
+        const angleDiff = Math.abs(knife.angle - other.angle);
+        const minAngle = 0.3; // Minimum angle between knives
+
+        if (angleDiff < minAngle || angleDiff > Math.PI * 2 - minAngle) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function update() {
+    if (!gameRunning || gamePaused) return;
+
+    // Update log rotation
+    log.rotation += log.speed * log.dir * 0.01;
+
+    // Change direction
+    if (log.changeTime > 0 && level > 3) {
+        log.changeTime--;
+        if (log.changeTime === 0) {
+            log.dir *= -1;
+            log.changeTime = ROTATION_PATTERNS[(level - 1) % ROTATION_PATTERNS.length].change;
+        }
+    }
+
+    // Update thrown knives
+    thrownKnives.forEach((knife, i) => {
+        if (!knife.stuck) {
+            knife.y += knife.vy;
+            knife.rotation += 0.5;
+
+            // Check if hit log
+            const dx = knife.x - W / 2;
+            const dy = knife.y - H / 2;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist <= log.radius) {
+                knife.stuck = true;
+                knife.angle = Math.atan2(dy, dx) - log.rotation;
+                score += 10;
+                playSound('hit');
+                createParticles(knife.x, knife.y, SKINS[selectedSkin].color, 12);
+
+                // Check collision with other knives
+                if (checkCollision(knife)) {
+                    gameOver();
+                }
+
+                // Check if hit apple
+                apples.forEach(apple => {
+                    if (!apple.hit) {
+                        const appleAngleDiff = Math.abs(knife.angle - apple.angle);
+                        if (appleAngleDiff < 0.3 || appleAngleDiff > Math.PI * 2 - 0.3) {
+                            apple.hit = true;
+                            applesThisGame++;
+                            coins += 5;
+                            score += 50;
+                            playSound('apple');
+                            createParticles(apple.x, apple.y, '#ffd60a', 20);
+                            localStorage.setItem('knifeCoins', coins);
+                            document.getElementById('coinDisplay').textContent = `💰 ${coins}`;
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    // Update particles
+    particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.3;
+        p.life--;
+        if (p.life <= 0) particles.splice(i, 1);
+    });
+
+    // Check level complete
+    if (knives.every(k => k.thrown) && thrownKnives.every(k => k.stuck)) {
+        score += 100;
+        level++;
+        document.getElementById('levelDisplay').textContent = level;
+        setTimeout(() => generateLevel(), 500);
+    }
+
+    // Screen shake
+    if (screenShake > 0) {
+        screenShake--;
+        canvas.style.transform = `translate(${(Math.random() - 0.5) * screenShake}px, ${(Math.random() - 0.5) * screenShake}px)`;
+    } else {
+        canvas.style.transform = 'translate(0, 0)';
+    }
+}
+
+let screenShake = 0;
+
+function draw() {
+    // Clear
+    ctx.fillStyle = '#06020a';
+    ctx.fillRect(0, 0, W, H);
+
+    // Stars
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    for (let i = 0; i < 50; i++) {
+        let x = (i * 37) % W;
+        let y = (i * 71) % (H * 0.6);
+        ctx.fillRect(x, y, 1, 1);
+    }
+
+    // Draw log
+    ctx.save();
+    ctx.translate(W / 2, H / 2);
+    ctx.rotate(log.rotation);
+
+    // Log shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.beginPath();
+    ctx.arc(5, 5, log.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Log body
+    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, log.radius);
+    gradient.addColorStop(0, '#8b4513');
+    gradient.addColorStop(1, '#654321');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, log.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wood rings
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.lineWidth = 2;
+    for (let i = 1; i < 5; i++) {
+        ctx.beginPath();
+        ctx.arc(0, 0, (log.radius / 5) * i, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Draw apples
+    apples.forEach(apple => {
+        if (!apple.hit) {
+            apple.x = Math.cos(apple.angle) * (log.radius - 10);
+            apple.y = Math.sin(apple.angle) * (log.radius - 10);
+
+            ctx.fillStyle = '#ff453a';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ff453a';
+            ctx.beginPath();
+            ctx.arc(apple.x, apple.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+    });
+
+    ctx.restore();
+
+    // Draw stuck knives
+    thrownKnives.forEach(knife => {
+        if (knife.stuck) {
+            ctx.save();
+            ctx.translate(W / 2, H / 2);
+            ctx.rotate(log.rotation + knife.angle);
+
+            const knifeX = log.radius;
+            const knifeY = 0;
+
+            // Knife blade
+            ctx.fillStyle = SKINS[selectedSkin].color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = SKINS[selectedSkin].color;
+            ctx.fillRect(knifeX, knifeY - 3, 30, 6);
+
+            // Knife handle
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(knifeX + 30, knifeY - 5, 12, 10);
+            ctx.shadowBlur = 0;
+
+            ctx.restore();
+        }
+    });
+
+    // Draw flying knives
+    thrownKnives.forEach(knife => {
+        if (!knife.stuck) {
+            ctx.save();
+            ctx.translate(knife.x, knife.y);
+            ctx.rotate(knife.rotation);
+
+            // Knife blade
+            ctx.fillStyle = SKINS[selectedSkin].color;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = SKINS[selectedSkin].color;
+            ctx.fillRect(-15, -3, 30, 6);
+
+            // Knife handle
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(15, -5, 12, 10);
+            ctx.shadowBlur = 0;
+
+            ctx.restore();
+        }
+    });
+
+    // Draw particles
+    particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 30;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+}
+
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+function gameOver() {
+    gameRunning = false;
+    playSound('gameover');
+    screenShake = 20;
+    createParticles(W / 2, H / 2, '#ff377f', 30);
+
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('knifeHighScore', highScore);
+        document.getElementById('highScore').textContent = highScore;
+        document.getElementById('newBest').style.display = 'block';
+    } else {
+        document.getElementById('newBest').style.display = 'none';
+    }
+
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('statLevel').textContent = level;
+    document.getElementById('statApples').textContent = applesThisGame;
+    document.getElementById('statPerfect').textContent = perfectCount;
+    document.getElementById('statCoins').textContent = coins;
+
+    setTimeout(() => {
+        document.getElementById('gameOverScreen').classList.add('active');
+    }, 800);
+}
+
+// Controls
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    throwKnife();
+});
+
+canvas.addEventListener('mousedown', throwKnife);
+
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+        e.preventDefault();
+        throwKnife();
+    }
+});
+
+document.getElementById('startBtn').addEventListener('click', () => {
+    document.getElementById('startScreen').classList.remove('active');
+    resetGame();
+});
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+    document.getElementById('gameOverScreen').classList.remove('active');
+    resetGame();
+});
+
+document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('gameOverScreen').classList.remove('active');
+    document.getElementById('startScreen').classList.add('active');
+});
+
+document.getElementById('shopBtn').addEventListener('click', () => {
+    document.getElementById('startScreen').classList.remove('active');
+    document.getElementById('shopScreen').classList.add('active');
+    renderShop();
+});
+
+document.getElementById('backShopBtn').addEventListener('click', () => {
+    document.getElementById('shopScreen').classList.remove('active');
+    document.getElementById('startScreen').classList.add('active');
+});
+
+document.getElementById('aboutBtn').addEventListener('click', () => {
+    document.getElementById('startScreen').classList.remove('active');
+    document.getElementById('aboutScreen').classList.add('active');
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('aboutScreen').classList.remove('active');
+    document.getElementById('startScreen').classList.add('active');
+});
+
+document.getElementById('pauseBtn').addEventListener('click', () => {
+    if (!gameRunning) return;
+    gamePaused = !gamePaused;
+    document.getElementById('pauseBtn').textContent = gamePaused ? '▶' : 'II';
+});
+
+// Shop
+function renderShop() {
+    const grid = document.getElementById('shopGrid');
+    grid.innerHTML = '';
+
+    SKINS.forEach((skin, i) => {
+        const unlocked = unlockedSkins.includes(i);
+        const selected = selectedSkin === i;
+
+        const card = document.createElement('div');
+        card.className = 'skin-card' + (selected ? ' selected' : '');
+        card.innerHTML = `
+            <div class="skin-preview" style="background: ${skin.color}"></div>
+            <div class="skin-name">${skin.name}</div>
+            <div class="skin-price">${unlocked ? (selected ? 'EQUIPPED' : 'SELECT') : skin.price + ' 💰'}</div>
+        `;
+
+        card.onclick = () => {
+            if (unlocked) {
+                selectedSkin = i;
+                localStorage.setItem('knifeSkin', i);
+                renderShop();
+            } else if (coins >= skin.price) {
+                coins -= skin.price;
+                unlockedSkins.push(i);
+                selectedSkin = i;
+                localStorage.setItem('knifeCoins', coins);
+                localStorage.setItem('knifeUnlockedSkins', JSON.stringify(unlockedSkins));
+                localStorage.setItem('knifeSkin', i);
+                document.getElementById('coinDisplay').textContent = `💰 ${coins}`;
+                renderShop();
+            }
+        };
+
+        grid.appendChild(card);
+    });
+}
+
+// Start
+gameLoop();
+</script>
+</body>
+</html>
